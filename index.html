@@ -23,7 +23,7 @@
     top:10px;
     right:10px;
     width:300px;
-    height:200px;
+    height:240px;
     background:rgba(0,0,0,0.9);
     color:white;
     padding:10px;
@@ -31,6 +31,13 @@
     overflow:auto;
     border-radius:6px;
     z-index:1000;
+  }
+  textarea {
+    width:100%;
+    height:140px;
+    background:#222;
+    color:#0f0;
+    border:1px solid #333;
   }
   button {
     margin-top:5px;
@@ -43,14 +50,18 @@
 
 <div id="map"></div>
 <div id="coordsBox">X: 0 | Y: 0</div>
+
 <div id="exportBox">
   <b>JSON Export:</b><br>
-  <textarea id="jsonOutput" style="width:100%; height:120px;"></textarea><br>
+  <textarea id="jsonOutput"></textarea><br>
   <button onclick="copyJSON()">JSON kopieren</button>
+  <button onclick="clearAll()">Alle Marker löschen</button>
 </div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
+const STORAGE_KEY = "fivem_map_markers";
+
 const map = L.map('map', {
   crs: L.CRS.Simple,
   minZoom: -2,
@@ -61,10 +72,10 @@ const bounds = [[0,0], [8192,8192]];
 L.imageOverlay("gta_map.png", bounds).addTo(map);
 map.fitBounds(bounds);
 
-let markersData = [];
+let markersData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 let markersLayer = L.layerGroup().addTo(map);
 
-// Mauskoordinaten anzeigen
+// Maus Koordinaten anzeigen
 map.on('mousemove', function(e) {
   const x = Math.round(e.latlng.lng);
   const y = Math.round(e.latlng.lat);
@@ -72,7 +83,7 @@ map.on('mousemove', function(e) {
     "X: " + x + " | Y: " + y;
 });
 
-// Klick = neuen Marker hinzufügen
+// Marker hinzufügen
 map.on('click', function(e) {
   const x = Math.round(e.latlng.lng);
   const y = Math.round(e.latlng.lat);
@@ -82,14 +93,12 @@ map.on('click', function(e) {
 
   const description = prompt("Beschreibung:");
 
-  const markerObj = { name, description, x, y };
-  markersData.push(markerObj);
-
+  markersData.push({ name, description, x, y });
+  saveData();
   renderMarkers();
-  updateJSON();
 });
 
-// Marker zeichnen
+// Marker anzeigen
 function renderMarkers() {
   markersLayer.clearLayers();
 
@@ -103,6 +112,8 @@ function renderMarkers() {
       <button onclick="deleteMarker(${index})">Löschen</button>
     `);
   });
+
+  updateJSON();
 }
 
 // Marker bearbeiten
@@ -115,8 +126,8 @@ function editMarker(index) {
   markersData[index].name = newName;
   markersData[index].description = newDesc;
 
+  saveData();
   renderMarkers();
-  updateJSON();
 }
 
 // Marker löschen
@@ -124,8 +135,22 @@ function deleteMarker(index) {
   if (!confirm("Marker wirklich löschen?")) return;
 
   markersData.splice(index, 1);
+  saveData();
   renderMarkers();
-  updateJSON();
+}
+
+// Alles löschen
+function clearAll() {
+  if (!confirm("Wirklich ALLE Marker löschen?")) return;
+
+  markersData = [];
+  saveData();
+  renderMarkers();
+}
+
+// Speichern im Browser
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(markersData));
 }
 
 // JSON aktualisieren
@@ -141,6 +166,9 @@ function copyJSON() {
   document.execCommand("copy");
   alert("JSON kopiert!");
 }
+
+// Beim Laden Marker anzeigen
+renderMarkers();
 
 </script>
 
