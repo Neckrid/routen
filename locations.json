@@ -1,20 +1,20 @@
 [
   {
-    "name": "Crack Konzentrat",
+    "name": "Crack",
+    "description": "Crackroute",
     "x": 5300,
-    "y": 4366,
-    "description": "Crack Route"
+    "y": 4367
   },
   {
     "name": "Schweres Metall",
+    "description": "Waffenroute"
     "x": 4536,
     "y": 4409,
-    "description": "Waffenroute"
   },
   {
     "name": "Oxy",
+    "description": "Waffenroute"
     "x": 4372,
     "y": 1671,
-    "description": "Waffenroute"
   }
 ]
