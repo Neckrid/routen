@@ -3,18 +3,18 @@
     "name": "Crack Konzentrat",
     "x": 5300,
     "y": 4366,
-    "description": "Nur für Fraktion Alpha"
+    "description": "Crack Route"
   },
   {
     "name": "Schweres Metall",
     "x": 4536,
     "y": 4409,
-    "description": "Zugang nur mit Code"
+    "description": "Waffenroute"
   },
   {
     "name": "Oxy",
     "x": 4372,
     "y": 1671,
-    "description": "Zugang nur mit Code"
+    "description": "Waffenroute"
   }
 ]
