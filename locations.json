@@ -3,12 +3,14 @@
     "name": "Crack",
     "description": "Crackroute",
     "x": 5300,
-    "y": 4367
+    "y": 4367,
+    "description": "Crackroute"
   },
   {
     "name": "Schweres Metall",
-    "description": "Waffenroute",
+    "description": "Waffenroute"
     "x": 4536,
-    "y": 4409
+    "y": 4409,
+    "description": "Waffenroute"
   },
 ]
