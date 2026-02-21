@@ -6,9 +6,15 @@
     "description": "Nur für Fraktion Alpha"
   },
   {
-    "name": "Waffenlager",
-    "x": 2100,
-    "y": 6000,
+    "name": "Schweres Metall",
+    "x": 4536,
+    "y": 4409,
+    "description": "Zugang nur mit Code"
+  }
+  {
+    "name": "Oxy",
+    "x": 4372,
+    "y": 1671,
     "description": "Zugang nur mit Code"
   }
 ]
