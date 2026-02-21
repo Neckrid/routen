@@ -21,7 +21,7 @@ const map = L.map('map', {
 });
 
 const bounds = [[0,0], [8192,8192]];
-const image = L.imageOverlay("gta_map.jpg", bounds).addTo(map);
+const image = L.imageOverlay("gta_map.png", bounds).addTo(map);
 map.fitBounds(bounds);
 
 fetch("locations.json")
