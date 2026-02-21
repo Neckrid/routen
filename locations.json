@@ -7,14 +7,14 @@
   },
   {
     "name": "Schweres Metall",
-    "description": "Waffenroute"
+    "description": "Waffenroute",
     "x": 4536,
-    "y": 4409,
+    "y": 4409
   },
   {
     "name": "Oxy",
-    "description": "Waffenroute"
+    "description": "Waffenroute",
     "x": 4372,
-    "y": 1671,
+    "y": 1671
   }
 ]
