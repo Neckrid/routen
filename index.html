@@ -75,6 +75,14 @@ map.fitBounds(bounds);
 let markersData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 let markersLayer = L.layerGroup().addTo(map);
 
+fetch("locations.json")
+  .then(res => res.json())
+  .then(data => {
+    data.forEach(loc => {
+      L.marker([loc.y, loc.x])
+        .addTo(map)
+        .bindPopup("<b>" + loc.name + "</b><br>" + loc.description);
+
 // Maus Koordinaten anzeigen
 map.on('mousemove', function(e) {
   const x = Math.round(e.latlng.lng);
