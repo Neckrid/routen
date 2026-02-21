@@ -5,25 +5,61 @@
 <title>FiveM Server Map</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <style>
-  body { margin:0; background:#111; }
+  body { margin:0; background:#111; font-family:Arial, sans-serif; }
   #map { height: 100vh; }
+  #coordsBox {
+    position:absolute;
+    bottom:10px;
+    left:10px;
+    background:rgba(0,0,0,0.8);
+    color:#00ff88;
+    padding:8px 12px;
+    border-radius:6px;
+    font-size:14px;
+    z-index:1000;
+  }
 </style>
 </head>
 <body>
 
 <div id="map"></div>
+<div id="coordsBox">X: 0 | Y: 0</div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
 const map = L.map('map', {
   crs: L.CRS.Simple,
-  minZoom: -2
+  minZoom: -2,
+  maxZoom: 2
 });
 
 const bounds = [[0,0], [8192,8192]];
-const image = L.imageOverlay("gta_map.png", bounds).addTo(map);
+L.imageOverlay("gta_map.png", bounds).addTo(map);
 map.fitBounds(bounds);
 
+// Maus-Koordinaten live anzeigen
+const coordsBox = document.getElementById("coordsBox");
+
+map.on('mousemove', function(e) {
+  const x = Math.round(e.latlng.lng);
+  const y = Math.round(e.latlng.lat);
+  coordsBox.innerHTML = "X: " + x + " | Y: " + y;
+});
+
+// Klick zeigt Popup mit fixen Koordinaten
+map.on('click', function(e) {
+  const x = Math.round(e.latlng.lng);
+  const y = Math.round(e.latlng.lat);
+
+  L.popup()
+    .setLatLng(e.latlng)
+    .setContent("<b>Kopieren:</b><br>X: " + x + "<br>Y: " + y)
+    .openOn(map);
+
+  console.log("X:", x, "Y:", y);
+});
+
+// Locations laden
 fetch("locations.json")
   .then(res => res.json())
   .then(data => {
@@ -33,6 +69,7 @@ fetch("locations.json")
         .bindPopup("<b>" + loc.name + "</b><br>" + loc.description);
     });
   });
+
 </script>
 
 </body>
