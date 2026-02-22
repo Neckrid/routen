@@ -3,16 +3,34 @@
 <head>
 <meta charset="utf-8" />
 <title>GTA 5 Interactive Map</title>
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 body { margin:0; background:#111; font-family:Arial; }
 #map { height:100vh; }
-#coords { position:absolute; bottom:10px; left:10px;
-background:black; color:#00ff88; padding:6px; border-radius:6px; z-index:1000; }
-#adminBtn { position:absolute; top:10px; left:10px; z-index:1000; }
+#coords {
+ position:absolute;
+ bottom:10px;
+ left:10px;
+ background:black;
+ color:#00ff88;
+ padding:6px;
+ border-radius:6px;
+ z-index:1000;
+}
+#adminBtn {
+ position:absolute;
+ top:10px;
+ left:10px;
+ z-index:1000;
+ padding:6px 10px;
+}
 </style>
 </head>
+
 <body>
 
 <button id="adminBtn">Admin Login</button>
@@ -22,13 +40,18 @@ background:black; color:#00ff88; padding:6px; border-radius:6px; z-index:1000; }
 <script>
 const SUPABASE_URL = "https://lleldalugvgmgqekcolx.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc";
-const ADMIN_PASSWORD = "Nexvillepd";
+const ADMIN_PASSWORD = "ADMIN_PASSWORT";
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let adminMode = false;
 
-const map = L.map('map', { crs:L.CRS.Simple, minZoom:-2, maxZoom:2 });
+const map = L.map('map', {
+ crs: L.CRS.Simple,
+ minZoom: -2,
+ maxZoom: 2
+});
+
 const bounds = [[0,0],[8192,8192]];
 L.imageOverlay("gta_map.png", bounds).addTo(map);
 map.fitBounds(bounds);
@@ -37,87 +60,110 @@ let markerLayer = L.layerGroup().addTo(map);
 
 // Koordinaten anzeigen
 map.on("mousemove", e=>{
-document.getElementById("coords").innerText =
-"X: "+Math.round(e.latlng.lng)+" | Y: "+Math.round(e.latlng.lat);
+ document.getElementById("coords").innerText =
+ "X: "+Math.round(e.latlng.lng)+" | Y: "+Math.round(e.latlng.lat);
 });
 
 // Admin Login
 document.getElementById("adminBtn").onclick = ()=>{
-const pass = prompt("Admin Passwort:");
-if(pass === ADMIN_PASSWORD){
-adminMode = true;
-alert("Admin Modus aktiviert");
-}else{
-alert("Falsches Passwort");
-}
+ const pass = prompt("Admin Passwort:");
+ if(pass === ADMIN_PASSWORD){
+  adminMode = true;
+  alert("Admin Modus aktiviert");
+  loadMarkers();
+ } else {
+  alert("Falsches Passwort");
+ }
 };
 
 // Marker laden
 async function loadMarkers(){
-markerLayer.clearLayers();
-const { data } = await supabase.from("markers").select("*");
-data.forEach(m=>{
-const icon = L.divIcon({
-className:"",
-html:`<div style="background:${m.color};
-width:16px;height:16px;border-radius:50%;border:2px solid white;"></div>`
-});
-const marker = L.marker([m.y,m.x],{icon}).addTo(markerLayer);
+ markerLayer.clearLayers();
 
-marker.bindPopup(`
-<b>${m.title}</b><br>
-${m.description}<br>
-${adminMode ? `
-<button onclick="editMarker(${m.id})">Bearbeiten</button>
-<button onclick="deleteMarker(${m.id})">Löschen</button>
-`:""}
-`);
-});
+ const { data, error } = await supabase
+   .from("markers")
+   .select("*");
+
+ if(error){
+   console.error(error);
+   return;
+ }
+
+ data.forEach(m=>{
+  const icon = L.divIcon({
+   className:"",
+   html:`<div style="background:${m.color};
+   width:16px;height:16px;border-radius:50%;
+   border:2px solid white;"></div>`
+  });
+
+  const marker = L.marker([m.y,m.x],{icon})
+    .addTo(markerLayer);
+
+  marker.bindPopup(`
+   <b>${m.title}</b><br>
+   ${m.description}<br>
+   ${adminMode ? `
+    <button onclick="editMarker(${m.id})">Bearbeiten</button>
+    <button onclick="deleteMarker(${m.id})">Löschen</button>
+   `:""}
+  `);
+ });
 }
 
 // Marker hinzufügen
 map.on("click", async e=>{
-if(!adminMode) return;
+ if(!adminMode) return;
 
-const title = prompt("Titel:");
-if(!title) return;
-const description = prompt("Beschreibung:");
-const color = prompt("Farbe (z.B. red, blue, #00ff00):","#ff0000");
+ const title = prompt("Titel:");
+ if(!title) return;
 
-await supabase.from("markers").insert([{
-title, description,
-x:Math.round(e.latlng.lng),
-y:Math.round(e.latlng.lat),
-color
-}]);
+ const description = prompt("Beschreibung:");
+ const color = prompt("Farbe (#ff0000 oder blue):","#ff0000");
 
-loadMarkers();
+ await supabase.from("markers").insert([{
+  title,
+  description,
+  x:Math.round(e.latlng.lng),
+  y:Math.round(e.latlng.lat),
+  color
+ }]);
+
+ loadMarkers();
 });
 
 // Bearbeiten
 async function editMarker(id){
-const { data } = await supabase.from("markers").select("*").eq("id",id).single();
-const title = prompt("Titel:",data.title);
-const description = prompt("Beschreibung:",data.description);
-const color = prompt("Farbe:",data.color);
+ const { data } = await supabase
+   .from("markers")
+   .select("*")
+   .eq("id",id)
+   .single();
 
-await supabase.from("markers").update({
-title,description,color
-}).eq("id",id);
+ const title = prompt("Titel:",data.title);
+ const description = prompt("Beschreibung:",data.description);
+ const color = prompt("Farbe:",data.color);
 
-loadMarkers();
+ await supabase.from("markers")
+  .update({title,description,color})
+  .eq("id",id);
+
+ loadMarkers();
 }
 
 // Löschen
 async function deleteMarker(id){
-if(!confirm("Wirklich löschen?")) return;
-await supabase.from("markers").delete().eq("id",id);
-loadMarkers();
+ if(!confirm("Wirklich löschen?")) return;
+
+ await supabase.from("markers")
+  .delete()
+  .eq("id",id);
+
+ loadMarkers();
 }
 
 loadMarkers();
 </script>
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </body>
 </html>
