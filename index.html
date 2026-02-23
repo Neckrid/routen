@@ -1,174 +1,162 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8" />
-<title>GTA 5 Interactive Map</title>
+<meta charset="utf-8"/>
+<title>GTA 5 Secure Map</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body { margin:0; background:#111; font-family:Arial; }
-#map { height:100vh; }
-#coords {
- position:absolute;
- bottom:10px;
- left:10px;
- background:black;
- color:#00ff88;
- padding:6px;
- border-radius:6px;
- z-index:1000;
+body{margin:0;background:#111;color:white;font-family:Arial;}
+#map{height:100vh;display:none;}
+#authBox{
+ position:absolute;top:50%;left:50%;
+ transform:translate(-50%,-50%);
+ background:#222;padding:20px;border-radius:10px;
 }
-#adminBtn {
- position:absolute;
- top:10px;
- left:10px;
- z-index:1000;
- padding:6px 10px;
+#coords{
+ position:absolute;bottom:10px;left:10px;
+ background:black;padding:5px;border-radius:5px;
+ display:none;
 }
 </style>
 </head>
 
 <body>
 
-<button id="adminBtn">Admin Login</button>
-<div id="coords">X: 0 | Y: 0</div>
+<div id="authBox">
+<h2>Login</h2>
+<input id="email" placeholder="Email"><br><br>
+<input id="password" type="password" placeholder="Passwort"><br><br>
+<button onclick="login()">Login</button>
+<button onclick="register()">Register</button>
+<p id="authMsg"></p>
+</div>
+
+<div id="coords"></div>
 <div id="map"></div>
 
 <script>
 
-// =======================
-// SUPABASE DATEN EINTRAGEN
-// =======================
 const SUPABASE_URL = "https://lleldalugvgmgqekcolx.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc";
-const ADMIN_PASSWORD = "NexvillePD";
-// =======================
 
-// Supabase Client (NUR EINMAL!)
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let adminMode = false;
+let user = null;
+let isAdmin = false;
+let markerLayer;
 
-const map = L.map('map', {
- crs: L.CRS.Simple,
- minZoom: -2,
- maxZoom: 2
-});
+async function login(){
+ const email = document.getElementById("email").value;
+ const password = document.getElementById("password").value;
 
-const bounds = [[0,0],[8192,8192]];
-L.imageOverlay("gta_map.png", bounds).addTo(map);
-map.fitBounds(bounds);
-
-let markerLayer = L.layerGroup().addTo(map);
-
-// Koordinaten anzeigen
-map.on("mousemove", e=>{
- document.getElementById("coords").innerText =
- "X: "+Math.round(e.latlng.lng)+" | Y: "+Math.round(e.latlng.lat);
-});
-
-// Admin Login
-document.getElementById("adminBtn").onclick = ()=>{
- const pass = prompt("Admin Passwort:");
- if(pass === ADMIN_PASSWORD){
-  adminMode = true;
-  alert("Admin Modus aktiviert");
-  loadMarkers();
+ const { data, error } = await db.auth.signInWithPassword({email,password});
+ if(error){
+  document.getElementById("authMsg").innerText = error.message;
  } else {
-  alert("Falsches Passwort");
+  user = data.user;
+  startApp();
  }
-};
+}
 
-// Marker laden
+async function register(){
+ const email = document.getElementById("email").value;
+ const password = document.getElementById("password").value;
+
+ const { data, error } = await db.auth.signUp({email,password});
+ if(error){
+  document.getElementById("authMsg").innerText = error.message;
+ } else {
+  alert("Registriert! Jetzt einloggen.");
+ }
+}
+
+async function startApp(){
+ document.getElementById("authBox").style.display="none";
+ document.getElementById("map").style.display="block";
+ document.getElementById("coords").style.display="block";
+
+ // Admin prüfen
+ const { data } = await db
+   .from("profiles")
+   .select("role")
+   .eq("id",user.id)
+   .single();
+
+ if(data && data.role === "admin"){
+  isAdmin = true;
+ }
+
+ initMap();
+ loadMarkers();
+}
+
+function initMap(){
+ const map = L.map('map',{crs:L.CRS.Simple,minZoom:-2});
+ const bounds = [[0,0],[8192,8192]];
+ L.imageOverlay("gta_map.png",bounds).addTo(map);
+ map.fitBounds(bounds);
+
+ markerLayer = L.layerGroup().addTo(map);
+
+ map.on("mousemove",e=>{
+  document.getElementById("coords").innerText =
+   "X:"+Math.round(e.latlng.lng)+" | Y:"+Math.round(e.latlng.lat);
+ });
+
+ if(isAdmin){
+  map.on("click", async e=>{
+   const title = prompt("Titel:");
+   if(!title) return;
+   const description = prompt("Beschreibung:");
+   const color = prompt("Farbe:","#ff0000");
+
+   await db.from("markers").insert([{
+    title,
+    description,
+    x:Math.round(e.latlng.lng),
+    y:Math.round(e.latlng.lat),
+    color,
+    created_by:user.id
+   }]);
+
+   loadMarkers();
+  });
+ }
+}
+
 async function loadMarkers(){
  markerLayer.clearLayers();
 
- const { data, error } = await db
-   .from("markers")
-   .select("*");
-
- if(error){
-   console.error(error);
-   return;
- }
+ const { data } = await db.from("markers").select("*");
 
  data.forEach(m=>{
   const icon = L.divIcon({
-   className:"",
    html:`<div style="background:${m.color};
    width:16px;height:16px;border-radius:50%;
    border:2px solid white;"></div>`
   });
 
   const marker = L.marker([m.y,m.x],{icon})
-    .addTo(markerLayer);
+   .addTo(markerLayer);
 
   marker.bindPopup(`
    <b>${m.title}</b><br>
-   ${m.description}<br>
-   ${adminMode ? `
-    <button onclick="editMarker(${m.id})">Bearbeiten</button>
-    <button onclick="deleteMarker(${m.id})">Löschen</button>
+   ${m.description}
+   ${isAdmin ? `
+    <br><button onclick="deleteMarker(${m.id})">Löschen</button>
    `:""}
   `);
  });
 }
 
-// Marker hinzufügen
-map.on("click", async e=>{
- if(!adminMode) return;
-
- const title = prompt("Titel:");
- if(!title) return;
-
- const description = prompt("Beschreibung:");
- const color = prompt("Farbe (#ff0000 oder blue):","#ff0000");
-
- await db.from("markers").insert([{
-  title,
-  description,
-  x:Math.round(e.latlng.lng),
-  y:Math.round(e.latlng.lat),
-  color
- }]);
-
- loadMarkers();
-});
-
-// Bearbeiten
-async function editMarker(id){
- const { data } = await db
-   .from("markers")
-   .select("*")
-   .eq("id",id)
-   .single();
-
- const title = prompt("Titel:",data.title);
- const description = prompt("Beschreibung:",data.description);
- const color = prompt("Farbe:",data.color);
-
- await db.from("markers")
-  .update({title,description,color})
-  .eq("id",id);
-
- loadMarkers();
-}
-
-// Löschen
 async function deleteMarker(id){
- if(!confirm("Wirklich löschen?")) return;
-
- await db.from("markers")
-  .delete()
-  .eq("id",id);
-
+ await db.from("markers").delete().eq("id",id);
  loadMarkers();
 }
-
-loadMarkers();
 
 </script>
 
