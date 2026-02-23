@@ -1,88 +1,122 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8" />
-<title>GTA 5 Interactive Map</title>
+<meta charset="utf-8"/>
+<title>GTA 5 Map</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body { margin:0; background:#111; font-family:Arial; }
-#map { height:100vh; }
-#coords {
- position:absolute;
- bottom:10px;
- left:10px;
- background:black;
- color:#00ff88;
- padding:6px;
- border-radius:6px;
- z-index:1000;
+body{margin:0;background:#111;font-family:Arial;}
+#map{height:100vh;display:none;}
+#coords{
+ position:absolute;bottom:10px;left:10px;
+ background:black;color:#00ff88;
+ padding:6px;border-radius:6px;
+ display:none;z-index:1000;
 }
-#adminBtn {
- position:absolute;
- top:10px;
- left:10px;
- z-index:1000;
- padding:6px 10px;
+#loginBox{
+ position:absolute;top:50%;left:50%;
+ transform:translate(-50%,-50%);
+ background:#222;padding:25px;
+ border-radius:10px;color:white;
+ text-align:center;
 }
+button{padding:6px 10px;margin:5px;}
 </style>
 </head>
 
 <body>
 
-<button id="adminBtn">Admin Login</button>
-<div id="coords">X: 0 | Y: 0</div>
+<div id="loginBox">
+<h2>Login</h2>
+<button onclick="userLogin()">User Login</button>
+<button onclick="adminLogin()">Admin Login</button>
+</div>
+
+<div id="coords"></div>
 <div id="map"></div>
 
 <script>
 
-// =======================
-// SUPABASE DATEN EINTRAGEN
-// =======================
+// ==========================
+// HIER EINTRAGEN
+// ==========================
 const SUPABASE_URL = "https://lleldalugvgmgqekcolx.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc";
-const ADMIN_PASSWORD = "NexvillePD";
-// =======================
 
-// Supabase Client (NUR EINMAL!)
+const USER_PASSWORD = "NexvilleUser26";
+const ADMIN_PASSWORD = "NexvillePD";
+// ==========================
+
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let adminMode = false;
+let isAdmin = false;
+let map;
+let markerLayer;
 
-const map = L.map('map', {
- crs: L.CRS.Simple,
- minZoom: -2,
- maxZoom: 2
-});
+// ---------- LOGIN ----------
 
-const bounds = [[0,0],[8192,8192]];
-L.imageOverlay("gta_map.png", bounds).addTo(map);
-map.fitBounds(bounds);
+function userLogin(){
+ const pass = prompt("User Passwort:");
+ if(pass === USER_PASSWORD){
+   startApp(false);
+ } else {
+   alert("Falsches Passwort");
+ }
+}
 
-let markerLayer = L.layerGroup().addTo(map);
-
-// Koordinaten anzeigen
-map.on("mousemove", e=>{
- document.getElementById("coords").innerText =
- "X: "+Math.round(e.latlng.lng)+" | Y: "+Math.round(e.latlng.lat);
-});
-
-// Admin Login
-document.getElementById("adminBtn").onclick = ()=>{
+function adminLogin(){
  const pass = prompt("Admin Passwort:");
  if(pass === ADMIN_PASSWORD){
-  adminMode = true;
-  alert("Admin Modus aktiviert");
-  loadMarkers();
+   startApp(true);
  } else {
-  alert("Falsches Passwort");
+   alert("Falsches Passwort");
  }
-};
+}
 
-// Marker laden
+// ---------- START ----------
+
+function startApp(admin){
+ isAdmin = admin;
+
+ document.getElementById("loginBox").style.display="none";
+ document.getElementById("map").style.display="block";
+ document.getElementById("coords").style.display="block";
+
+ initMap();
+ loadMarkers();
+}
+
+// ---------- MAP ----------
+
+function initMap(){
+ map = L.map('map',{
+  crs:L.CRS.Simple,
+  minZoom:-2,
+  maxZoom:2
+ });
+
+ const bounds = [[0,0],[8192,8192]];
+ L.imageOverlay("gta_map.png",bounds).addTo(map);
+ map.fitBounds(bounds);
+
+ markerLayer = L.layerGroup().addTo(map);
+
+ map.on("mousemove",e=>{
+  document.getElementById("coords").innerText =
+   "X: "+Math.round(e.latlng.lng)+" | Y: "+Math.round(e.latlng.lat);
+ });
+
+ if(isAdmin){
+  map.on("click",addMarker);
+ }
+}
+
+// ---------- MARKER LADEN ----------
+
 async function loadMarkers(){
  markerLayer.clearLayers();
 
@@ -98,9 +132,11 @@ async function loadMarkers(){
  data.forEach(m=>{
   const icon = L.divIcon({
    className:"",
-   html:`<div style="background:${m.color};
-   width:16px;height:16px;border-radius:50%;
-   border:2px solid white;"></div>`
+   html:`<div style="
+    background:${m.color};
+    width:16px;height:16px;
+    border-radius:50%;
+    border:2px solid white;"></div>`
   });
 
   const marker = L.marker([m.y,m.x],{icon})
@@ -108,19 +144,18 @@ async function loadMarkers(){
 
   marker.bindPopup(`
    <b>${m.title}</b><br>
-   ${m.description}<br>
-   ${adminMode ? `
-    <button onclick="editMarker(${m.id})">Bearbeiten</button>
-    <button onclick="deleteMarker(${m.id})">Löschen</button>
+   ${m.description}
+   ${isAdmin ? `
+   <br><button onclick="editMarker(${m.id})">Bearbeiten</button>
+   <button onclick="deleteMarker(${m.id})">Löschen</button>
    `:""}
   `);
  });
 }
 
-// Marker hinzufügen
-map.on("click", async e=>{
- if(!adminMode) return;
+// ---------- MARKER HINZUFÜGEN ----------
 
+async function addMarker(e){
  const title = prompt("Titel:");
  if(!title) return;
 
@@ -136,9 +171,10 @@ map.on("click", async e=>{
  }]);
 
  loadMarkers();
-});
+}
 
-// Bearbeiten
+// ---------- BEARBEITEN ----------
+
 async function editMarker(id){
  const { data } = await db
    .from("markers")
@@ -157,7 +193,8 @@ async function editMarker(id){
  loadMarkers();
 }
 
-// Löschen
+// ---------- LÖSCHEN ----------
+
 async function deleteMarker(id){
  if(!confirm("Wirklich löschen?")) return;
 
@@ -167,8 +204,6 @@ async function deleteMarker(id){
 
  loadMarkers();
 }
-
-loadMarkers();
 
 </script>
 
