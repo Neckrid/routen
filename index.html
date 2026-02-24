@@ -49,11 +49,12 @@ input{
 }
 
 button{
- padding:9px 14px;
+ padding:7px 12px;
  border:none;
  border-radius:8px;
  cursor:pointer;
  font-weight:bold;
+ margin-top:6px;
 }
 
 .primary{background:#00ffc3;color:black;}
@@ -65,8 +66,8 @@ button{
  left:50%;
  transform:translateX(-50%);
  display:none;
- font-size:13px;
- padding:6px 12px;
+ font-size:12px;
+ padding:5px 10px;
  z-index:1000;
 }
 
@@ -74,10 +75,10 @@ button{
 #searchBox{
  position:absolute;
  top:10px;
- left:15px;
+ left:80px;   /* weiter nach rechts */
  z-index:1000;
  display:none;
- width:200px;
+ width:220px;
 }
 
 /* ADMIN PANEL */
@@ -109,6 +110,7 @@ button{
  cursor:pointer;
  font-weight:bold;
  z-index:1100;
+ display:none;
 }
 
 #adminPanel h3{
@@ -119,9 +121,10 @@ button{
 
 .colorPreview{
  width:100%;
- height:40px;
- border-radius:8px;
+ height:20px;     /* dünner */
+ border-radius:6px;
  margin-top:5px;
+ margin-bottom:12px;  /* Abstand zum Button */
  border:2px solid white;
 }
 
@@ -155,10 +158,9 @@ button{
 </div>
 
 <button id="logoutBtn" class="danger" onclick="logout()">Logout</button>
-
 <input id="searchBox" placeholder="🔎 Suche...">
 
-<div id="adminToggle" style="display:none;">Admin</div>
+<div id="adminToggle">Admin</div>
 
 <div id="adminPanel">
 <h3>Admin Panel</h3>
@@ -180,12 +182,10 @@ const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let map,markerLayer,isAdmin=false,selectedCoords=null,allMarkers=[];
 
-/* ENTER LOGIN */
 document.addEventListener("keydown",e=>{
  if(e.key==="Enter") login();
 });
 
-/* SESSION */
 window.onload=async()=>{
  const {data}=await db.auth.getSession();
  if(data.session){
@@ -254,7 +254,6 @@ function initMap(){
 }
 
 async function loadMarkers(){
- markerLayer.clearLayers();
  const {data}=await db.from("markers").select("*");
  allMarkers=data;
  renderMarkers(data);
@@ -286,7 +285,16 @@ function renderMarkers(data){
     .eq("id",m.id);
   });
 
-  marker.bindPopup("<b>"+m.title+"</b><br>"+m.description);
+  let popup="<b>"+m.title+"</b><br>"+m.description;
+
+  if(isAdmin){
+   popup+=`
+   <br><button onclick="editMarker(${m.id})">Bearbeiten</button>
+   <button onclick="deleteMarker(${m.id})">Löschen</button>
+   `;
+  }
+
+  marker.bindPopup(popup);
  });
 }
 
@@ -305,13 +313,11 @@ document.getElementById("adminToggle").onclick=()=>{
  document.getElementById("adminPanel").classList.toggle("open");
 };
 
-/* COLOR PREVIEW */
 function updateColorPreview(){
  const color=document.getElementById("mColor").value;
  document.getElementById("colorPreview").style.background=color;
 }
 
-/* CREATE */
 async function createMarker(){
  if(!selectedCoords){
   alert("Klicke zuerst auf die Karte");
@@ -328,6 +334,26 @@ async function createMarker(){
   y:Math.round(selectedCoords.lat)
  }]);
 
+ loadMarkers();
+}
+
+async function editMarker(id){
+ const {data}=await db.from("markers").select("*").eq("id",id).single();
+
+ const title=prompt("Titel:",data.title);
+ const description=prompt("Beschreibung:",data.description);
+ const color=prompt("Farbe:",data.color);
+
+ await db.from("markers")
+  .update({title,description,color})
+  .eq("id",id);
+
+ loadMarkers();
+}
+
+async function deleteMarker(id){
+ if(!confirm("Wirklich löschen?")) return;
+ await db.from("markers").delete().eq("id",id);
  loadMarkers();
 }
 
