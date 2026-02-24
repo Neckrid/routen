@@ -44,26 +44,11 @@ input{
 }
 
 button{
- padding:7px 12px;
+ padding:8px 14px;
  border:none;
  border-radius:8px;
  cursor:pointer;
  font-weight:bold;
- margin-top:6px;
-}
-
-.primary{background:#00ffc3;color:black;}
-.danger{background:#ff3b3b;color:white;}
-.secondary{background:#555;color:white;}
-
-#logoutBtn{
- position:absolute;
- top:10px;
- right:20px;   /* Abstand vom Admin Toggle */
- display:none;
- font-size:12px;
- padding:6px 12px;
- z-index:1200;
 }
 
 /* SEARCH */
@@ -74,6 +59,21 @@ button{
  z-index:1100;
  display:none;
  width:220px;
+}
+
+/* LOGOUT (optisch wie Admin Toggle, nur rot) */
+#logoutBtn{
+ position:absolute;
+ top:10px;
+ right:0;
+ background:#ff3b3b;
+ color:white;
+ padding:8px 12px;
+ border-radius:8px 0 0 8px;
+ cursor:pointer;
+ font-weight:bold;
+ display:none;
+ z-index:1200;
 }
 
 /* ADMIN TOGGLE */
@@ -122,6 +122,9 @@ button{
  border:2px solid white;
 }
 
+.primary{background:#00ffc3;color:black;}
+.danger{background:#ff3b3b;color:white;}
+
 #coords{
  position:absolute;
  bottom:15px;
@@ -151,7 +154,7 @@ button{
 <p id="msg"></p>
 </div>
 
-<button id="logoutBtn" class="danger" onclick="logout()">Logout</button>
+<button id="logoutBtn" onclick="logout()">Logout</button>
 <input id="searchBox" placeholder="🔎 Suche...">
 <div id="adminToggle">Admin</div>
 
@@ -163,9 +166,8 @@ button{
 <input id="mColor" type="color" value="#ff0000" onchange="updateColorPreview()">
 <div id="colorPreview" class="colorPreview"></div>
 
-<button id="saveBtn" class="primary" onclick="saveMarker()">Speichern</button>
-<button id="deleteBtn" class="danger" onclick="deleteMarker()">Löschen</button>
-<button class="secondary" onclick="clearForm()">Neu</button>
+<button class="primary" onclick="saveMarker()">Speichern</button>
+<button class="danger" onclick="deleteMarker()">Löschen</button>
 
 </div>
 
@@ -180,12 +182,10 @@ const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let map,markerLayer,isAdmin=false,selectedCoords=null,currentEditId=null,allMarkers=[];
 
-/* ENTER LOGIN */
 document.addEventListener("keydown",e=>{
  if(e.key==="Enter") login();
 });
 
-/* SESSION */
 window.onload=async()=>{
  const {data}=await db.auth.getSession();
  if(data.session){
@@ -255,7 +255,6 @@ function initMap(){
  }
 }
 
-/* LOAD */
 async function loadMarkers(){
  const {data}=await db.from("markers").select("*");
  allMarkers=data;
@@ -302,7 +301,6 @@ function renderMarkers(data){
  });
 }
 
-/* SAVE */
 async function saveMarker(){
  const title=document.getElementById("mTitle").value;
  const description=document.getElementById("mDesc").value;
@@ -336,17 +334,6 @@ function clearForm(){
  currentEditId=null;
 }
 
-/* SEARCH */
-document.getElementById("searchBox").addEventListener("input",e=>{
- const value=e.target.value.toLowerCase();
- const filtered=allMarkers.filter(m=>
-  m.title.toLowerCase().includes(value) ||
-  m.description.toLowerCase().includes(value)
- );
- renderMarkers(filtered);
-});
-
-/* REALTIME */
 function setupRealtime(){
  db.channel("realtime-markers")
   .on("postgres_changes",
@@ -355,7 +342,6 @@ function setupRealtime(){
   ).subscribe();
 }
 
-/* TOGGLE */
 document.getElementById("adminToggle").onclick=()=>{
  document.getElementById("adminPanel").classList.toggle("open");
 };
