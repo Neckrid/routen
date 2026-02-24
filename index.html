@@ -61,7 +61,7 @@ button{
  width:220px;
 }
 
-/* LOGOUT (optisch wie Admin Toggle, nur rot) */
+/* LOGOUT */
 #logoutBtn{
  position:absolute;
  top:10px;
@@ -181,6 +181,24 @@ const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let map,markerLayer,isAdmin=false,selectedCoords=null,currentEditId=null,allMarkers=[];
+let inactivityTimer;
+
+/* ================= AUTO LOGOUT ================= */
+
+function resetInactivityTimer(){
+ clearTimeout(inactivityTimer);
+ inactivityTimer=setTimeout(()=>{
+  alert("Automatischer Logout wegen Inaktivität (60 Minuten)");
+  logout();
+ },60*60*1000);
+}
+
+document.addEventListener("mousemove",resetInactivityTimer);
+document.addEventListener("keydown",resetInactivityTimer);
+document.addEventListener("click",resetInactivityTimer);
+document.addEventListener("touchstart",resetInactivityTimer);
+
+/* ================= LOGIN ================= */
 
 document.addEventListener("keydown",e=>{
  if(e.key==="Enter") login();
@@ -216,6 +234,8 @@ async function logout(){
  location.reload();
 }
 
+/* ================= START ================= */
+
 function startApp(){
  document.getElementById("loginPanel").style.display="none";
  document.getElementById("map").style.display="block";
@@ -231,7 +251,10 @@ function startApp(){
  loadMarkers();
  setupRealtime();
  updateColorPreview();
+ resetInactivityTimer();
 }
+
+/* ================= MAP ================= */
 
 function initMap(){
  map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2});
@@ -254,6 +277,8 @@ function initMap(){
   });
  }
 }
+
+/* ================= MARKER ================= */
 
 async function loadMarkers(){
  const {data}=await db.from("markers").select("*");
@@ -301,6 +326,8 @@ function renderMarkers(data){
  });
 }
 
+/* SAVE */
+
 async function saveMarker(){
  const title=document.getElementById("mTitle").value;
  const description=document.getElementById("mDesc").value;
@@ -334,6 +361,19 @@ function clearForm(){
  currentEditId=null;
 }
 
+/* SEARCH */
+
+document.getElementById("searchBox").addEventListener("input",e=>{
+ const value=e.target.value.toLowerCase();
+ const filtered=allMarkers.filter(m=>
+  m.title.toLowerCase().includes(value) ||
+  m.description.toLowerCase().includes(value)
+ );
+ renderMarkers(filtered);
+});
+
+/* REALTIME */
+
 function setupRealtime(){
  db.channel("realtime-markers")
   .on("postgres_changes",
@@ -341,6 +381,8 @@ function setupRealtime(){
    ()=>loadMarkers()
   ).subscribe();
 }
+
+/* TOGGLE */
 
 document.getElementById("adminToggle").onclick=()=>{
  document.getElementById("adminPanel").classList.toggle("open");
