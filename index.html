@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>GTA 5 Map</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
@@ -9,89 +10,144 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{margin:0;background:#111;font-family:Arial;}
+body{margin:0;background:#111;font-family:Arial;color:white;}
 #map{height:100vh;display:none;}
-#coords{
- position:absolute;bottom:10px;left:10px;
- background:black;color:#00ff88;
- padding:6px;border-radius:6px;
- display:none;z-index:1000;
-}
-#loginBox{
+
+.panel{
  position:absolute;top:50%;left:50%;
  transform:translate(-50%,-50%);
- background:#222;padding:25px;
- border-radius:10px;color:white;
+ background:#1e1e1e;padding:25px;
+ border-radius:12px;width:90%;max-width:400px;
  text-align:center;
 }
-button{padding:6px 10px;margin:5px;}
+
+input{
+ width:100%;padding:12px;margin:8px 0;
+ border-radius:8px;border:none;font-size:16px;
+}
+
+button{
+ padding:10px 16px;
+ border-radius:8px;
+ border:none;
+ font-size:14px;
+ background:#2c7be5;
+ color:white;
+ cursor:pointer;
+}
+
+#logoutBtn{
+ position:absolute;
+ top:10px;
+ left:50%;
+ transform:translateX(-50%);
+ background:#e55353;
+ display:none;
+ font-size:13px;
+ padding:6px 14px;
+ z-index:1000;
+}
+
+#coords{
+ position:absolute;
+ bottom:10px;
+ left:10px;
+ background:black;
+ padding:6px 10px;
+ border-radius:8px;
+ font-size:14px;
+ display:none;
+ z-index:1000;
+}
+
+.leaflet-div-icon{
+ background:transparent !important;
+ border:none !important;
+}
 </style>
 </head>
 
 <body>
 
-<div id="loginBox">
+<div id="loginPanel" class="panel">
 <h2>Login</h2>
-<button onclick="userLogin()">User Login</button>
-<button onclick="adminLogin()">Admin Login</button>
+<input id="username" placeholder="Benutzername">
+<input id="password" type="password" placeholder="Passwort">
+<button onclick="login()">Login</button>
+<p id="msg"></p>
 </div>
 
+<button id="logoutBtn" onclick="logout()">Logout</button>
 <div id="coords"></div>
 <div id="map"></div>
 
 <script>
 
-// ==========================
-// HIER EINTRAGEN
-// ==========================
 const SUPABASE_URL = "https://lleldalugvgmgqekcolx.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc";
-
-const USER_PASSWORD = "NexvilleUser26";
-const ADMIN_PASSWORD = "NexvillePD";
-// ==========================
-
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc"
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let isAdmin = false;
 let map;
 let markerLayer;
+let currentUser;
+let isAdmin = false;
 
-// ---------- LOGIN ----------
+// ENTER LOGIN
+document.addEventListener("keydown",function(e){
+ if(e.key === "Enter"){
+  login();
+ }
+});
 
-function userLogin(){
- const pass = prompt("User Passwort:");
- if(pass === USER_PASSWORD){
-   startApp(false);
+// SESSION CHECK (eingeloggt bleiben)
+window.onload = async function(){
+ const { data } = await db.auth.getSession();
+ if(data.session){
+  currentUser = data.session.user;
+  isAdmin = currentUser.email === "admin@gta.local";
+  startApp();
+ }
+};
+
+// LOGIN
+async function login(){
+ const username = document.getElementById("username").value;
+ const password = document.getElementById("password").value;
+
+ const fakeEmail = username + "@gta.local";
+
+ const { data, error } =
+  await db.auth.signInWithPassword({
+   email: fakeEmail,
+   password: password
+  });
+
+ if(error){
+  document.getElementById("msg").innerText = "Login fehlgeschlagen";
  } else {
-   alert("Falsches Passwort");
+  currentUser = data.user;
+  isAdmin = currentUser.email === "admin@gta.local";
+  startApp();
  }
 }
 
-function adminLogin(){
- const pass = prompt("Admin Passwort:");
- if(pass === ADMIN_PASSWORD){
-   startApp(true);
- } else {
-   alert("Falsches Passwort");
- }
+// LOGOUT
+async function logout(){
+ await db.auth.signOut();
+ location.reload();
 }
 
-// ---------- START ----------
-
-function startApp(admin){
- isAdmin = admin;
-
- document.getElementById("loginBox").style.display="none";
+function startApp(){
+ document.getElementById("loginPanel").style.display="none";
  document.getElementById("map").style.display="block";
  document.getElementById("coords").style.display="block";
+ document.getElementById("logoutBtn").style.display="block";
 
  initMap();
  loadMarkers();
 }
 
-// ---------- MAP ----------
-
+// MAP
 function initMap(){
  map = L.map('map',{
   crs:L.CRS.Simple,
@@ -107,7 +163,7 @@ function initMap(){
 
  map.on("mousemove",e=>{
   document.getElementById("coords").innerText =
-   "X: "+Math.round(e.latlng.lng)+" | Y: "+Math.round(e.latlng.lat);
+   "X:"+Math.round(e.latlng.lng)+" | Y:"+Math.round(e.latlng.lat);
  });
 
  if(isAdmin){
@@ -115,52 +171,44 @@ function initMap(){
  }
 }
 
-// ---------- MARKER LADEN ----------
-
+// MARKER LADEN
 async function loadMarkers(){
  markerLayer.clearLayers();
-
- const { data, error } = await db
-   .from("markers")
-   .select("*");
-
- if(error){
-   console.error(error);
-   return;
- }
+ const { data } = await db.from("markers").select("*");
 
  data.forEach(m=>{
   const icon = L.divIcon({
    className:"",
    html:`<div style="
     background:${m.color};
-    width:16px;height:16px;
+    width:20px;height:20px;
     border-radius:50%;
-    border:2px solid white;"></div>`
+    border:3px solid white;"></div>`
   });
 
   const marker = L.marker([m.y,m.x],{icon})
-    .addTo(markerLayer);
+   .addTo(markerLayer);
 
-  marker.bindPopup(`
-   <b>${m.title}</b><br>
-   ${m.description}
-   ${isAdmin ? `
+  let popupContent = "<b>"+m.title+"</b><br>"+m.description;
+
+  if(isAdmin){
+   popupContent += `
    <br><button onclick="editMarker(${m.id})">Bearbeiten</button>
    <button onclick="deleteMarker(${m.id})">Löschen</button>
-   `:""}
-  `);
+   `;
+  }
+
+  marker.bindPopup(popupContent);
  });
 }
 
-// ---------- MARKER HINZUFÜGEN ----------
-
+// ADD
 async function addMarker(e){
  const title = prompt("Titel:");
  if(!title) return;
 
  const description = prompt("Beschreibung:");
- const color = prompt("Farbe (#ff0000 oder blue):","#ff0000");
+ const color = prompt("Farbe:","#ff0000");
 
  await db.from("markers").insert([{
   title,
@@ -173,14 +221,13 @@ async function addMarker(e){
  loadMarkers();
 }
 
-// ---------- BEARBEITEN ----------
-
+// EDIT
 async function editMarker(id){
  const { data } = await db
-   .from("markers")
-   .select("*")
-   .eq("id",id)
-   .single();
+  .from("markers")
+  .select("*")
+  .eq("id",id)
+  .single();
 
  const title = prompt("Titel:",data.title);
  const description = prompt("Beschreibung:",data.description);
@@ -193,8 +240,7 @@ async function editMarker(id){
  loadMarkers();
 }
 
-// ---------- LÖSCHEN ----------
-
+// DELETE
 async function deleteMarker(id){
  if(!confirm("Wirklich löschen?")) return;
 
@@ -206,6 +252,5 @@ async function deleteMarker(id){
 }
 
 </script>
-
 </body>
 </html>
