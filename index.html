@@ -12,18 +12,18 @@
 <style>
 body{
  margin:0;
- background:#0f0f0f;
+ background:#0e0e0e;
  font-family:Arial;
  color:white;
+ overflow:hidden;
 }
 
-/* MAP */
 #map{
  height:100vh;
  display:none;
 }
 
-/* LOGIN PANEL */
+/* LOGIN */
 .panel{
  position:absolute;
  top:50%;left:50%;
@@ -32,38 +32,32 @@ body{
  padding:30px;
  border-radius:15px;
  width:90%;max-width:400px;
- box-shadow:0 0 25px #00ffcc55;
+ box-shadow:0 0 25px #00ffc355;
  text-align:center;
 }
 
 input{
  width:100%;
- padding:12px;
- margin:10px 0;
+ padding:10px;
+ margin:8px 0;
  border-radius:8px;
  border:none;
  background:#222;
  color:white;
- font-size:16px;
+ font-size:15px;
+ box-sizing:border-box;
 }
 
 button{
- padding:10px 18px;
+ padding:9px 14px;
  border:none;
  border-radius:8px;
  cursor:pointer;
  font-weight:bold;
 }
 
-.primary{
- background:#00ffcc;
- color:black;
-}
-
-.danger{
- background:#ff3b3b;
- color:white;
-}
+.primary{background:#00ffc3;color:black;}
+.danger{background:#ff3b3b;color:white;}
 
 #logoutBtn{
  position:absolute;
@@ -72,8 +66,63 @@ button{
  transform:translateX(-50%);
  display:none;
  font-size:13px;
- padding:6px 14px;
+ padding:6px 12px;
  z-index:1000;
+}
+
+/* SEARCH */
+#searchBox{
+ position:absolute;
+ top:10px;
+ left:15px;
+ z-index:1000;
+ display:none;
+ width:200px;
+}
+
+/* ADMIN PANEL */
+#adminPanel{
+ position:absolute;
+ top:60px;
+ right:-320px;
+ width:300px;
+ background:#161616;
+ padding:20px;
+ border-radius:15px 0 0 15px;
+ box-shadow:0 0 25px #00ffc322;
+ transition:0.4s;
+ z-index:1000;
+}
+
+#adminPanel.open{
+ right:0;
+}
+
+#adminToggle{
+ position:absolute;
+ top:60px;
+ right:0;
+ background:#00ffc3;
+ color:black;
+ padding:8px 12px;
+ border-radius:8px 0 0 8px;
+ cursor:pointer;
+ font-weight:bold;
+ z-index:1100;
+}
+
+#adminPanel h3{
+ margin-top:0;
+ text-align:center;
+ color:#00ffc3;
+}
+
+.colorPreview{
+ width:100%;
+ height:40px;
+ border-radius:8px;
+ margin-top:5px;
+ border:2px solid white;
 }
 
 #coords{
@@ -88,26 +137,6 @@ button{
  z-index:1000;
 }
 
-/* ADMIN PANEL */
-#adminPanel{
- position:absolute;
- right:10px;
- top:60px;
- background:#181818;
- padding:20px;
- border-radius:12px;
- width:260px;
- box-shadow:0 0 20px #00ffcc33;
- display:none;
- z-index:1000;
-}
-
-#adminPanel h3{
- margin-top:0;
- text-align:center;
- color:#00ffcc;
-}
-
 .leaflet-div-icon{
  background:transparent !important;
  border:none !important;
@@ -117,7 +146,6 @@ button{
 
 <body>
 
-<!-- LOGIN -->
 <div id="loginPanel" class="panel">
 <h2>GTA Map Login</h2>
 <input id="username" placeholder="Benutzername">
@@ -127,100 +155,83 @@ button{
 </div>
 
 <button id="logoutBtn" class="danger" onclick="logout()">Logout</button>
-<div id="coords"></div>
 
-<!-- ADMIN PANEL -->
+<input id="searchBox" placeholder="🔎 Suche...">
+
+<div id="adminToggle" style="display:none;">Admin</div>
+
 <div id="adminPanel">
 <h3>Admin Panel</h3>
 <input id="mTitle" placeholder="Titel">
 <input id="mDesc" placeholder="Beschreibung">
-<input id="mColor" type="color" value="#ff0000">
+<input id="mColor" type="color" value="#ff0000" onchange="updateColorPreview()">
+<div id="colorPreview" class="colorPreview"></div>
 <button class="primary" onclick="createMarker()">Marker erstellen</button>
 </div>
 
+<div id="coords"></div>
 <div id="map"></div>
 
 <script>
 
-const SUPABASE_URL = "https://lleldalugvgmgqekcolx.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc";
+const SUPABASE_URL="https://lleldalugvgmgqekcolx.supabase.co";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc";
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let map,markerLayer,isAdmin=false,selectedCoords=null,allMarkers=[];
 
-let map;
-let markerLayer;
-let isAdmin = false;
-let inactivityTimer;
-let selectedCoords = null;
-
-// ENTER LOGIN
+/* ENTER LOGIN */
 document.addEventListener("keydown",e=>{
  if(e.key==="Enter") login();
 });
 
-// SESSION CHECK
-window.onload = async()=>{
- const { data } = await db.auth.getSession();
+/* SESSION */
+window.onload=async()=>{
+ const {data}=await db.auth.getSession();
  if(data.session){
-  isAdmin = data.session.user.email==="admin@gta.local";
+  isAdmin=data.session.user.email==="admin@gta.local";
   startApp();
  }
 };
 
-// LOGIN
 async function login(){
  const username=document.getElementById("username").value;
  const password=document.getElementById("password").value;
 
- const { error } =
-  await db.auth.signInWithPassword({
-   email:username+"@gta.local",
-   password
-  });
+ const {error}=await db.auth.signInWithPassword({
+  email:username+"@gta.local",
+  password
+ });
 
  if(error){
   document.getElementById("msg").innerText="Login fehlgeschlagen";
- } else {
+ }else{
   isAdmin=username==="admin";
   startApp();
  }
 }
 
-// LOGOUT
 async function logout(){
  await db.auth.signOut();
  location.reload();
 }
-
-// AUTO LOGOUT 60 MIN
-function resetTimer(){
- clearTimeout(inactivityTimer);
- inactivityTimer=setTimeout(()=>{
-  alert("Automatischer Logout wegen Inaktivität");
-  logout();
- },60*60*1000);
-}
-
-document.addEventListener("mousemove",resetTimer);
-document.addEventListener("keydown",resetTimer);
-document.addEventListener("click",resetTimer);
 
 function startApp(){
  document.getElementById("loginPanel").style.display="none";
  document.getElementById("map").style.display="block";
  document.getElementById("coords").style.display="block";
  document.getElementById("logoutBtn").style.display="block";
+ document.getElementById("searchBox").style.display="block";
 
  if(isAdmin){
-  document.getElementById("adminPanel").style.display="block";
+  document.getElementById("adminToggle").style.display="block";
  }
 
  initMap();
  loadMarkers();
- resetTimer();
+ updateColorPreview();
 }
 
-// MAP
 function initMap(){
  map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2});
  const bounds=[[0,0],[8192,8192]];
@@ -242,10 +253,15 @@ function initMap(){
  }
 }
 
-// LOAD MARKER
 async function loadMarkers(){
  markerLayer.clearLayers();
- const { data }=await db.from("markers").select("*");
+ const {data}=await db.from("markers").select("*");
+ allMarkers=data;
+ renderMarkers(data);
+}
+
+function renderMarkers(data){
+ markerLayer.clearLayers();
 
  data.forEach(m=>{
   const icon=L.divIcon({
@@ -270,19 +286,32 @@ async function loadMarkers(){
     .eq("id",m.id);
   });
 
-  let popup="<b>"+m.title+"</b><br>"+m.description;
-
-  if(isAdmin){
-   popup+=`
-   <br><button onclick="editMarker(${m.id})">Bearbeiten</button>
-   <button onclick="deleteMarker(${m.id})">Löschen</button>`;
-  }
-
-  marker.bindPopup(popup);
+  marker.bindPopup("<b>"+m.title+"</b><br>"+m.description);
  });
 }
 
-// CREATE
+/* SEARCH */
+document.getElementById("searchBox").addEventListener("input",e=>{
+ const value=e.target.value.toLowerCase();
+ const filtered=allMarkers.filter(m=>
+  m.title.toLowerCase().includes(value) ||
+  m.description.toLowerCase().includes(value)
+ );
+ renderMarkers(filtered);
+});
+
+/* ADMIN PANEL TOGGLE */
+document.getElementById("adminToggle").onclick=()=>{
+ document.getElementById("adminPanel").classList.toggle("open");
+};
+
+/* COLOR PREVIEW */
+function updateColorPreview(){
+ const color=document.getElementById("mColor").value;
+ document.getElementById("colorPreview").style.background=color;
+}
+
+/* CREATE */
 async function createMarker(){
  if(!selectedCoords){
   alert("Klicke zuerst auf die Karte");
@@ -294,35 +323,11 @@ async function createMarker(){
  const color=document.getElementById("mColor").value;
 
  await db.from("markers").insert([{
-  title,
-  description,
-  color,
+  title,description,color,
   x:Math.round(selectedCoords.lng),
   y:Math.round(selectedCoords.lat)
  }]);
 
- loadMarkers();
-}
-
-// EDIT
-async function editMarker(id){
- const { data }=await db.from("markers").select("*").eq("id",id).single();
-
- const title=prompt("Titel:",data.title);
- const description=prompt("Beschreibung:",data.description);
- const color=prompt("Farbe:",data.color);
-
- await db.from("markers")
-  .update({title,description,color})
-  .eq("id",id);
-
- loadMarkers();
-}
-
-// DELETE
-async function deleteMarker(id){
- if(!confirm("Wirklich löschen?")) return;
- await db.from("markers").delete().eq("id",id);
  loadMarkers();
 }
 
