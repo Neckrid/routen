@@ -18,12 +18,8 @@ body{
  overflow:hidden;
 }
 
-#map{
- height:100vh;
- display:none;
-}
+#map{height:100vh;display:none;}
 
-/* LOGIN */
 .panel{
  position:absolute;
  top:50%;left:50%;
@@ -44,7 +40,6 @@ input{
  border:none;
  background:#222;
  color:white;
- font-size:15px;
  box-sizing:border-box;
 }
 
@@ -59,49 +54,32 @@ button{
 
 .primary{background:#00ffc3;color:black;}
 .danger{background:#ff3b3b;color:white;}
+.secondary{background:#555;color:white;}
 
 #logoutBtn{
  position:absolute;
  top:10px;
- left:50%;
- transform:translateX(-50%);
+ right:20px;   /* Abstand vom Admin Toggle */
  display:none;
  font-size:12px;
- padding:5px 10px;
- z-index:1000;
+ padding:6px 12px;
+ z-index:1200;
 }
 
 /* SEARCH */
 #searchBox{
  position:absolute;
  top:10px;
- left:80px;   /* weiter nach rechts */
- z-index:1000;
+ left:80px;
+ z-index:1100;
  display:none;
  width:220px;
 }
 
-/* ADMIN PANEL */
-#adminPanel{
- position:absolute;
- top:60px;
- right:-320px;
- width:300px;
- background:#161616;
- padding:20px;
- border-radius:15px 0 0 15px;
- box-shadow:0 0 25px #00ffc322;
- transition:0.4s;
- z-index:1000;
-}
-
-#adminPanel.open{
- right:0;
-}
-
+/* ADMIN TOGGLE */
 #adminToggle{
  position:absolute;
- top:60px;
+ top:50px;
  right:0;
  background:#00ffc3;
  color:black;
@@ -113,6 +91,22 @@ button{
  display:none;
 }
 
+/* ADMIN PANEL */
+#adminPanel{
+ position:absolute;
+ top:90px;
+ right:-320px;
+ width:300px;
+ background:#161616;
+ padding:20px;
+ border-radius:15px 0 0 15px;
+ box-shadow:0 0 25px #00ffc322;
+ transition:0.4s;
+ z-index:1000;
+}
+
+#adminPanel.open{right:0;}
+
 #adminPanel h3{
  margin-top:0;
  text-align:center;
@@ -121,10 +115,10 @@ button{
 
 .colorPreview{
  width:100%;
- height:20px;     /* dünner */
+ height:20px;
  border-radius:6px;
  margin-top:5px;
- margin-bottom:12px;  /* Abstand zum Button */
+ margin-bottom:12px;
  border:2px solid white;
 }
 
@@ -159,16 +153,20 @@ button{
 
 <button id="logoutBtn" class="danger" onclick="logout()">Logout</button>
 <input id="searchBox" placeholder="🔎 Suche...">
-
 <div id="adminToggle">Admin</div>
 
 <div id="adminPanel">
 <h3>Admin Panel</h3>
+
 <input id="mTitle" placeholder="Titel">
 <input id="mDesc" placeholder="Beschreibung">
 <input id="mColor" type="color" value="#ff0000" onchange="updateColorPreview()">
 <div id="colorPreview" class="colorPreview"></div>
-<button class="primary" onclick="createMarker()">Marker erstellen</button>
+
+<button id="saveBtn" class="primary" onclick="saveMarker()">Speichern</button>
+<button id="deleteBtn" class="danger" onclick="deleteMarker()">Löschen</button>
+<button class="secondary" onclick="clearForm()">Neu</button>
+
 </div>
 
 <div id="coords"></div>
@@ -180,12 +178,14 @@ const SUPABASE_URL="https://lleldalugvgmgqekcolx.supabase.co";
 const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc";
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let map,markerLayer,isAdmin=false,selectedCoords=null,allMarkers=[];
+let map,markerLayer,isAdmin=false,selectedCoords=null,currentEditId=null,allMarkers=[];
 
+/* ENTER LOGIN */
 document.addEventListener("keydown",e=>{
  if(e.key==="Enter") login();
 });
 
+/* SESSION */
 window.onload=async()=>{
  const {data}=await db.auth.getSession();
  if(data.session){
@@ -229,6 +229,7 @@ function startApp(){
 
  initMap();
  loadMarkers();
+ setupRealtime();
  updateColorPreview();
 }
 
@@ -248,11 +249,13 @@ function initMap(){
  if(isAdmin){
   map.on("click",e=>{
    selectedCoords=e.latlng;
-   document.getElementById("mTitle").focus();
+   currentEditId=null;
+   clearForm();
   });
  }
 }
 
+/* LOAD */
 async function loadMarkers(){
  const {data}=await db.from("markers").select("*");
  allMarkers=data;
@@ -277,25 +280,60 @@ function renderMarkers(data){
    draggable:isAdmin
   }).addTo(markerLayer);
 
-  marker.on("dragend",async e=>{
-   if(!isAdmin) return;
-   const pos=e.target.getLatLng();
-   await db.from("markers")
-    .update({x:Math.round(pos.lng),y:Math.round(pos.lat)})
-    .eq("id",m.id);
-  });
-
-  let popup="<b>"+m.title+"</b><br>"+m.description;
-
   if(isAdmin){
-   popup+=`
-   <br><button onclick="editMarker(${m.id})">Bearbeiten</button>
-   <button onclick="deleteMarker(${m.id})">Löschen</button>
-   `;
+   marker.on("click",()=>{
+    currentEditId=m.id;
+    document.getElementById("mTitle").value=m.title;
+    document.getElementById("mDesc").value=m.description;
+    document.getElementById("mColor").value=m.color;
+    updateColorPreview();
+    document.getElementById("adminPanel").classList.add("open");
+   });
+
+   marker.on("dragend",async e=>{
+    const pos=e.target.getLatLng();
+    await db.from("markers")
+     .update({x:Math.round(pos.lng),y:Math.round(pos.lat)})
+     .eq("id",m.id);
+   });
   }
 
-  marker.bindPopup(popup);
+  marker.bindPopup("<b>"+m.title+"</b><br>"+m.description);
  });
+}
+
+/* SAVE */
+async function saveMarker(){
+ const title=document.getElementById("mTitle").value;
+ const description=document.getElementById("mDesc").value;
+ const color=document.getElementById("mColor").value;
+
+ if(currentEditId){
+  await db.from("markers")
+   .update({title,description,color})
+   .eq("id",currentEditId);
+ }else{
+  if(!selectedCoords){alert("Karte anklicken");return;}
+  await db.from("markers").insert([{
+   title,description,color,
+   x:Math.round(selectedCoords.lng),
+   y:Math.round(selectedCoords.lat)
+  }]);
+ }
+
+ clearForm();
+}
+
+async function deleteMarker(){
+ if(!currentEditId)return;
+ await db.from("markers").delete().eq("id",currentEditId);
+ clearForm();
+}
+
+function clearForm(){
+ document.getElementById("mTitle").value="";
+ document.getElementById("mDesc").value="";
+ currentEditId=null;
 }
 
 /* SEARCH */
@@ -308,53 +346,23 @@ document.getElementById("searchBox").addEventListener("input",e=>{
  renderMarkers(filtered);
 });
 
-/* ADMIN PANEL TOGGLE */
+/* REALTIME */
+function setupRealtime(){
+ db.channel("realtime-markers")
+  .on("postgres_changes",
+   {event:"*",schema:"public",table:"markers"},
+   ()=>loadMarkers()
+  ).subscribe();
+}
+
+/* TOGGLE */
 document.getElementById("adminToggle").onclick=()=>{
  document.getElementById("adminPanel").classList.toggle("open");
 };
 
 function updateColorPreview(){
- const color=document.getElementById("mColor").value;
- document.getElementById("colorPreview").style.background=color;
-}
-
-async function createMarker(){
- if(!selectedCoords){
-  alert("Klicke zuerst auf die Karte");
-  return;
- }
-
- const title=document.getElementById("mTitle").value;
- const description=document.getElementById("mDesc").value;
- const color=document.getElementById("mColor").value;
-
- await db.from("markers").insert([{
-  title,description,color,
-  x:Math.round(selectedCoords.lng),
-  y:Math.round(selectedCoords.lat)
- }]);
-
- loadMarkers();
-}
-
-async function editMarker(id){
- const {data}=await db.from("markers").select("*").eq("id",id).single();
-
- const title=prompt("Titel:",data.title);
- const description=prompt("Beschreibung:",data.description);
- const color=prompt("Farbe:",data.color);
-
- await db.from("markers")
-  .update({title,description,color})
-  .eq("id",id);
-
- loadMarkers();
-}
-
-async function deleteMarker(id){
- if(!confirm("Wirklich löschen?")) return;
- await db.from("markers").delete().eq("id",id);
- loadMarkers();
+ document.getElementById("colorPreview").style.background=
+  document.getElementById("mColor").value;
 }
 
 </script>
