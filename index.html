@@ -91,7 +91,7 @@ button{
  display:none;
 }
 
-/* ADMIN PANEL */
+/* ADMIN PANEL (komplett versteckt via transform) */
 #adminPanel{
  position:absolute;
  top:90px;
@@ -103,23 +103,39 @@ button{
  box-shadow:0 0 25px #00ffc322;
  transition:transform 0.4s ease;
  z-index:1000;
-
- /* Komplett außerhalb */
  transform:translateX(100%);
 }
-
-/* Wenn offen */
-#adminPanel.open{
- transform:translateX(0);
-}
-
-#adminPanel.open{right:0;}
+#adminPanel.open{ transform:translateX(0); }
 
 #adminPanel h3{
  margin-top:0;
  text-align:center;
  color:#00ffc3;
 }
+
+/* ✅ Badge / Status für ausgewählte Koordinate */
+#coordBadge{
+ margin:10px 0 14px 0;
+ padding:10px 12px;
+ border-radius:10px;
+ font-size:13px;
+ line-height:1.25;
+ background:#0b0b0b;
+ border:1px solid #2a2a2a;
+ color:#cfcfcf;
+ box-shadow:inset 0 0 0 1px #000;
+}
+#coordBadge.ready{
+ border-color:#00ffc355;
+ color:#00ffc3;
+ box-shadow:0 0 12px #00ffc322, inset 0 0 0 1px #000;
+}
+#coordBadge.editing{
+ border-color:#ffcc0033;
+ color:#ffcc00;
+ box-shadow:0 0 12px #ffcc0022, inset 0 0 0 1px #000;
+}
+#coordBadge b{ color:white; }
 
 .colorPreview{
  width:100%;
@@ -184,6 +200,9 @@ button{
 <div id="adminPanel">
 <h3>Marker Verwaltung</h3>
 
+<!-- ✅ Koordinaten-Status -->
+<div id="coordBadge">🖱️ <b>Keine Koordinate gewählt</b><br>Klicke in die Karte, um einen neuen Marker zu platzieren.</div>
+
 <input id="mTitle" placeholder="Titel">
 <input id="mDesc" placeholder="Beschreibung">
 <input id="mColor" type="color" value="#ff0000" onchange="updateColorPreview()">
@@ -191,7 +210,6 @@ button{
 
 <button class="primary" onclick="saveMarker()">Speichern</button>
 <button class="danger" onclick="deleteMarker()">Löschen</button>
-
 </div>
 
 <div id="coords"></div>
@@ -202,7 +220,6 @@ button{
 </button>
 
 <script>
-
 const SUPABASE_URL="https://lleldalugvgmgqekcolx.supabase.co";
 const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc";
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
@@ -211,7 +228,6 @@ let map,markerLayer,isAdmin=false,selectedCoords=null,currentEditId=null,allMark
 let inactivityTimer;
 
 /* ================= AUTO LOGOUT ================= */
-
 function resetInactivityTimer(){
  clearTimeout(inactivityTimer);
  inactivityTimer=setTimeout(()=>{
@@ -219,14 +235,12 @@ function resetInactivityTimer(){
   logout();
  },60*60*1000);
 }
-
 document.addEventListener("mousemove",resetInactivityTimer);
 document.addEventListener("keydown",resetInactivityTimer);
 document.addEventListener("click",resetInactivityTimer);
 document.addEventListener("touchstart",resetInactivityTimer);
 
 /* ================= LOGIN ================= */
-
 document.addEventListener("keydown",e=>{
  if(e.key==="Enter") login();
 });
@@ -263,7 +277,6 @@ async function logout(){
 }
 
 /* ================= START ================= */
-
 function startApp(){
  document.getElementById("loginPanel").style.display="none";
  document.getElementById("map").style.display="block";
@@ -280,11 +293,34 @@ function startApp(){
  loadMarkers();
  setupRealtime();
  updateColorPreview();
+ updateCoordBadge();      // ✅ initial
  resetInactivityTimer();
 }
 
-/* ================= MAP ================= */
+/* ================= COORD BADGE ================= */
+function updateCoordBadge(mode){
+ const badge=document.getElementById("coordBadge");
 
+ // mode: "ready" (neuer Marker), "editing" (edit), undefined (default)
+ badge.classList.remove("ready","editing");
+
+ if(mode==="editing"){
+  badge.classList.add("editing");
+  badge.innerHTML="✏️ <b>Bearbeiten-Modus</b><br>Du bearbeitest einen bestehenden Marker.";
+  return;
+ }
+
+ if(selectedCoords){
+  badge.classList.add("ready");
+  badge.innerHTML=
+   "✅ <b>Koordinate gewählt</b><br>" +
+   "X: "+Math.round(selectedCoords.lng)+" &nbsp; | &nbsp; Y: "+Math.round(selectedCoords.lat);
+ }else{
+  badge.innerHTML="🖱️ <b>Keine Koordinate gewählt</b><br>Klicke in die Karte, um einen neuen Marker zu platzieren.";
+ }
+}
+
+/* ================= MAP ================= */
 function initMap(){
  map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2});
  const bounds=[[0,0],[8192,8192]];
@@ -300,19 +336,21 @@ function initMap(){
 
  if(isAdmin){
   map.on("click",e=>{
+   clearForm();
    selectedCoords=e.latlng;
    currentEditId=null;
-   clearForm();
+
+   document.getElementById("adminPanel").classList.add("open");
+   updateCoordBadge(); // ✅ zeigt Koordinate
   });
  }
 }
 
 /* ================= MARKER ================= */
-
 async function loadMarkers(){
  const {data}=await db.from("markers").select("*");
- allMarkers=data;
- renderMarkers(data);
+ allMarkers=data || [];
+ renderMarkers(allMarkers);
 }
 
 function renderMarkers(data){
@@ -335,12 +373,16 @@ function renderMarkers(data){
 
   if(isAdmin){
    marker.on("click",()=>{
+    selectedCoords=null; // kein Insert mit alten Koords
+
     currentEditId=m.id;
     document.getElementById("mTitle").value=m.title;
     document.getElementById("mDesc").value=m.description;
     document.getElementById("mColor").value=m.color;
     updateColorPreview();
+
     document.getElementById("adminPanel").classList.add("open");
+    updateCoordBadge("editing"); // ✅ edit status
    });
 
    marker.on("dragend",async e=>{
@@ -356,55 +398,59 @@ function renderMarkers(data){
 }
 
 async function saveMarker(){
- const title=document.getElementById("mTitle").value;
- const description=document.getElementById("mDesc").value;
+ const title=document.getElementById("mTitle").value.trim();
+ const description=document.getElementById("mDesc").value.trim();
  const color=document.getElementById("mColor").value;
+
+ if(!title){ alert("Titel fehlt"); return; }
 
  if(currentEditId){
   await db.from("markers")
    .update({title,description,color})
    .eq("id",currentEditId);
+
+  clearForm();
+  updateCoordBadge(); // ✅ zurück zu normal
  }else{
-  if(!selectedCoords){alert("Karte anklicken");return;}
+  if(!selectedCoords){ alert("Karte anklicken"); return; }
+
   await db.from("markers").insert([{
    title,description,color,
    x:Math.round(selectedCoords.lng),
    y:Math.round(selectedCoords.lat)
   }]);
- }
 
- clearForm();
+  clearForm();
+  selectedCoords=null;
+  updateCoordBadge(); // ✅ zurück zu normal
+ }
 }
 
 async function deleteMarker(){
- if(!currentEditId)return;
+ if(!currentEditId) return;
  await db.from("markers").delete().eq("id",currentEditId);
  clearForm();
+ selectedCoords=null;
+ updateCoordBadge();
 }
 
-/* ================= FIX: FORM RESET ================= */
-/* Reset jetzt auch selectedCoords, damit keine "alten" Klick-Koordinaten
-   unabsichtlich fürs Einfügen genutzt werden. */
 function clearForm(){
  document.getElementById("mTitle").value="";
  document.getElementById("mDesc").value="";
  currentEditId=null;
- selectedCoords=null;   /* <-- FIX */
 }
 
 /* SEARCH */
-
 document.getElementById("searchBox").addEventListener("input",e=>{
  const value=e.target.value.toLowerCase();
  const filtered=allMarkers.filter(m=>
-  m.title.toLowerCase().includes(value) ||
-  m.description.toLowerCase().includes(value)
+  (m.title||"").toLowerCase().includes(value) ||
+  (m.description||"").toLowerCase().includes(value)
  );
  renderMarkers(filtered);
 });
 
 /* REALTIME */
-
 function setupRealtime(){
  db.channel("realtime-markers")
   .on("postgres_changes",
@@ -421,7 +467,6 @@ function updateColorPreview(){
  document.getElementById("colorPreview").style.background=
   document.getElementById("mColor").value;
 }
-
 </script>
 </body>
 </html>
