@@ -6,6 +6,7 @@
 <title>Fraktionen</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 <style>
 body{
@@ -13,104 +14,44 @@ body{
  background:#0e0e0e;
  color:white;
  font-family:Arial;
- overflow-x:hidden;
 }
 
-/* BACK BUTTON */
-#backBtn{
- position:fixed;
- bottom:20px;
- right:20px;
- background:#00ffc3;
- color:black;
- padding:14px 18px;
- border-radius:14px;
- font-weight:bold;
- cursor:pointer;
- box-shadow:0 0 25px #00ffc355;
- z-index:1000;
-}
-
-/* ADMIN */
-#adminToggle{
- position:fixed;
- top:20px;
- right:0;
- background:#00ffc3;
- color:black;
- padding:8px 14px;
- border-radius:8px 0 0 8px;
- cursor:pointer;
- font-weight:bold;
- display:none;
- z-index:1000;
-}
-
-#adminPanel{
- position:fixed;
- top:70px;
- right:-320px;
- width:280px;
- background:#161616;
- padding:20px;
- border-radius:15px 0 0 15px;
- transition:0.4s;
- z-index:999;
- box-shadow:0 0 25px #000;
-}
-
-#adminPanel.open{right:0;}
-
-input{
- width:100%;
- padding:8px;
- margin:8px 0;
- border-radius:8px;
+/* SEARCH */
+#searchBox{
+ margin:100px 0 0 40px;
+ width:260px;
+ padding:10px;
+ border-radius:10px;
  border:none;
- background:#222;
+ background:#1f1f1f;
  color:white;
 }
-
-button{
- padding:8px;
- border:none;
- border-radius:8px;
- cursor:pointer;
- font-weight:bold;
-}
-
-.primary{background:#00ffc3;color:black;}
-.danger{background:#ff3b3b;color:white;}
 
 /* GRID */
 #container{
  display:flex;
  flex-wrap:wrap;
  gap:25px;
- padding:100px 40px;
- justify-content:flex-start;
+ padding:20px 40px 100px 40px;
 }
 
 /* CARD */
 .card{
  padding:25px;
  border-radius:22px;
- min-width:270px;
- transition:0.3s ease;
+ min-width:300px;
  backdrop-filter:blur(12px);
+ box-shadow:0 20px 50px rgba(0,0,0,0.7);
+ transition:0.3s;
  display:flex;
  flex-direction:column;
- box-shadow:0 20px 50px rgba(0,0,0,0.7);
 }
 
-.card:hover{
- transform:translateY(-6px);
-}
+.card:hover{transform:translateY(-6px);}
 
 .card h3{
  margin:0 0 15px 0;
  font-size:20px;
- font-weight:700;
  letter-spacing:1px;
 }
 
@@ -123,50 +64,129 @@ button{
  display:flex;
  justify-content:space-between;
  align-items:center;
- font-size:14px;
+ cursor:grab;
+}
+
+.member span{
+ display:flex;
+ align-items:center;
+ gap:6px;
+}
+
+.leader-star{
+ cursor:pointer;
+ font-size:16px;
+}
+
+.leader-active{
+ color:gold;
 }
 
 .member button{
  background:#ff3b3b;
- color:white;
  border:none;
  border-radius:6px;
  padding:4px 8px;
- font-size:12px;
+ color:white;
  cursor:pointer;
 }
 
-.member button:hover{
- background:red;
+/* ADD FORM */
+.add-form{
+ margin-top:10px;
+ display:none;
+ flex-direction:column;
+ gap:8px;
 }
 
-/* CARD BUTTONS */
+.add-form input{
+ padding:8px;
+ border-radius:8px;
+ border:none;
+ background:#222;
+ color:white;
+}
+
 .card-buttons{
- margin-top:15px;
+ margin-top:12px;
  display:flex;
  gap:10px;
-}
-
-.card-buttons button{
- flex:1;
 }
 
 .add-btn{
  background:white;
  color:black;
+ flex:1;
 }
 
 .delete-btn{
  background:#ff3b3b;
  color:white;
+ flex:1;
 }
+
+/* BACK */
+#backBtn{
+ position:fixed;
+ bottom:20px;
+ right:20px;
+ background:#00ffc3;
+ color:black;
+ padding:14px 18px;
+ border-radius:14px;
+ font-weight:bold;
+ cursor:pointer;
+ box-shadow:0 0 25px #00ffc355;
+}
+
+/* ADMIN */
+#adminToggle{
+ position:fixed;
+ top:20px;
+ right:0;
+ background:#00ffc3;
+ color:black;
+ padding:8px 14px;
+ border-radius:8px 0 0 8px;
+ cursor:pointer;
+ display:none;
+}
+
+#adminPanel{
+ position:fixed;
+ top:70px;
+ right:-320px;
+ width:280px;
+ background:#161616;
+ padding:20px;
+ border-radius:15px 0 0 15px;
+ transition:0.4s;
+}
+
+#adminPanel.open{right:0;}
+
+#adminPanel input{
+ width:100%;
+ padding:8px;
+ margin:8px 0;
+ border-radius:8px;
+ border:none;
+ background:#222;
+ color:white;
+}
+
+.primary{background:#00ffc3;color:black;}
 </style>
 </head>
 
 <body>
 
+<input id="searchBox" placeholder="🔎 Fraktion suchen...">
+
+<div id="container"></div>
+
 <button id="backBtn" onclick="window.location='index.html'">
-⬅ Zurück zur Karte
+⬅ Zurück
 </button>
 
 <div id="adminToggle">Admin</div>
@@ -178,8 +198,6 @@ button{
 <button class="primary" onclick="createFraktion()">Erstellen</button>
 </div>
 
-<div id="container"></div>
-
 <script>
 
 const SUPABASE_URL="https://lleldalugvgmgqekcolx.supabase.co";
@@ -187,25 +205,25 @@ const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let isAdmin=false;
+let allFraktionen=[];
 
 window.onload=async()=>{
  const {data}=await db.auth.getSession();
- if(!data.session){
-  window.location="index.html";
-  return;
- }
+ if(!data.session){window.location="index.html";return;}
  isAdmin=data.session.user.email.toLowerCase()==="admin@gta.local";
- if(isAdmin){
-  document.getElementById("adminToggle").style.display="block";
- }
+ if(isAdmin) document.getElementById("adminToggle").style.display="block";
  loadFraktionen();
  setupRealtime();
 };
 
-/* ================= LOAD ================= */
-
+/* LOAD */
 async function loadFraktionen(){
  const {data}=await db.from("fraktionen").select("*");
+ allFraktionen=data;
+ renderFraktionen(data);
+}
+
+async function renderFraktionen(data){
  const container=document.getElementById("container");
  container.innerHTML="";
 
@@ -214,76 +232,128 @@ async function loadFraktionen(){
   const {data:members}=await db
    .from("fraktions_mitglieder")
    .select("*")
-   .eq("fraktion_id",f.id);
+   .eq("fraktion_id",f.id)
+   .order("sort_order",{ascending:true});
 
   const card=document.createElement("div");
   card.className="card";
-  card.style.background=f.color + "22";
-  card.style.border="2px solid " + f.color;
-  card.style.boxShadow="0 0 30px " + f.color + "55";
+  card.style.background=f.color+"22";
+  card.style.border="2px solid "+f.color;
+  card.style.boxShadow="0 0 30px "+f.color+"55";
 
-  let html="<h3 style='color:"+f.color+"'>"+f.name+"</h3>";
+  let html=`<h3 style="color:${f.color}">${f.name}</h3>`;
+  html+=`<div id="list-${f.id}">`;
 
   members.forEach(m=>{
    html+=`
-    <div class="member">
-     <span>${m.vorname} ${m.nachname}</span>
-     ${isAdmin ? `<button onclick="deleteMember('${m.id}')">✖</button>` : ``}
-    </div>
-   `;
+   <div class="member" data-id="${m.id}">
+    <span>
+     <span class="leader-star ${m.leader?'leader-active':''}"
+      onclick="toggleLeader('${m.id}',${m.leader})">★</span>
+     ${m.vorname} ${m.nachname}
+    </span>
+    ${isAdmin?`<button onclick="deleteMember('${m.id}')">✖</button>`:""}
+   </div>`;
   });
+
+  html+=`</div>`;
 
   if(isAdmin){
    html+=`
-    <div class="card-buttons">
-     <button class="add-btn" onclick="addMember('${f.id}')">+ Mitglied</button>
-     <button class="delete-btn" onclick="deleteFraktion('${f.id}')">Fraktion löschen</button>
-    </div>
-   `;
+   <div class="add-form" id="form-${f.id}">
+    <input id="vor-${f.id}" placeholder="Vorname">
+    <input id="nach-${f.id}" placeholder="Nachname">
+    <button class="primary" onclick="saveMember('${f.id}')">Speichern</button>
+   </div>
+
+   <div class="card-buttons">
+    <button class="add-btn" onclick="toggleForm('${f.id}')">+ Mitglied</button>
+    <button class="delete-btn" onclick="deleteFraktion('${f.id}')">Fraktion löschen</button>
+   </div>`;
   }
 
   card.innerHTML=html;
   container.appendChild(card);
+
+  if(isAdmin){
+   new Sortable(document.getElementById("list-"+f.id),{
+    animation:150,
+    onEnd: async function(){
+     const items=document.querySelectorAll(`#list-${f.id} .member`);
+     for(let i=0;i<items.length;i++){
+      await db.from("fraktions_mitglieder")
+       .update({sort_order:i})
+       .eq("id",items[i].dataset.id);
+     }
+    }
+   });
+  }
  }
 }
 
-/* ================= CRUD ================= */
+/* MEMBER */
+function toggleForm(id){
+ const form=document.getElementById("form-"+id);
+ form.style.display=form.style.display==="flex"?"none":"flex";
+}
 
+async function saveMember(fraktion_id){
+ const vor=document.getElementById("vor-"+fraktion_id).value;
+ const nach=document.getElementById("nach-"+fraktion_id).value;
+ if(!vor||!nach)return;
+
+ const {data}=await db.from("fraktions_mitglieder")
+  .select("sort_order")
+  .eq("fraktion_id",fraktion_id)
+  .order("sort_order",{ascending:false})
+  .limit(1);
+
+ let next= data.length? data[0].sort_order+1 : 0;
+
+ await db.from("fraktions_mitglieder")
+  .insert([{fraktion_id,vorname:vor,nachname:nach,sort_order:next}]);
+
+ toggleForm(fraktion_id);
+}
+
+async function deleteMember(id){
+ await db.from("fraktions_mitglieder").delete().eq("id",id);
+}
+
+async function toggleLeader(id,current){
+ await db.from("fraktions_mitglieder")
+  .update({leader:!current})
+  .eq("id",id);
+}
+
+/* FRAKTION */
 async function createFraktion(){
  const name=document.getElementById("fName").value;
  const color=document.getElementById("fColor").value;
- if(!name) return;
+ if(!name)return;
  await db.from("fraktionen").insert([{name,color}]);
- document.getElementById("fName").value="";
 }
 
 async function deleteFraktion(id){
  await db.from("fraktionen").delete().eq("id",id);
 }
 
-async function addMember(fraktion_id){
- const vorname=prompt("Vorname:");
- const nachname=prompt("Nachname:");
- if(!vorname || !nachname) return;
- await db.from("fraktions_mitglieder")
-  .insert([{fraktion_id,vorname,nachname}]);
-}
+/* SEARCH */
+document.getElementById("searchBox").addEventListener("input",e=>{
+ const value=e.target.value.toLowerCase();
+ const filtered=allFraktionen.filter(f=>
+  f.name.toLowerCase().includes(value)
+ );
+ renderFraktionen(filtered);
+});
 
-async function deleteMember(id){
- await db.from("fraktions_mitglieder")
-  .delete().eq("id",id);
-}
-
-/* ================= REALTIME ================= */
-
+/* REALTIME */
 function setupRealtime(){
  db.channel("fraktionen-realtime")
   .on("postgres_changes",{event:"*",schema:"public",table:"fraktionen"},loadFraktionen)
   .on("postgres_changes",{event:"*",schema:"public",table:"fraktions_mitglieder"},loadFraktionen)
   .subscribe();
 }
-
-/* ================= TOGGLE ================= */
 
 document.getElementById("adminToggle").onclick=()=>{
  document.getElementById("adminPanel").classList.toggle("open");
