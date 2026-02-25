@@ -11,14 +11,10 @@
 <style>
 :root{
   --bg:#0e0e0e;
-  --panel:#151515;
-  --panel2:#1c1c1c;
   --text:#ffffff;
-  --muted:#bfbfbf;
   --accent:#00ffc3;
   --danger:#ff3b3b;
 }
-
 *{ box-sizing:border-box; }
 
 body{
@@ -39,17 +35,6 @@ body{
   backdrop-filter: blur(10px);
 }
 
-#searchBox{
-  width:min(340px, calc(100vw - 48px));
-  padding:12px 14px 12px 40px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,0.10);
-  background:rgba(20,20,20,0.70);
-  color:var(--text);
-  outline:none;
-  box-shadow:0 0 25px rgba(0,255,195,0.08);
-}
-
 #searchWrap{
   position:relative;
   display:inline-block;
@@ -65,12 +50,23 @@ body{
   color:var(--accent);
 }
 
+#searchBox{
+  width:min(340px, calc(100vw - 48px));
+  padding:12px 14px 12px 40px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.10);
+  background:rgba(20,20,20,0.70);
+  color:var(--text);
+  outline:none;
+  box-shadow:0 0 25px rgba(0,255,195,0.08);
+}
+
 /* Grid */
 #container{
   display:flex;
   flex-wrap:wrap;
   gap:22px;
-  padding:10px 24px 110px 24px; /* less top padding -> moved up */
+  padding:10px 24px 110px 24px;
   align-items:flex-start;
 }
 
@@ -113,7 +109,6 @@ body{
   cursor:grab;
   user-select:none;
 }
-
 .member:active{ cursor:grabbing; }
 
 .member span{
@@ -142,9 +137,7 @@ body{
   cursor:pointer;
   box-shadow:0 0 18px rgba(255,59,59,0.18);
 }
-.member .delBtn:hover{
-  filter:brightness(1.05);
-}
+.member .delBtn:hover{ filter:brightness(1.05); }
 
 /* Buttons */
 .btnRow{
@@ -163,7 +156,6 @@ body{
   letter-spacing:0.2px;
   transition:transform .15s ease, filter .15s ease, box-shadow .15s ease;
 }
-
 .btn:active{ transform:scale(0.98); }
 
 .btnAdd{
@@ -307,7 +299,7 @@ body{
 <div id="topBar">
   <div id="searchWrap">
     <span id="searchIcon">🔎</span>
-    <input id="searchBox" placeholder="Fraktion suchen...">
+    <input id="searchBox" placeholder="Fraktion oder Mitglied suchen...">
   </div>
 </div>
 
@@ -331,6 +323,7 @@ const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let isAdmin=false;
 let allFraktionen=[];
+let membersByFraktion = new Map(); // fraktion_id -> members[]
 
 window.onload=async()=>{
   const {data}=await db.auth.getSession();
@@ -338,29 +331,39 @@ window.onload=async()=>{
   isAdmin=data.session.user.email.toLowerCase()==="admin@gta.local";
   if(isAdmin) document.getElementById("adminToggle").style.display="block";
 
-  await loadFraktionen();
+  await refreshDataAndRender();
   setupRealtime();
 };
 
-/* LOAD */
-async function loadFraktionen(){
-  const {data, error}=await db.from("fraktionen").select("*");
-  if(error){ console.error(error); return; }
-  allFraktionen=data;
-  await renderFraktionen(data);
+async function refreshDataAndRender(){
+  const fr = await db.from("fraktionen").select("*");
+  if(fr.error){ console.error(fr.error); return; }
+  allFraktionen = fr.data || [];
+
+  const mem = await db.from("fraktions_mitglieder").select("*");
+  if(mem.error){ console.error(mem.error); return; }
+
+  // build map
+  membersByFraktion = new Map();
+  for(const m of (mem.data || [])){
+    if(!membersByFraktion.has(m.fraktion_id)) membersByFraktion.set(m.fraktion_id, []);
+    membersByFraktion.get(m.fraktion_id).push(m);
+  }
+  // sort members for each fraktion
+  for(const [fid, arr] of membersByFraktion.entries()){
+    arr.sort((a,b)=> (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  }
+
+  await renderFraktionen(allFraktionen);
 }
 
+/* RENDER */
 async function renderFraktionen(list){
   const container=document.getElementById("container");
   container.innerHTML="";
 
   for(const f of list){
-    const {data:members, error}=await db
-      .from("fraktions_mitglieder")
-      .select("*")
-      .eq("fraktion_id",f.id)
-      .order("sort_order",{ascending:true});
-    if(error){ console.error(error); continue; }
+    const members = membersByFraktion.get(f.id) || [];
 
     const card=document.createElement("div");
     card.className="card";
@@ -377,7 +380,7 @@ async function renderFraktionen(list){
           <span>
             <span class="leader-star ${m.leader ? 'leader-active' : ''}"
                   title="Leader umschalten"
-                  onclick="toggleLeader(event, '${m.id}', ${m.leader})">★</span>
+                  onclick="toggleLeader(event, '${f.id}', '${m.id}', ${m.leader})">★</span>
             ${escapeHtml(m.vorname)} ${escapeHtml(m.nachname)}
           </span>
           ${isAdmin ? `<button class="delBtn" onclick="deleteMember(event, '${m.id}')">✖</button>` : ``}
@@ -405,30 +408,28 @@ async function renderFraktionen(list){
     card.innerHTML=html;
     container.appendChild(card);
 
-    // Enter -> save member (no popups)
     if(isAdmin){
+      // Enter -> save member
       const vor = card.querySelector(`#vor-${CSS.escape(f.id)}`);
       const nach = card.querySelector(`#nach-${CSS.escape(f.id)}`);
-      if(vor && nach){
-        const handler = (ev)=>{
-          if(ev.key === "Enter"){
-            ev.preventDefault();
-            saveMember(f.id);
-          }
-        };
-        vor.addEventListener("keydown", handler);
-        nach.addEventListener("keydown", handler);
-      }
+      const handler = (ev)=>{
+        if(ev.key === "Enter"){
+          ev.preventDefault();
+          saveMember(f.id);
+        }
+      };
+      if(vor) vor.addEventListener("keydown", handler);
+      if(nach) nach.addEventListener("keydown", handler);
 
       // Drag & drop sortable
       new Sortable(document.getElementById("list-"+f.id),{
         animation:160,
         onEnd: async ()=>{
           const items=document.querySelectorAll(`#list-${CSS.escape(f.id)} .member`);
+          // update local + DB
           for(let i=0;i<items.length;i++){
-            await db.from("fraktions_mitglieder")
-              .update({sort_order:i})
-              .eq("id",items[i].dataset.id);
+            const id = items[i].dataset.id;
+            await db.from("fraktions_mitglieder").update({sort_order:i}).eq("id", id);
           }
         }
       });
@@ -436,7 +437,7 @@ async function renderFraktionen(list){
   }
 }
 
-/* UI actions */
+/* UI */
 function toggleForm(id){
   const form=document.getElementById("form-"+id);
   if(!form) return;
@@ -448,7 +449,7 @@ function toggleForm(id){
   }
 }
 
-/* CRUD */
+/* CRUD: FRAKTION */
 async function createFraktion(){
   const name=document.getElementById("fName").value.trim();
   const color=document.getElementById("fColor").value;
@@ -462,6 +463,7 @@ async function deleteFraktion(id){
   await db.from("fraktionen").delete().eq("id",id);
 }
 
+/* CRUD: MEMBER */
 async function saveMember(fraktion_id){
   const vorEl=document.getElementById("vor-"+fraktion_id);
   const nachEl=document.getElementById("nach-"+fraktion_id);
@@ -471,14 +473,8 @@ async function saveMember(fraktion_id){
   const nach=nachEl.value.trim();
   if(!vor || !nach) return;
 
-  const {data:last}=await db
-    .from("fraktions_mitglieder")
-    .select("sort_order")
-    .eq("fraktion_id",fraktion_id)
-    .order("sort_order",{ascending:false})
-    .limit(1);
-
-  const next = (last && last.length) ? (last[0].sort_order + 1) : 0;
+  const current = membersByFraktion.get(fraktion_id) || [];
+  const next = current.length ? ((current[current.length-1].sort_order ?? (current.length-1)) + 1) : 0;
 
   await db.from("fraktions_mitglieder").insert([{
     fraktion_id,
@@ -498,25 +494,50 @@ async function deleteMember(ev, id){
   await db.from("fraktions_mitglieder").delete().eq("id",id);
 }
 
-async function toggleLeader(ev, id, current){
+/* ✅ NUR 1 LEADER PRO FRAKTION */
+async function toggleLeader(ev, fraktion_id, member_id, current){
   ev.stopPropagation();
-  await db.from("fraktions_mitglieder")
-    .update({leader: !current})
-    .eq("id",id);
+
+  if(current){
+    // leader OFF
+    await db.from("fraktions_mitglieder").update({leader:false}).eq("id", member_id);
+    return;
+  }
+
+  // leader ON -> first disable all in this fraktion, then enable this one
+  await db.from("fraktions_mitglieder").update({leader:false}).eq("fraktion_id", fraktion_id);
+  await db.from("fraktions_mitglieder").update({leader:true}).eq("id", member_id);
 }
 
-/* SEARCH */
-document.getElementById("searchBox").addEventListener("input",async e=>{
-  const value=e.target.value.toLowerCase().trim();
-  const filtered = allFraktionen.filter(f => f.name.toLowerCase().includes(value));
+/* SEARCH (Fraktion + Mitglieder) */
+document.getElementById("searchBox").addEventListener("input", async (e)=>{
+  const q = e.target.value.toLowerCase().trim();
+
+  if(!q){
+    await renderFraktionen(allFraktionen);
+    return;
+  }
+
+  const filtered = allFraktionen.filter(f=>{
+    // match fraktion name
+    if((f.name || "").toLowerCase().includes(q)) return true;
+
+    // match member names
+    const members = membersByFraktion.get(f.id) || [];
+    return members.some(m=>{
+      const full = `${m.vorname || ""} ${m.nachname || ""}`.toLowerCase();
+      return full.includes(q);
+    });
+  });
+
   await renderFraktionen(filtered);
 });
 
 /* REALTIME */
 function setupRealtime(){
   db.channel("fraktionen-realtime")
-    .on("postgres_changes",{event:"*",schema:"public",table:"fraktionen"},loadFraktionen)
-    .on("postgres_changes",{event:"*",schema:"public",table:"fraktions_mitglieder"},loadFraktionen)
+    .on("postgres_changes",{event:"*",schema:"public",table:"fraktionen"}, refreshDataAndRender)
+    .on("postgres_changes",{event:"*",schema:"public",table:"fraktions_mitglieder"}, refreshDataAndRender)
     .subscribe();
 }
 
