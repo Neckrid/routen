@@ -9,59 +9,48 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 <style>
-:root{
-  --bg:#0e0e0e;
-  --text:#ffffff;
-  --accent:#00ffc3;
-  --danger:#ff3b3b;
-}
 *{ box-sizing:border-box; }
 
 body{
   margin:0;
-  background:radial-gradient(ellipse at top, #1a1a1a 0%, var(--bg) 55%, #070707 100%);
-  color:var(--text);
+  background:#0e0e0e;
   font-family:Arial;
+  color:white;
   overflow-x:hidden;
 }
 
-/* Top area (moved up) */
+/* ===== TOPBAR / SEARCH ===== */
 #topBar{
   position:sticky;
   top:0;
-  z-index:1200;
-  padding:18px 24px 10px 24px;
-  background:linear-gradient(to bottom, rgba(14,14,14,0.92), rgba(14,14,14,0.55), rgba(14,14,14,0));
+  z-index:1100;
+  padding:12px 24px 10px 24px;
+  background:linear-gradient(to bottom, rgba(14,14,14,0.95), rgba(14,14,14,0.7), rgba(14,14,14,0));
   backdrop-filter: blur(10px);
 }
 
-#searchWrap{
-  position:relative;
-  display:inline-block;
-}
-
+#searchWrap{ position:relative; display:inline-block; }
 #searchIcon{
   position:absolute;
-  left:14px;
+  left:12px;
   top:50%;
   transform:translateY(-50%);
-  opacity:0.85;
+  color:#00ffc3;
   font-size:14px;
-  color:var(--accent);
+  opacity:0.9;
 }
 
 #searchBox{
   width:min(340px, calc(100vw - 48px));
-  padding:12px 14px 12px 40px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,0.10);
-  background:rgba(20,20,20,0.70);
-  color:var(--text);
+  padding:10px 12px 10px 34px;
+  border-radius:8px;
+  border:none;
+  background:#222;
+  color:white;
   outline:none;
-  box-shadow:0 0 25px rgba(0,255,195,0.08);
 }
 
-/* Grid */
+/* ===== GRID ===== */
 #container{
   display:flex;
   flex-wrap:wrap;
@@ -70,35 +59,33 @@ body{
   align-items:flex-start;
 }
 
-/* Card */
+/* ===== CARD ===== */
 .card{
-  padding:22px;
+  padding:20px;
   border-radius:22px;
   min-width:320px;
   max-width:420px;
   flex:0 1 360px;
-  backdrop-filter: blur(14px);
-  box-shadow:0 18px 55px rgba(0,0,0,0.70);
-  transition:transform .25s ease, box-shadow .25s ease;
+  background:#161616;
+  box-shadow:0 0 25px #00ffc322;
+  transition:0.25s;
   display:flex;
   flex-direction:column;
 }
-
 .card:hover{
   transform:translateY(-6px);
-  box-shadow:0 26px 70px rgba(0,0,0,0.85);
+  box-shadow:0 0 32px #00ffc344;
 }
-
 .card h3{
   margin:0 0 14px 0;
   font-size:20px;
   font-weight:800;
-  letter-spacing:0.6px;
+  letter-spacing:0.4px;
 }
 
-/* Members list */
+/* ===== MEMBER ROW ===== */
 .member{
-  background:rgba(0,0,0,0.38);
+  background:rgba(0,0,0,0.35);
   border:1px solid rgba(255,255,255,0.06);
   padding:10px 12px;
   border-radius:14px;
@@ -121,58 +108,44 @@ body{
 .leader-star{
   cursor:pointer;
   font-size:16px;
-  opacity:0.9;
-  transition:transform .15s ease, opacity .15s ease;
+  opacity:0.95;
 }
-.leader-star:hover{ transform:scale(1.12); opacity:1; }
-.leader-active{ color:#ffd54a; text-shadow:0 0 10px rgba(255,213,74,0.4); }
+.leader-active{
+  color:#ffd54a;
+  text-shadow:0 0 10px rgba(255,213,74,0.35);
+}
 
-.member .delBtn{
-  background:rgba(255,59,59,0.92);
+/* ===== BUTTONS WIE INDEX ===== */
+button{
+  padding:8px 14px;
   border:none;
-  border-radius:12px;
-  padding:8px 12px;
-  color:white;
-  font-weight:800;
+  border-radius:8px;
   cursor:pointer;
-  box-shadow:0 0 18px rgba(255,59,59,0.18);
+  font-weight:bold;
+  font-family:Arial;
 }
-.member .delBtn:hover{ filter:brightness(1.05); }
 
-/* Buttons */
+.primary{ background:#00ffc3; color:black; }
+.danger{ background:#ff3b3b; color:white; }
+
+/* delete member small */
+.delBtn{
+  background:#ff3b3b;
+  color:white;
+  border-radius:10px;
+  padding:6px 10px;
+  font-weight:bold;
+}
+
+/* Card button row */
 .btnRow{
   display:flex;
   gap:12px;
   margin-top:12px;
 }
+.btnRow button{ flex:1; }
 
-.btn{
-  flex:1;
-  padding:10px 12px;
-  border:none;
-  border-radius:14px;
-  font-weight:900;
-  cursor:pointer;
-  letter-spacing:0.2px;
-  transition:transform .15s ease, filter .15s ease, box-shadow .15s ease;
-}
-.btn:active{ transform:scale(0.98); }
-
-.btnAdd{
-  background:linear-gradient(180deg, rgba(0,255,195,1), rgba(0,200,160,1));
-  color:#001410;
-  box-shadow:0 0 20px rgba(0,255,195,0.20);
-}
-.btnAdd:hover{ filter:brightness(1.03); }
-
-.btnDelete{
-  background:linear-gradient(180deg, rgba(255,59,59,1), rgba(210,30,30,1));
-  color:white;
-  box-shadow:0 0 20px rgba(255,59,59,0.18);
-}
-.btnDelete:hover{ filter:brightness(1.03); }
-
-/* Add form (slide down) */
+/* Add form */
 .add-form{
   display:none;
   flex-direction:column;
@@ -186,104 +159,87 @@ body{
 
 .add-form input{
   width:100%;
-  padding:10px 12px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.10);
-  background:rgba(24,24,24,0.7);
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  background:#222;
   color:white;
   outline:none;
 }
 
-.add-form .btnSave{
-  width:100%;
-  padding:10px 12px;
-  border-radius:14px;
-  border:none;
-  font-weight:900;
-  background:linear-gradient(180deg, rgba(0,255,195,1), rgba(0,200,160,1));
-  color:#001410;
-  cursor:pointer;
-  box-shadow:0 0 20px rgba(0,255,195,0.20);
-}
-
-/* Back button */
+/* ===== BACK BUTTON ===== */
 #backBtn{
   position:fixed;
   bottom:20px;
   right:20px;
-  background:linear-gradient(180deg, rgba(0,255,195,1), rgba(0,200,160,1));
-  color:#001410;
-  padding:14px 18px;
-  border-radius:16px;
-  font-weight:900;
+  background:#00ffc3;
+  color:black;
+  padding:12px 16px;
+  border-radius:12px;
+  font-weight:bold;
   cursor:pointer;
-  box-shadow:0 0 25px rgba(0,255,195,0.22);
-  border:none;
   z-index:1200;
+  box-shadow:0 0 20px #00ffc355;
 }
 
-/* Admin toggle/panel */
-#adminToggle{
+/* ===== HEADER BUTTONS WIE INDEX ===== */
+#logoutBtn{
   position:fixed;
-  top:20px;
+  top:10px;
   right:0;
-  background:linear-gradient(180deg, rgba(0,255,195,1), rgba(0,200,160,1));
-  color:#001410;
-  padding:10px 14px;
-  border-radius:14px 0 0 14px;
+  background:#ff3b3b;
+  color:white;
+  padding:8px 12px;
+  border-radius:8px 0 0 8px;
   cursor:pointer;
-  font-weight:900;
+  font-weight:bold;
   display:none;
   z-index:1200;
-  box-shadow:0 0 20px rgba(0,255,195,0.18);
 }
 
+#adminToggle{
+  position:fixed;
+  top:50px;
+  right:0;
+  background:#00ffc3;
+  color:black;
+  padding:8px 12px;
+  border-radius:8px 0 0 8px;
+  cursor:pointer;
+  font-weight:bold;
+  display:none;
+  z-index:1200;
+}
+
+/* Admin Panel */
 #adminPanel{
   position:fixed;
-  top:70px;
+  top:90px;
   right:-340px;
   width:300px;
-  background:rgba(18,18,18,0.92);
-  padding:18px;
-  border-radius:18px 0 0 18px;
-  transition:0.35s;
+  background:#161616;
+  padding:20px;
+  border-radius:15px 0 0 15px;
+  box-shadow:0 0 25px #00ffc322;
+  transition:0.4s;
   z-index:1190;
-  border:1px solid rgba(255,255,255,0.08);
-  box-shadow:0 18px 55px rgba(0,0,0,0.7);
-  backdrop-filter: blur(14px);
 }
-
 #adminPanel.open{ right:0; }
 
 #adminPanel h3{
   margin:0 0 10px 0;
-  color:var(--accent);
   text-align:center;
-  font-weight:900;
+  color:#00ffc3;
 }
 
 #adminPanel input{
   width:100%;
-  padding:10px 12px;
+  padding:10px;
   margin:8px 0;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.10);
-  background:rgba(24,24,24,0.7);
-  color:white;
-  outline:none;
-}
-
-#adminPanel .createBtn{
-  width:100%;
-  padding:10px 12px;
-  margin-top:10px;
-  border-radius:14px;
+  border-radius:8px;
   border:none;
-  font-weight:900;
-  background:linear-gradient(180deg, rgba(0,255,195,1), rgba(0,200,160,1));
-  color:#001410;
-  cursor:pointer;
-  box-shadow:0 0 20px rgba(0,255,195,0.20);
+  background:#222;
+  color:white;
 }
 
 @media (max-width: 520px){
@@ -307,13 +263,14 @@ body{
 
 <button id="backBtn" onclick="window.location='index.html'">⬅ Zurück</button>
 
+<button id="logoutBtn" onclick="logout()">Logout</button>
 <div id="adminToggle">Admin</div>
 
 <div id="adminPanel">
   <h3>Fraktion erstellen</h3>
   <input id="fName" placeholder="Fraktionsname">
   <input id="fColor" type="color" value="#00ffc3">
-  <button class="createBtn" onclick="createFraktion()">Erstellen</button>
+  <button class="primary" style="width:100%;" onclick="createFraktion()">Erstellen</button>
 </div>
 
 <script>
@@ -323,17 +280,45 @@ const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let isAdmin=false;
 let allFraktionen=[];
-let membersByFraktion = new Map(); // fraktion_id -> members[]
+let membersByFraktion = new Map();
+
+/* ================= AUTO LOGOUT (60 MIN INAKTIV) ================= */
+let inactivityTimer;
+
+function resetInactivityTimer(){
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(()=>{
+    alert("Automatischer Logout wegen Inaktivität (60 Minuten)");
+    logout();
+  }, 60*60*1000);
+}
+
+document.addEventListener("mousemove", resetInactivityTimer);
+document.addEventListener("keydown", resetInactivityTimer);
+document.addEventListener("click", resetInactivityTimer);
+document.addEventListener("touchstart", resetInactivityTimer);
+/* =============================================================== */
 
 window.onload=async()=>{
   const {data}=await db.auth.getSession();
   if(!data.session){ window.location="index.html"; return; }
+
+  // Login vorhanden -> Logout Button zeigen
+  document.getElementById("logoutBtn").style.display="block";
+
   isAdmin=data.session.user.email.toLowerCase()==="admin@gta.local";
   if(isAdmin) document.getElementById("adminToggle").style.display="block";
+
+  resetInactivityTimer(); // Timer starten
 
   await refreshDataAndRender();
   setupRealtime();
 };
+
+async function logout(){
+  await db.auth.signOut();
+  window.location="index.html";
+}
 
 async function refreshDataAndRender(){
   const fr = await db.from("fraktionen").select("*");
@@ -343,13 +328,11 @@ async function refreshDataAndRender(){
   const mem = await db.from("fraktions_mitglieder").select("*");
   if(mem.error){ console.error(mem.error); return; }
 
-  // build map
   membersByFraktion = new Map();
   for(const m of (mem.data || [])){
     if(!membersByFraktion.has(m.fraktion_id)) membersByFraktion.set(m.fraktion_id, []);
     membersByFraktion.get(m.fraktion_id).push(m);
   }
-  // sort members for each fraktion
   for(const [fid, arr] of membersByFraktion.entries()){
     arr.sort((a,b)=> (a.sort_order ?? 0) - (b.sort_order ?? 0));
   }
@@ -357,7 +340,6 @@ async function refreshDataAndRender(){
   await renderFraktionen(allFraktionen);
 }
 
-/* RENDER */
 async function renderFraktionen(list){
   const container=document.getElementById("container");
   container.innerHTML="";
@@ -367,9 +349,8 @@ async function renderFraktionen(list){
 
     const card=document.createElement("div");
     card.className="card";
-    card.style.background=f.color+"18";
-    card.style.border="2px solid "+f.color;
-    card.style.boxShadow="0 0 28px "+f.color+"55";
+    card.style.border = "2px solid " + f.color;
+    card.style.boxShadow = "0 0 25px " + f.color + "33";
 
     let html=`<h3 style="color:${f.color}">${escapeHtml(f.name)}</h3>`;
     html+=`<div id="list-${f.id}">`;
@@ -395,12 +376,12 @@ async function renderFraktionen(list){
         <div class="add-form" id="form-${f.id}">
           <input id="vor-${f.id}" placeholder="Vorname" autocomplete="off">
           <input id="nach-${f.id}" placeholder="Nachname" autocomplete="off">
-          <button class="btnSave" onclick="saveMember('${f.id}')">Mitglied speichern</button>
+          <button class="primary" onclick="saveMember('${f.id}')">Mitglied speichern</button>
         </div>
 
         <div class="btnRow">
-          <button class="btn btnAdd" onclick="toggleForm('${f.id}')">+ Mitglied</button>
-          <button class="btn btnDelete" onclick="deleteFraktion('${f.id}')">Fraktion löschen</button>
+          <button class="primary" onclick="toggleForm('${f.id}')">+ Mitglied</button>
+          <button class="danger" onclick="deleteFraktion('${f.id}')">Fraktion löschen</button>
         </div>
       `;
     }
@@ -409,7 +390,6 @@ async function renderFraktionen(list){
     container.appendChild(card);
 
     if(isAdmin){
-      // Enter -> save member
       const vor = card.querySelector(`#vor-${CSS.escape(f.id)}`);
       const nach = card.querySelector(`#nach-${CSS.escape(f.id)}`);
       const handler = (ev)=>{
@@ -421,12 +401,10 @@ async function renderFraktionen(list){
       if(vor) vor.addEventListener("keydown", handler);
       if(nach) nach.addEventListener("keydown", handler);
 
-      // Drag & drop sortable
       new Sortable(document.getElementById("list-"+f.id),{
         animation:160,
         onEnd: async ()=>{
           const items=document.querySelectorAll(`#list-${CSS.escape(f.id)} .member`);
-          // update local + DB
           for(let i=0;i<items.length;i++){
             const id = items[i].dataset.id;
             await db.from("fraktions_mitglieder").update({sort_order:i}).eq("id", id);
@@ -437,7 +415,6 @@ async function renderFraktionen(list){
   }
 }
 
-/* UI */
 function toggleForm(id){
   const form=document.getElementById("form-"+id);
   if(!form) return;
@@ -499,12 +476,9 @@ async function toggleLeader(ev, fraktion_id, member_id, current){
   ev.stopPropagation();
 
   if(current){
-    // leader OFF
     await db.from("fraktions_mitglieder").update({leader:false}).eq("id", member_id);
     return;
   }
-
-  // leader ON -> first disable all in this fraktion, then enable this one
   await db.from("fraktions_mitglieder").update({leader:false}).eq("fraktion_id", fraktion_id);
   await db.from("fraktions_mitglieder").update({leader:true}).eq("id", member_id);
 }
@@ -519,10 +493,7 @@ document.getElementById("searchBox").addEventListener("input", async (e)=>{
   }
 
   const filtered = allFraktionen.filter(f=>{
-    // match fraktion name
     if((f.name || "").toLowerCase().includes(q)) return true;
-
-    // match member names
     const members = membersByFraktion.get(f.id) || [];
     return members.some(m=>{
       const full = `${m.vorname || ""} ${m.nachname || ""}`.toLowerCase();
