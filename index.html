@@ -374,10 +374,14 @@ async function deleteMarker(){
  clearForm();
 }
 
+/* ================= FIX: FORM RESET ================= */
+/* Reset jetzt auch selectedCoords, damit keine "alten" Klick-Koordinaten
+   unabsichtlich fürs Einfügen genutzt werden. */
 function clearForm(){
  document.getElementById("mTitle").value="";
  document.getElementById("mDesc").value="";
  currentEditId=null;
+ selectedCoords=null;   /* <-- FIX */
 }
 
 /* SEARCH */
