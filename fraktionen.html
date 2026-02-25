@@ -58,36 +58,71 @@ body{
   align-items:flex-start;
 }
 
-/* ===== CARD ===== */
+/* ===== FRAKTIONS-CARD (GLAS + GLOW) =====
+   Glow-Farbe kommt pro Card via style="--glow: #xxxxxx"
+*/
 .card{
   padding:18px;
   border-radius:22px;
   min-width:320px;
   max-width:420px;
   flex:0 1 360px;
-  background:#161616;
-  box-shadow:0 0 25px #00ffc322;
-  transition:0.25s;
+
+  /* Glas/Dark */
+  background:rgba(22,22,22,0.62);
+  border:1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  /* Weiche Schatten + farbiger Glow */
+  box-shadow:
+    0 18px 55px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(255,255,255,0.05) inset,
+    0 0 22px color-mix(in srgb, var(--glow, #00ffc3) 40%, transparent);
+  transition:0.25s ease;
   display:flex;
   flex-direction:column;
+  position:relative;
+  overflow:hidden;
 }
+
+.card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:22px;
+  pointer-events:none;
+  background:
+    radial-gradient(120% 80% at 20% 0%, rgba(255,255,255,0.06), transparent 45%),
+    radial-gradient(90% 70% at 100% 30%, color-mix(in srgb, var(--glow, #00ffc3) 18%, transparent), transparent 55%);
+  opacity:0.9;
+}
+
 .card:hover{
   transform:translateY(-6px);
-  box-shadow:0 0 32px #00ffc344;
+  box-shadow:
+    0 26px 75px rgba(0,0,0,0.65),
+    0 0 0 1px rgba(255,255,255,0.06) inset,
+    0 0 34px color-mix(in srgb, var(--glow, #00ffc3) 55%, transparent);
 }
+
 .card h3{
   margin:0 0 12px 0;
   font-size:20px;
   font-weight:800;
   letter-spacing:0.4px;
+  position:relative;
+  z-index:1;
 }
 
-/* ===== MEMBER LIST WRAP (GRAUEN BLOCK WEG) ===== */
+/* ===== MEMBER LIST WRAP (kein grauer Block) ===== */
 .memberList{
   background:transparent;
   border:none;
   border-radius:0;
   padding:0;
+  position:relative;
+  z-index:1;
 }
 
 /* ===== MEMBER ROW ===== */
@@ -118,7 +153,7 @@ body{
   min-width:0;
 }
 
-/* Namen + Stern größer */
+/* Namen + Stern etwas größer */
 .memberName{
   font-size:16px;
   font-weight:800;
@@ -136,19 +171,18 @@ body{
   opacity:0.95;
   line-height:1;
 }
-
-/* Leader aktiv: Stern gold + Zeile goldener Rahmen */
 .leader-active{
   color:#ffd54a;
   text-shadow:0 0 10px rgba(255,213,74,0.35);
 }
 
+/* Leader-Zeile: goldener Rahmen */
 .member.leaderRow{
   border:1px solid rgba(255,213,74,0.85);
   box-shadow:0 0 16px rgba(255,213,74,0.18);
 }
 
-/* ===== DELETE BUTTON (SMALL) ===== */
+/* ===== DELETE BUTTON (small) ===== */
 .delBtn{
   background:rgba(255,59,59,0.18);
   border:1px solid rgba(255,59,59,0.45);
@@ -180,15 +214,6 @@ button{
   box-shadow:0 0 18px #00ffc322;
 }
 
-/* Outline-Style wie dangerSoft */
-.outline{
-  background:transparent;
-  border:1px solid rgba(255,255,255,0.12);
-  padding:9px 10px;
-  border-radius:12px;
-  font-size:12px;
-}
-
 /* „Fraktion löschen“ (rot outline) */
 .dangerSoft{
   background:transparent;
@@ -203,7 +228,7 @@ button{
   color:white;
 }
 
-/* „+ Mitglied“ soll wie dangerSoft aussehen, aber türkis */
+/* „+ Mitglied“ -> Optik wie dangerSoft, aber türkis */
 .addSoft{
   background:transparent;
   color:#00ffc3;
@@ -223,6 +248,8 @@ button{
   gap:12px;
   margin-top:12px;
   align-items:center;
+  position:relative;
+  z-index:1;
 }
 
 /* Add form */
@@ -235,6 +262,8 @@ button{
   border-radius:16px;
   background:rgba(0,0,0,0.18);
   border:1px solid rgba(255,255,255,0.06);
+  position:relative;
+  z-index:1;
 }
 .add-form input{
   width:100%;
@@ -261,7 +290,7 @@ button{
   box-shadow:0 0 20px #00ffc355;
 }
 
-/* ===== HEADER BUTTONS WIE INDEX ===== */
+/* ===== HEADER BUTTONS (wie Index) ===== */
 #logoutBtn{
   position:fixed;
   top:10px;
@@ -380,7 +409,8 @@ window.onload=async()=>{
   if(!data.session){ window.location="index.html"; return; }
 
   document.getElementById("logoutBtn").style.display="block";
-  isAdmin = data.session.user.email.toLowerCase()==="admin@gta.local";
+
+  isAdmin = (data.session.user.email || "").toLowerCase()==="admin@gta.local";
   if(isAdmin) document.getElementById("adminToggle").style.display="block";
 
   resetInactivityTimer();
@@ -413,19 +443,34 @@ async function refreshDataAndRender(){
   await renderFraktionen(allFraktionen);
 }
 
+function normalizeColor(hex){
+  // expects #RRGGBB or #RGB -> returns #RRGGBB; fallback accent
+  if(!hex) return "#00ffc3";
+  let c = String(hex).trim();
+  if(!c.startsWith("#")) return "#00ffc3";
+  if(c.length===4){
+    c = "#" + c[1]+c[1] + c[2]+c[2] + c[3]+c[3];
+  }
+  if(c.length!==7) return "#00ffc3";
+  return c;
+}
+
 async function renderFraktionen(list){
   const container=document.getElementById("container");
   container.innerHTML="";
 
   for(const f of list){
     const members = membersByFraktion.get(f.id) || [];
+    const glow = normalizeColor(f.color);
 
     const card=document.createElement("div");
     card.className="card";
-    card.style.border = "2px solid " + f.color;
-    card.style.boxShadow = "0 0 25px " + f.color + "33";
+    card.style.setProperty("--glow", glow);
 
-    let html=`<h3 style="color:${f.color}">${escapeHtml(f.name)}</h3>`;
+    // minimaler farbiger Rahmen (wie im Mockup, aber soft)
+    card.style.border = "1px solid " + "color-mix(in srgb, " + glow + " 35%, rgba(255,255,255,0.10))";
+
+    let html=`<h3 style="color:${glow}">${escapeHtml(f.name)}</h3>`;
     html+=`<div class="memberList" id="list-${f.id}">`;
 
     for(const m of members){
@@ -464,6 +509,7 @@ async function renderFraktionen(list){
     container.appendChild(card);
 
     if(isAdmin){
+      // Enter -> save member
       const vor = card.querySelector(`#vor-${CSS.escape(f.id)}`);
       const nach = card.querySelector(`#nach-${CSS.escape(f.id)}`);
       const handler = (ev)=>{
@@ -475,6 +521,7 @@ async function renderFraktionen(list){
       if(vor) vor.addEventListener("keydown", handler);
       if(nach) nach.addEventListener("keydown", handler);
 
+      // Drag & Drop Sortierung
       new Sortable(document.getElementById("list-"+f.id),{
         animation:160,
         onEnd: async ()=>{
@@ -500,11 +547,12 @@ function toggleForm(id){
   }
 }
 
+/* CRUD: FRAKTION */
 async function createFraktion(){
   const name=document.getElementById("fName").value.trim();
   const color=document.getElementById("fColor").value;
   if(!name) return;
-  await db.from("fraktionen").insert([{name,color}]);
+  await db.from("fraktionen").insert([{name, color}]);
   document.getElementById("fName").value="";
 }
 
@@ -513,6 +561,7 @@ async function deleteFraktion(id){
   await db.from("fraktionen").delete().eq("id",id);
 }
 
+/* CRUD: MEMBER */
 async function saveMember(fraktion_id){
   const vorEl=document.getElementById("vor-"+fraktion_id);
   const nachEl=document.getElementById("nach-"+fraktion_id);
@@ -555,10 +604,14 @@ async function toggleLeader(ev, fraktion_id, member_id, current){
   await db.from("fraktions_mitglieder").update({leader:true}).eq("id", member_id);
 }
 
-/* SEARCH */
+/* SEARCH (Fraktion + Mitglieder) */
 document.getElementById("searchBox").addEventListener("input", async (e)=>{
   const q = e.target.value.toLowerCase().trim();
-  if(!q){ await renderFraktionen(allFraktionen); return; }
+
+  if(!q){
+    await renderFraktionen(allFraktionen);
+    return;
+  }
 
   const filtered = allFraktionen.filter(f=>{
     if((f.name || "").toLowerCase().includes(q)) return true;
@@ -580,10 +633,12 @@ function setupRealtime(){
     .subscribe();
 }
 
+/* ADMIN TOGGLE */
 document.getElementById("adminToggle").onclick=()=>{
   document.getElementById("adminPanel").classList.toggle("open");
 };
 
+/* Helpers */
 function escapeHtml(str){
   return String(str)
     .replaceAll("&","&amp;")
