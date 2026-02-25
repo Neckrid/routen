@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Fraktionen</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+ margin:0;
+ background:#0e0e0e;
+ color:white;
+ font-family:Arial;
+}
+
+#backBtn{
+ position:absolute;
+ bottom:20px;
+ right:20px;
+ background:#00ffc3;
+ color:black;
+ padding:12px 16px;
+ border-radius:12px;
+ font-weight:bold;
+ cursor:pointer;
+}
+
+#adminToggle{
+ position:absolute;
+ top:20px;
+ right:0;
+ background:#00ffc3;
+ color:black;
+ padding:8px 12px;
+ border-radius:8px 0 0 8px;
+ cursor:pointer;
+}
+
+#adminPanel{
+ position:absolute;
+ top:70px;
+ right:-300px;
+ width:280px;
+ background:#161616;
+ padding:20px;
+ border-radius:15px 0 0 15px;
+ transition:0.4s;
+}
+
+#adminPanel.open{right:0;}
+
+input{
+ width:100%;
+ padding:8px;
+ margin:8px 0;
+ border-radius:6px;
+ border:none;
+ background:#222;
+ color:white;
+}
+
+button{
+ padding:6px 10px;
+ border:none;
+ border-radius:6px;
+ cursor:pointer;
+ font-weight:bold;
+}
+
+.primary{background:#00ffc3;color:black;}
+.danger{background:#ff3b3b;color:white;}
+
+#container{
+ display:flex;
+ flex-wrap:wrap;
+ gap:20px;
+ padding:80px 20px;
+}
+
+.card{
+ padding:20px;
+ border-radius:15px;
+ min-width:250px;
+ transition:0.3s;
+ box-shadow:0 0 15px #000;
+}
+
+.card h3{margin-top:0;}
+
+.member{
+ margin-left:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<button id="backBtn" onclick="window.location='index.html'">
+⬅ Zurück zur Karte
+</button>
+
+<div id="adminToggle">Admin</div>
+
+<div id="adminPanel">
+<h3>Fraktion erstellen</h3>
+<input id="fName" placeholder="Fraktionsname">
+<input id="fColor" type="color">
+<button class="primary" onclick="createFraktion()">Erstellen</button>
+</div>
+
+<div id="container"></div>
+
+<script>
+
+const SUPABASE_URL="https://lleldalugvgmgqekcolx.supabase.co";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc";
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let isAdmin=false;
+
+window.onload=async()=>{
+ const {data}=await db.auth.getSession();
+ if(!data.session){
+  window.location="index.html";
+  return;
+ }
+ isAdmin=data.session.user.email==="admin@gta.local";
+ if(isAdmin) document.getElementById("adminToggle").style.display="block";
+ loadFraktionen();
+ setupRealtime();
+};
+
+async function loadFraktionen(){
+ const {data}=await db.from("fraktionen").select("*");
+ const container=document.getElementById("container");
+ container.innerHTML="";
+
+ for(const f of data){
+  const {data:members}=await db.from("fraktions_mitglieder")
+   .select("*").eq("fraktion_id",f.id);
+
+  const card=document.createElement("div");
+  card.className="card";
+  card.style.background=f.color;
+  card.style.height=(120 + members.length*25)+"px";
+
+  let html="<h3>"+f.name+"</h3>";
+
+  members.forEach(m=>{
+   html+="<div class='member'>"+m.vorname+" "+m.nachname+
+   (isAdmin?" <button onclick=\"deleteMember('"+m.id+"')\">❌</button>":"")
+   +"</div>";
+  });
+
+  if(isAdmin){
+   html+="<button onclick=\"addMember('"+f.id+"')\">+ Mitglied</button>";
+   html+="<button class='danger' onclick=\"deleteFraktion('"+f.id+"')\">Fraktion löschen</button>";
+  }
+
+  card.innerHTML=html;
+  container.appendChild(card);
+ }
+}
+
+async function createFraktion(){
+ const name=document.getElementById("fName").value;
+ const color=document.getElementById("fColor").value;
+ await db.from("fraktionen").insert([{name,color}]);
+}
+
+async function deleteFraktion(id){
+ await db.from("fraktionen").delete().eq("id",id);
+}
+
+async function addMember(fraktion_id){
+ const vorname=prompt("Vorname:");
+ const nachname=prompt("Nachname:");
+ if(!vorname || !nachname) return;
+ await db.from("fraktions_mitglieder")
+  .insert([{fraktion_id,vorname,nachname}]);
+}
+
+async function deleteMember(id){
+ await db.from("fraktions_mitglieder")
+  .delete().eq("id",id);
+}
+
+function setupRealtime(){
+ db.channel("fraktionen-realtime")
+  .on("postgres_changes",{event:"*",schema:"public",table:"fraktionen"},loadFraktionen)
+  .on("postgres_changes",{event:"*",schema:"public",table:"fraktions_mitglieder"},loadFraktionen)
+  .subscribe();
+}
+
+document.getElementById("adminToggle").onclick=()=>{
+ document.getElementById("adminPanel").classList.toggle("open");
+};
+
+</script>
+</body>
+</html>
