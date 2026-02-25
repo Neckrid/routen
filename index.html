@@ -431,9 +431,10 @@ function markerIconHTML(color, icon){
  if(icon==="house"){
   return `
    <div style="display:flex;align-items:center;justify-content:center;">
-     <svg viewBox="0 0 24 24" width="28" height="28" style="
+     <svg viewBox="0 0 24 24" width="38" height="38" style="
        color:${safeColor};
-       filter: drop-shadow(0 0 10px ${safeColor});
+       filter: drop-shadow(0 0 18px ${safeColor});
+       transform: scale(1.15);
      ">
        <path fill="currentColor" d="M12 3.2 3 10.2v10.2c0 .9.7 1.6 1.6 1.6H9.8v-6.3c0-.7.5-1.2 1.2-1.2h2c.7 0 1.2.5 1.2 1.2V22h5.2c.9 0 1.6-.7 1.6-1.6V10.2L12 3.2z"/>
      </svg>
@@ -443,16 +444,17 @@ function markerIconHTML(color, icon){
  if(icon==="lab"){
   return `
    <div style="display:flex;align-items:center;justify-content:center;">
-     <svg viewBox="0 0 24 24" width="28" height="28" style="
+     <svg viewBox="0 0 24 24" width="38" height="38" style="
        color:${safeColor};
-       filter: drop-shadow(0 0 10px ${safeColor});
+       filter: drop-shadow(0 0 18px ${safeColor});
+       transform: scale(1.15);
      ">
        <path fill="currentColor" d="M9 2h6v2h-1v5.1l4.9 8.5c1 1.7-.2 3.4-2.1 3.4H7.2c-1.9 0-3.1-1.7-2.1-3.4L10 9.1V4H9V2zm2.2 8.1-4.4 7.6c-.2.4.1.8.4.8h9.6c.4 0 .7-.4.4-.8l-4.4-7.6V4h-1.6v6.1z"/>
      </svg>
    </div>`;
  }
 
- // Default: Punkt
+ // Default Punkt (kleiner lassen)
  return `<div style="
     background:${safeColor};
     width:22px;height:22px;
