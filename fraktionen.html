@@ -58,9 +58,7 @@ body{
   align-items:flex-start;
 }
 
-/* ===== FRAKTIONS-CARD (GLAS + GLOW) =====
-   Glow-Farbe kommt pro Card via style="--glow: #xxxxxx"
-*/
+/* ===== FRAKTIONS-CARD (GLAS + GLOW) ===== */
 .card{
   padding:18px;
   border-radius:22px;
@@ -68,17 +66,16 @@ body{
   max-width:420px;
   flex:0 1 360px;
 
-  /* Glas/Dark */
   background:rgba(22,22,22,0.62);
   border:1px solid rgba(255,255,255,0.10);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 
-  /* Weiche Schatten + farbiger Glow */
   box-shadow:
     0 18px 55px rgba(0,0,0,0.55),
     0 0 0 1px rgba(255,255,255,0.05) inset,
     0 0 22px color-mix(in srgb, var(--glow, #00ffc3) 40%, transparent);
+
   transition:0.25s ease;
   display:flex;
   flex-direction:column;
@@ -106,6 +103,7 @@ body{
     0 0 34px color-mix(in srgb, var(--glow, #00ffc3) 55%, transparent);
 }
 
+/* Handle zum Karten-Drag */
 .card h3{
   margin:0 0 12px 0;
   font-size:20px;
@@ -113,9 +111,12 @@ body{
   letter-spacing:0.4px;
   position:relative;
   z-index:1;
+  cursor:grab;
+  user-select:none;
 }
+.card h3:active{ cursor:grabbing; }
 
-/* ===== MEMBER LIST WRAP (kein grauer Block) ===== */
+/* ===== MEMBER LIST WRAP ===== */
 .memberList{
   background:transparent;
   border:none;
@@ -123,6 +124,7 @@ body{
   padding:0;
   position:relative;
   z-index:1;
+  min-height: 10px;
 }
 
 /* ===== MEMBER ROW ===== */
@@ -152,8 +154,6 @@ body{
   gap:10px;
   min-width:0;
 }
-
-/* Namen + Stern etwas größer */
 .memberName{
   font-size:16px;
   font-weight:800;
@@ -175,14 +175,12 @@ body{
   color:#ffd54a;
   text-shadow:0 0 10px rgba(255,213,74,0.35);
 }
-
-/* Leader-Zeile: goldener Rahmen */
 .member.leaderRow{
   border:1px solid rgba(255,213,74,0.85);
   box-shadow:0 0 16px rgba(255,213,74,0.18);
 }
 
-/* ===== DELETE BUTTON (small) ===== */
+/* ===== DELETE BUTTON: NUR BEIM HOVER SICHTBAR ===== */
 .delBtn{
   background:rgba(255,59,59,0.18);
   border:1px solid rgba(255,59,59,0.45);
@@ -192,10 +190,29 @@ body{
   font-weight:900;
   font-size:12px;
   cursor:pointer;
+
+  opacity:0;
+  transform:scale(0.95);
+  pointer-events:none;
+  transition:0.18s ease;
+}
+.member:hover .delBtn{
+  opacity:1;
+  transform:scale(1);
+  pointer-events:auto;
 }
 .delBtn:hover{
   background:rgba(255,59,59,0.28);
   color:#fff;
+}
+
+/* Auf Touch-Geräten ohne Hover: Button immer sichtbar */
+@media (hover: none){
+  .delBtn{
+    opacity:1;
+    transform:none;
+    pointer-events:auto;
+  }
 }
 
 /* ===== BUTTONS ===== */
@@ -409,13 +426,14 @@ window.onload=async()=>{
   if(!data.session){ window.location="index.html"; return; }
 
   document.getElementById("logoutBtn").style.display="block";
-
   isAdmin = (data.session.user.email || "").toLowerCase()==="admin@gta.local";
   if(isAdmin) document.getElementById("adminToggle").style.display="block";
 
   resetInactivityTimer();
   await refreshDataAndRender();
   setupRealtime();
+
+  setupFactionDrag(); // Fraktionsboxen drag&drop
 };
 
 async function logout(){
@@ -424,7 +442,14 @@ async function logout(){
 }
 
 async function refreshDataAndRender(){
-  const fr = await db.from("fraktionen").select("*");
+  // Wenn du Fraktionsboxen global sortieren willst:
+  // lege in Supabase in "fraktionen" eine Spalte "sort_order int default 0" an.
+  // Falls nicht vorhanden, fällt es automatisch auf "created_at" zurück.
+  let fr = await db.from("fraktionen").select("*").order("sort_order", {ascending:true});
+  if(fr.error){
+    // fallback wenn sort_order nicht existiert
+    fr = await db.from("fraktionen").select("*").order("created_at", {ascending:true});
+  }
   if(fr.error){ console.error(fr.error); return; }
   allFraktionen = fr.data || [];
 
@@ -441,16 +466,17 @@ async function refreshDataAndRender(){
   }
 
   await renderFraktionen(allFraktionen);
+
+  // nach jedem Render Sortables neu binden
+  setupMembersDragAll();
+  setupFactionDrag();
 }
 
 function normalizeColor(hex){
-  // expects #RRGGBB or #RGB -> returns #RRGGBB; fallback accent
   if(!hex) return "#00ffc3";
   let c = String(hex).trim();
   if(!c.startsWith("#")) return "#00ffc3";
-  if(c.length===4){
-    c = "#" + c[1]+c[1] + c[2]+c[2] + c[3]+c[3];
-  }
+  if(c.length===4) c = "#" + c[1]+c[1] + c[2]+c[2] + c[3]+c[3];
   if(c.length!==7) return "#00ffc3";
   return c;
 }
@@ -465,18 +491,17 @@ async function renderFraktionen(list){
 
     const card=document.createElement("div");
     card.className="card";
+    card.dataset.fraktionId = f.id;
     card.style.setProperty("--glow", glow);
-
-    // minimaler farbiger Rahmen (wie im Mockup, aber soft)
     card.style.border = "1px solid " + "color-mix(in srgb, " + glow + " 35%, rgba(255,255,255,0.10))";
 
     let html=`<h3 style="color:${glow}">${escapeHtml(f.name)}</h3>`;
-    html+=`<div class="memberList" id="list-${f.id}">`;
+    html+=`<div class="memberList" id="list-${f.id}" data-fraktion-id="${f.id}">`;
 
     for(const m of members){
       const leaderRowClass = m.leader ? "leaderRow" : "";
       html+=`
-        <div class="member ${leaderRowClass}" data-id="${m.id}">
+        <div class="member ${leaderRowClass}" data-id="${m.id}" data-leader="${m.leader ? "1" : "0"}">
           <div class="memberLeft">
             <span class="leader-star ${m.leader ? 'leader-active' : ''}"
                   title="Leader umschalten"
@@ -520,18 +545,6 @@ async function renderFraktionen(list){
       };
       if(vor) vor.addEventListener("keydown", handler);
       if(nach) nach.addEventListener("keydown", handler);
-
-      // Drag & Drop Sortierung
-      new Sortable(document.getElementById("list-"+f.id),{
-        animation:160,
-        onEnd: async ()=>{
-          const items=document.querySelectorAll(`#list-${CSS.escape(f.id)} .member`);
-          for(let i=0;i<items.length;i++){
-            const id = items[i].dataset.id;
-            await db.from("fraktions_mitglieder").update({sort_order:i}).eq("id", id);
-          }
-        }
-      });
     }
   }
 }
@@ -547,12 +560,104 @@ function toggleForm(id){
   }
 }
 
-/* CRUD: FRAKTION */
+/* ================== DRAG & DROP: MEMBER ZWISCHEN FRAKTIONEN ================== */
+function setupMembersDragAll(){
+  const lists = document.querySelectorAll(".memberList");
+  lists.forEach(listEl=>{
+    // Sortable pro Liste
+    new Sortable(listEl,{
+      group:{ name:"members", pull:true, put:true },
+      animation:160,
+      draggable:".member",
+      // Optional: setze ein "ghost" feel
+      ghostClass:"ghost",
+      onAdd: async (evt)=>{
+        if(!isAdmin) { await refreshDataAndRender(); return; } // nur Admin darf ändern
+        const memberId = evt.item?.dataset?.id;
+        const newFraktionId = evt.to?.dataset?.fraktionId;
+        if(!memberId || !newFraktionId) return;
+
+        // Update fraktion_id des Members
+        const wasLeader = evt.item?.dataset?.leader === "1";
+
+        // Leader-Regel: Wenn Leader in neue Fraktion gezogen wird -> dort alle anderen leader=false, dann diesen true
+        if(wasLeader){
+          await db.from("fraktions_mitglieder").update({leader:false}).eq("fraktion_id", newFraktionId);
+          await db.from("fraktions_mitglieder").update({fraktion_id:newFraktionId, leader:true}).eq("id", memberId);
+        }else{
+          await db.from("fraktions_mitglieder").update({fraktion_id:newFraktionId}).eq("id", memberId);
+        }
+
+        // Sortierung in Ziel-Liste und Quell-Liste speichern
+        await persistMemberOrder(evt.to);
+        if(evt.from) await persistMemberOrder(evt.from);
+      },
+      onUpdate: async (evt)=>{
+        if(!isAdmin) { await refreshDataAndRender(); return; }
+        await persistMemberOrder(evt.to);
+      }
+    });
+  });
+}
+
+async function persistMemberOrder(listEl){
+  if(!listEl) return;
+  const items = listEl.querySelectorAll(".member");
+  for(let i=0;i<items.length;i++){
+    const id = items[i].dataset.id;
+    if(!id) continue;
+    await db.from("fraktions_mitglieder").update({sort_order:i}).eq("id", id);
+  }
+}
+
+/* ================== DRAG & DROP: FRAKTIONSBOXEN ================== */
+function setupFactionDrag(){
+  const container = document.getElementById("container");
+  if(!container) return;
+
+  // Nur Admin darf global umsortieren
+  new Sortable(container,{
+    animation:180,
+    draggable:".card",
+    handle:"h3",
+    onEnd: async ()=>{
+      if(!isAdmin) { await refreshDataAndRender(); return; }
+
+      const cards = container.querySelectorAll(".card");
+      for(let i=0;i<cards.length;i++){
+        const fid = cards[i].dataset.fraktionId;
+        if(!fid) continue;
+        // benötigt Spalte sort_order in fraktionen (Fallback: Fehler wird ignoriert)
+        const res = await db.from("fraktionen").update({sort_order:i}).eq("id", fid);
+        if(res.error){
+          // wenn sort_order nicht existiert, einfach ignorieren (UI bleibt trotzdem sortiert bis reload)
+          // console.warn(res.error);
+        }
+      }
+    }
+  });
+}
+
+/* ================== CRUD: FRAKTION ================== */
 async function createFraktion(){
   const name=document.getElementById("fName").value.trim();
   const color=document.getElementById("fColor").value;
   if(!name) return;
-  await db.from("fraktionen").insert([{name, color}]);
+
+  // Wenn du global sortieren willst: fraktionen.sort_order nutzen
+  // wir setzen sie ans Ende (max + 1)
+  let nextOrder = 0;
+  try{
+    const last = await db.from("fraktionen").select("sort_order").order("sort_order",{ascending:false}).limit(1);
+    if(!last.error && last.data && last.data.length) nextOrder = (last.data[0].sort_order ?? 0) + 1;
+  }catch(e){}
+
+  const ins = await db.from("fraktionen").insert([{name, color, sort_order: nextOrder}]);
+  if(ins.error){
+    // fallback ohne sort_order
+    await db.from("fraktionen").insert([{name, color}]);
+  }
+
   document.getElementById("fName").value="";
 }
 
@@ -561,8 +666,10 @@ async function deleteFraktion(id){
   await db.from("fraktionen").delete().eq("id",id);
 }
 
-/* CRUD: MEMBER */
+/* ================== CRUD: MEMBER ================== */
 async function saveMember(fraktion_id){
+  if(!isAdmin) return;
+
   const vorEl=document.getElementById("vor-"+fraktion_id);
   const nachEl=document.getElementById("nach-"+fraktion_id);
   if(!vorEl || !nachEl) return;
@@ -589,12 +696,14 @@ async function saveMember(fraktion_id){
 
 async function deleteMember(ev, id){
   ev.stopPropagation();
+  if(!isAdmin) return;
   await db.from("fraktions_mitglieder").delete().eq("id",id);
 }
 
 /* ✅ NUR 1 LEADER PRO FRAKTION */
 async function toggleLeader(ev, fraktion_id, member_id, current){
   ev.stopPropagation();
+  if(!isAdmin) return;
 
   if(current){
     await db.from("fraktions_mitglieder").update({leader:false}).eq("id", member_id);
@@ -610,6 +719,8 @@ document.getElementById("searchBox").addEventListener("input", async (e)=>{
 
   if(!q){
     await renderFraktionen(allFraktionen);
+    setupMembersDragAll();
+    setupFactionDrag();
     return;
   }
 
@@ -623,6 +734,8 @@ document.getElementById("searchBox").addEventListener("input", async (e)=>{
   });
 
   await renderFraktionen(filtered);
+  setupMembersDragAll();
+  setupFactionDrag();
 });
 
 /* REALTIME */
