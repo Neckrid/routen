@@ -10,7 +10,6 @@
 
 <style>
 *{ box-sizing:border-box; }
-
 body{
   margin:0;
   background:#0e0e0e;
@@ -28,7 +27,6 @@ body{
   background:linear-gradient(to bottom, rgba(14,14,14,0.95), rgba(14,14,14,0.7), rgba(14,14,14,0));
   backdrop-filter: blur(10px);
 }
-
 #searchWrap{ position:relative; display:inline-block; }
 #searchIcon{
   position:absolute;
@@ -39,7 +37,6 @@ body{
   font-size:14px;
   opacity:0.9;
 }
-
 #searchBox{
   width:min(340px, calc(100vw - 48px));
   padding:10px 12px 10px 34px;
@@ -61,7 +58,7 @@ body{
 
 /* ===== CARD ===== */
 .card{
-  padding:20px;
+  padding:18px;
   border-radius:22px;
   min-width:320px;
   max-width:420px;
@@ -74,20 +71,28 @@ body{
 }
 .card:hover{
   transform:translateY(-6px);
-  box-shadow:0 0 32px #00ffc344;
+  box-shadow:0 0 34px #00ffc344;
 }
 .card h3{
-  margin:0 0 14px 0;
+  margin:0 0 12px 0;
   font-size:20px;
   font-weight:800;
   letter-spacing:0.4px;
 }
 
+/* ===== MEMBER LIST WRAP ===== */
+.memberList{
+  background:rgba(0,0,0,0.18);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:16px;
+  padding:10px;
+}
+
 /* ===== MEMBER ROW ===== */
 .member{
-  background:rgba(0,0,0,0.35);
+  background:linear-gradient(180deg, rgba(0,0,0,0.22), rgba(0,0,0,0.10));
   border:1px solid rgba(255,255,255,0.06);
-  padding:10px 12px;
+  padding:10px 10px;
   border-radius:14px;
   margin-bottom:10px;
   display:flex;
@@ -96,26 +101,54 @@ body{
   cursor:grab;
   user-select:none;
 }
+.member:last-child{ margin-bottom:0; }
 .member:active{ cursor:grabbing; }
 
-.member span{
+.memberLeft{
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:10px;
+  min-width:0;
+}
+.memberName{
   font-size:14px;
+  font-weight:700;
+  color:#f1f1f1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
+/* Leader Stern */
 .leader-star{
   cursor:pointer;
   font-size:16px;
-  opacity:0.95;
+  opacity:0.9;
+  line-height:1;
+  transform:translateY(-0.5px);
 }
 .leader-active{
   color:#ffd54a;
   text-shadow:0 0 10px rgba(255,213,74,0.35);
 }
 
-/* ===== BUTTONS WIE INDEX ===== */
+/* Small delete X */
+.delBtn{
+  background:rgba(255,59,59,0.18);
+  border:1px solid rgba(255,59,59,0.45);
+  color:#ff6b6b;
+  border-radius:10px;
+  padding:6px 9px;
+  font-weight:900;
+  font-size:12px;
+  cursor:pointer;
+}
+.delBtn:hover{
+  background:rgba(255,59,59,0.28);
+  color:#fff;
+}
+
+/* ===== BUTTONS LIKE INDEX ===== */
 button{
   padding:8px 14px;
   border:none;
@@ -126,15 +159,16 @@ button{
 }
 
 .primary{ background:#00ffc3; color:black; }
-.danger{ background:#ff3b3b; color:white; }
 
-/* delete member small */
-.delBtn{
-  background:#ff3b3b;
+/* smaller / nicer danger */
+.dangerSoft{
+  background:transparent;
+  color:#ff6b6b;
+  border:1px solid rgba(255,59,59,0.55);
+}
+.dangerSoft:hover{
+  background:rgba(255,59,59,0.12);
   color:white;
-  border-radius:10px;
-  padding:6px 10px;
-  font-weight:bold;
 }
 
 /* Card button row */
@@ -142,21 +176,32 @@ button{
   display:flex;
   gap:12px;
   margin-top:12px;
+  align-items:center;
 }
-.btnRow button{ flex:1; }
+.btnRow .primary{
+  flex:1;
+  padding:10px 14px;
+  border-radius:12px;
+  box-shadow:0 0 18px #00ffc322;
+}
+.btnRow .dangerSoft{
+  flex:0 0 auto;
+  padding:9px 10px;   /* smaller */
+  border-radius:12px;
+  font-size:12px;
+}
 
 /* Add form */
 .add-form{
   display:none;
   flex-direction:column;
   gap:10px;
-  margin-top:10px;
+  margin-top:12px;
   padding:12px;
   border-radius:16px;
-  background:rgba(0,0,0,0.25);
-  border:1px solid rgba(255,255,255,0.08);
+  background:rgba(0,0,0,0.18);
+  border:1px solid rgba(255,255,255,0.06);
 }
-
 .add-form input{
   width:100%;
   padding:10px;
@@ -165,6 +210,11 @@ button{
   background:#222;
   color:white;
   outline:none;
+}
+.add-form .primary{
+  padding:10px 14px;
+  border-radius:12px;
+  box-shadow:0 0 18px #00ffc322;
 }
 
 /* ===== BACK BUTTON ===== */
@@ -284,7 +334,6 @@ let membersByFraktion = new Map();
 
 /* ================= AUTO LOGOUT (60 MIN INAKTIV) ================= */
 let inactivityTimer;
-
 function resetInactivityTimer(){
   clearTimeout(inactivityTimer);
   inactivityTimer = setTimeout(()=>{
@@ -292,7 +341,6 @@ function resetInactivityTimer(){
     logout();
   }, 60*60*1000);
 }
-
 document.addEventListener("mousemove", resetInactivityTimer);
 document.addEventListener("keydown", resetInactivityTimer);
 document.addEventListener("click", resetInactivityTimer);
@@ -303,14 +351,11 @@ window.onload=async()=>{
   const {data}=await db.auth.getSession();
   if(!data.session){ window.location="index.html"; return; }
 
-  // Login vorhanden -> Logout Button zeigen
   document.getElementById("logoutBtn").style.display="block";
-
   isAdmin=data.session.user.email.toLowerCase()==="admin@gta.local";
   if(isAdmin) document.getElementById("adminToggle").style.display="block";
 
-  resetInactivityTimer(); // Timer starten
-
+  resetInactivityTimer();
   await refreshDataAndRender();
   setupRealtime();
 };
@@ -353,23 +398,24 @@ async function renderFraktionen(list){
     card.style.boxShadow = "0 0 25px " + f.color + "33";
 
     let html=`<h3 style="color:${f.color}">${escapeHtml(f.name)}</h3>`;
-    html+=`<div id="list-${f.id}">`;
+
+    html += `<div class="memberList" id="list-${f.id}">`;
 
     for(const m of members){
       html+=`
         <div class="member" data-id="${m.id}">
-          <span>
+          <div class="memberLeft">
             <span class="leader-star ${m.leader ? 'leader-active' : ''}"
                   title="Leader umschalten"
                   onclick="toggleLeader(event, '${f.id}', '${m.id}', ${m.leader})">★</span>
-            ${escapeHtml(m.vorname)} ${escapeHtml(m.nachname)}
-          </span>
-          ${isAdmin ? `<button class="delBtn" onclick="deleteMember(event, '${m.id}')">✖</button>` : ``}
+            <div class="memberName">${escapeHtml(m.vorname)} ${escapeHtml(m.nachname)}</div>
+          </div>
+          ${isAdmin ? `<button class="delBtn" onclick="deleteMember(event, '${m.id}')">✕</button>` : ``}
         </div>
       `;
     }
 
-    html+=`</div>`;
+    html += `</div>`;
 
     if(isAdmin){
       html+=`
@@ -381,7 +427,7 @@ async function renderFraktionen(list){
 
         <div class="btnRow">
           <button class="primary" onclick="toggleForm('${f.id}')">+ Mitglied</button>
-          <button class="danger" onclick="deleteFraktion('${f.id}')">Fraktion löschen</button>
+          <button class="dangerSoft" onclick="deleteFraktion('${f.id}')">Fraktion löschen</button>
         </div>
       `;
     }
