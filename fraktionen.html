@@ -13,40 +13,50 @@ body{
  background:#0e0e0e;
  color:white;
  font-family:Arial;
+ overflow-x:hidden;
 }
 
+/* BACK BUTTON */
 #backBtn{
- position:absolute;
+ position:fixed;
  bottom:20px;
  right:20px;
  background:#00ffc3;
  color:black;
- padding:12px 16px;
- border-radius:12px;
+ padding:14px 18px;
+ border-radius:14px;
  font-weight:bold;
  cursor:pointer;
+ box-shadow:0 0 25px #00ffc355;
+ z-index:1000;
 }
 
+/* ADMIN */
 #adminToggle{
- position:absolute;
+ position:fixed;
  top:20px;
  right:0;
  background:#00ffc3;
  color:black;
- padding:8px 12px;
+ padding:8px 14px;
  border-radius:8px 0 0 8px;
  cursor:pointer;
+ font-weight:bold;
+ display:none;
+ z-index:1000;
 }
 
 #adminPanel{
- position:absolute;
+ position:fixed;
  top:70px;
- right:-300px;
+ right:-320px;
  width:280px;
  background:#161616;
  padding:20px;
  border-radius:15px 0 0 15px;
  transition:0.4s;
+ z-index:999;
+ box-shadow:0 0 25px #000;
 }
 
 #adminPanel.open{right:0;}
@@ -55,16 +65,16 @@ input{
  width:100%;
  padding:8px;
  margin:8px 0;
- border-radius:6px;
+ border-radius:8px;
  border:none;
  background:#222;
  color:white;
 }
 
 button{
- padding:6px 10px;
+ padding:8px;
  border:none;
- border-radius:6px;
+ border-radius:8px;
  cursor:pointer;
  font-weight:bold;
 }
@@ -72,27 +82,84 @@ button{
 .primary{background:#00ffc3;color:black;}
 .danger{background:#ff3b3b;color:white;}
 
+/* GRID */
 #container{
  display:flex;
  flex-wrap:wrap;
- gap:20px;
- padding:80px 20px;
+ gap:25px;
+ padding:100px 40px;
+ justify-content:flex-start;
 }
 
+/* CARD */
 .card{
- padding:20px;
- border-radius:15px;
- min-width:250px;
- transition:0.3s;
- box-shadow:0 0 15px #000;
+ padding:25px;
+ border-radius:22px;
+ min-width:270px;
+ transition:0.3s ease;
+ backdrop-filter:blur(12px);
+ display:flex;
+ flex-direction:column;
+ box-shadow:0 20px 50px rgba(0,0,0,0.7);
 }
 
-.card h3{margin-top:0;}
+.card:hover{
+ transform:translateY(-6px);
+}
 
+.card h3{
+ margin:0 0 15px 0;
+ font-size:20px;
+ font-weight:700;
+ letter-spacing:1px;
+}
+
+/* MEMBER */
 .member{
- margin-left:10px;
+ background:rgba(0,0,0,0.35);
+ padding:8px 12px;
+ border-radius:10px;
+ margin-bottom:8px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ font-size:14px;
 }
 
+.member button{
+ background:#ff3b3b;
+ color:white;
+ border:none;
+ border-radius:6px;
+ padding:4px 8px;
+ font-size:12px;
+ cursor:pointer;
+}
+
+.member button:hover{
+ background:red;
+}
+
+/* CARD BUTTONS */
+.card-buttons{
+ margin-top:15px;
+ display:flex;
+ gap:10px;
+}
+
+.card-buttons button{
+ flex:1;
+}
+
+.add-btn{
+ background:white;
+ color:black;
+}
+
+.delete-btn{
+ background:#ff3b3b;
+ color:white;
+}
 </style>
 </head>
 
@@ -107,7 +174,7 @@ button{
 <div id="adminPanel">
 <h3>Fraktion erstellen</h3>
 <input id="fName" placeholder="Fraktionsname">
-<input id="fColor" type="color">
+<input id="fColor" type="color" value="#00ffc3">
 <button class="primary" onclick="createFraktion()">Erstellen</button>
 </div>
 
@@ -127,11 +194,15 @@ window.onload=async()=>{
   window.location="index.html";
   return;
  }
- isAdmin=data.session.user.email==="admin@gta.local";
- if(isAdmin) document.getElementById("adminToggle").style.display="block";
+ isAdmin=data.session.user.email.toLowerCase()==="admin@gta.local";
+ if(isAdmin){
+  document.getElementById("adminToggle").style.display="block";
+ }
  loadFraktionen();
  setupRealtime();
 };
+
+/* ================= LOAD ================= */
 
 async function loadFraktionen(){
  const {data}=await db.from("fraktionen").select("*");
@@ -139,25 +210,36 @@ async function loadFraktionen(){
  container.innerHTML="";
 
  for(const f of data){
-  const {data:members}=await db.from("fraktions_mitglieder")
-   .select("*").eq("fraktion_id",f.id);
+
+  const {data:members}=await db
+   .from("fraktions_mitglieder")
+   .select("*")
+   .eq("fraktion_id",f.id);
 
   const card=document.createElement("div");
   card.className="card";
-  card.style.background=f.color;
-  card.style.height=(120 + members.length*25)+"px";
+  card.style.background=f.color + "22";
+  card.style.border="2px solid " + f.color;
+  card.style.boxShadow="0 0 30px " + f.color + "55";
 
-  let html="<h3>"+f.name+"</h3>";
+  let html="<h3 style='color:"+f.color+"'>"+f.name+"</h3>";
 
   members.forEach(m=>{
-   html+="<div class='member'>"+m.vorname+" "+m.nachname+
-   (isAdmin?" <button onclick=\"deleteMember('"+m.id+"')\">❌</button>":"")
-   +"</div>";
+   html+=`
+    <div class="member">
+     <span>${m.vorname} ${m.nachname}</span>
+     ${isAdmin ? `<button onclick="deleteMember('${m.id}')">✖</button>` : ``}
+    </div>
+   `;
   });
 
   if(isAdmin){
-   html+="<button onclick=\"addMember('"+f.id+"')\">+ Mitglied</button>";
-   html+="<button class='danger' onclick=\"deleteFraktion('"+f.id+"')\">Fraktion löschen</button>";
+   html+=`
+    <div class="card-buttons">
+     <button class="add-btn" onclick="addMember('${f.id}')">+ Mitglied</button>
+     <button class="delete-btn" onclick="deleteFraktion('${f.id}')">Fraktion löschen</button>
+    </div>
+   `;
   }
 
   card.innerHTML=html;
@@ -165,10 +247,14 @@ async function loadFraktionen(){
  }
 }
 
+/* ================= CRUD ================= */
+
 async function createFraktion(){
  const name=document.getElementById("fName").value;
  const color=document.getElementById("fColor").value;
+ if(!name) return;
  await db.from("fraktionen").insert([{name,color}]);
+ document.getElementById("fName").value="";
 }
 
 async function deleteFraktion(id){
@@ -188,12 +274,16 @@ async function deleteMember(id){
   .delete().eq("id",id);
 }
 
+/* ================= REALTIME ================= */
+
 function setupRealtime(){
  db.channel("fraktionen-realtime")
   .on("postgres_changes",{event:"*",schema:"public",table:"fraktionen"},loadFraktionen)
   .on("postgres_changes",{event:"*",schema:"public",table:"fraktions_mitglieder"},loadFraktionen)
   .subscribe();
 }
+
+/* ================= TOGGLE ================= */
 
 document.getElementById("adminToggle").onclick=()=>{
  document.getElementById("adminPanel").classList.toggle("open");
