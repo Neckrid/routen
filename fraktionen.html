@@ -113,6 +113,7 @@ body{
   z-index:1;
   cursor:grab;
   user-select:none;
+  padding-right:6px;
 }
 .card h3:active{ cursor:grabbing; }
 
@@ -205,68 +206,83 @@ body{
   background:rgba(255,59,59,0.28);
   color:#fff;
 }
-
-/* Auf Touch-Geräten ohne Hover: Button immer sichtbar */
+/* Touch: immer sichtbar */
 @media (hover: none){
-  .delBtn{
-    opacity:1;
-    transform:none;
-    pointer-events:auto;
-  }
+  .delBtn{ opacity:1; transform:none; pointer-events:auto; }
 }
 
-/* ===== BUTTONS ===== */
+/* ===== BUTTONS BASE ===== */
 button{
-  padding:8px 14px;
   border:none;
-  border-radius:8px;
   cursor:pointer;
-  font-weight:bold;
+  font-weight:900;
   font-family:Arial;
+  letter-spacing:0.2px;
 }
 
-.primary{
-  background:#00ffc3;
-  color:black;
-  box-shadow:0 0 18px #00ffc322;
-}
-
-/* „Fraktion löschen“ (rot outline) */
-.dangerSoft{
-  background:transparent;
-  color:#ff6b6b;
-  border:1px solid rgba(255,59,59,0.55);
-  padding:9px 10px;
-  border-radius:12px;
-  font-size:12px;
-}
-.dangerSoft:hover{
-  background:rgba(255,59,59,0.12);
-  color:white;
-}
-
-/* „+ Mitglied“ -> Optik wie dangerSoft, aber türkis */
-.addSoft{
-  background:transparent;
-  color:#00ffc3;
-  border:1px solid rgba(0,255,195,0.55);
-  padding:9px 10px;
-  border-radius:12px;
-  font-size:12px;
-}
-.addSoft:hover{
-  background:rgba(0,255,195,0.10);
-  color:white;
-}
-
-/* Buttons row */
+/* ===== NEW: SCHÖNERE, GRÖSSERE ACTION BUTTONS ===== */
 .btnRow{
   display:flex;
   gap:12px;
-  margin-top:12px;
+  margin-top:14px;
   align-items:center;
   position:relative;
   z-index:1;
+}
+
+.actionBtn{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:12px 14px;            /* größer */
+  border-radius:14px;           /* runder */
+  font-size:14px;               /* größer */
+  line-height:1;
+  background:rgba(0,0,0,0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition:0.18s ease;
+  user-select:none;
+}
+
+/* + Mitglied (türkis outline, glow) */
+.addSoft{
+  color:#00ffc3;
+  border:1px solid rgba(0,255,195,0.55);
+  box-shadow:0 0 0 rgba(0,255,195,0);
+}
+.addSoft:hover{
+  background:rgba(0,255,195,0.08);
+  box-shadow:0 0 22px rgba(0,255,195,0.12);
+  transform:translateY(-1px);
+}
+
+/* Fraktion löschen (rot outline, glow) */
+.dangerSoft{
+  color:#ff6b6b;
+  border:1px solid rgba(255,59,59,0.55);
+  box-shadow:0 0 0 rgba(255,59,59,0);
+}
+.dangerSoft:hover{
+  background:rgba(255,59,59,0.10);
+  box-shadow:0 0 22px rgba(255,59,59,0.12);
+  color:white;
+  transform:translateY(-1px);
+}
+
+/* icon chip */
+.actionIcon{
+  width:26px;
+  height:26px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.06);
 }
 
 /* Add form */
@@ -292,6 +308,15 @@ button{
   outline:none;
 }
 
+/* Save button (Primary) */
+.primary{
+  background:#00ffc3;
+  color:black;
+  padding:11px 14px;
+  border-radius:12px;
+  box-shadow:0 0 18px #00ffc322;
+}
+
 /* ===== BACK BUTTON ===== */
 #backBtn{
   position:fixed;
@@ -301,7 +326,7 @@ button{
   color:black;
   padding:12px 16px;
   border-radius:12px;
-  font-weight:bold;
+  font-weight:900;
   cursor:pointer;
   z-index:1200;
   box-shadow:0 0 20px #00ffc355;
@@ -317,7 +342,7 @@ button{
   padding:8px 12px;
   border-radius:8px 0 0 8px;
   cursor:pointer;
-  font-weight:bold;
+  font-weight:900;
   display:none;
   z-index:1200;
 }
@@ -331,7 +356,7 @@ button{
   padding:8px 12px;
   border-radius:8px 0 0 8px;
   cursor:pointer;
-  font-weight:bold;
+  font-weight:900;
   display:none;
   z-index:1200;
 }
@@ -355,6 +380,7 @@ button{
   margin:0 0 10px 0;
   text-align:center;
   color:#00ffc3;
+  font-weight:900;
 }
 
 #adminPanel input{
@@ -371,6 +397,7 @@ button{
   #container{ padding-left:14px; padding-right:14px; }
   #topBar{ padding-left:14px; padding-right:14px; }
   .card{ min-width: 100%; flex:1 1 100%; }
+  .actionBtn{ padding:13px 14px; font-size:15px; } /* Mobile minimal größer */
 }
 </style>
 </head>
@@ -433,7 +460,7 @@ window.onload=async()=>{
   await refreshDataAndRender();
   setupRealtime();
 
-  setupFactionDrag(); // Fraktionsboxen drag&drop
+  setupFactionDrag();
 };
 
 async function logout(){
@@ -442,12 +469,9 @@ async function logout(){
 }
 
 async function refreshDataAndRender(){
-  // Wenn du Fraktionsboxen global sortieren willst:
-  // lege in Supabase in "fraktionen" eine Spalte "sort_order int default 0" an.
-  // Falls nicht vorhanden, fällt es automatisch auf "created_at" zurück.
+  // Für globale Reihenfolge: fraktionen.sort_order anlegen (int)
   let fr = await db.from("fraktionen").select("*").order("sort_order", {ascending:true});
   if(fr.error){
-    // fallback wenn sort_order nicht existiert
     fr = await db.from("fraktionen").select("*").order("created_at", {ascending:true});
   }
   if(fr.error){ console.error(fr.error); return; }
@@ -467,7 +491,6 @@ async function refreshDataAndRender(){
 
   await renderFraktionen(allFraktionen);
 
-  // nach jedem Render Sortables neu binden
   setupMembersDragAll();
   setupFactionDrag();
 }
@@ -524,8 +547,14 @@ async function renderFraktionen(list){
         </div>
 
         <div class="btnRow">
-          <button class="addSoft" onclick="toggleForm('${f.id}')">+ Mitglied</button>
-          <button class="dangerSoft" onclick="deleteFraktion('${f.id}')">Fraktion löschen</button>
+          <button class="actionBtn addSoft" onclick="toggleForm('${f.id}')">
+            <span class="actionIcon">＋</span>
+            <span>Mitglied</span>
+          </button>
+          <button class="actionBtn dangerSoft" onclick="deleteFraktion('${f.id}')">
+            <span class="actionIcon">🗑</span>
+            <span>Fraktion löschen</span>
+          </button>
         </div>
       `;
     }
@@ -534,7 +563,6 @@ async function renderFraktionen(list){
     container.appendChild(card);
 
     if(isAdmin){
-      // Enter -> save member
       const vor = card.querySelector(`#vor-${CSS.escape(f.id)}`);
       const nach = card.querySelector(`#nach-${CSS.escape(f.id)}`);
       const handler = (ev)=>{
@@ -560,27 +588,28 @@ function toggleForm(id){
   }
 }
 
-/* ================== DRAG & DROP: MEMBER ZWISCHEN FRAKTIONEN ================== */
+/* ================== DRAG & DROP: MEMBER ZWISCHEN FRAKTIONEN + AUTOSCROLL ================== */
 function setupMembersDragAll(){
   const lists = document.querySelectorAll(".memberList");
   lists.forEach(listEl=>{
-    // Sortable pro Liste
     new Sortable(listEl,{
       group:{ name:"members", pull:true, put:true },
       animation:160,
       draggable:".member",
-      // Optional: setze ein "ghost" feel
-      ghostClass:"ghost",
+
+      /* ✅ Auto-Scroll beim Drag */
+      scroll:true,
+      scrollSensitivity:80,  // je kleiner, desto früher scrollt es
+      scrollSpeed:16,
+
       onAdd: async (evt)=>{
-        if(!isAdmin) { await refreshDataAndRender(); return; } // nur Admin darf ändern
+        if(!isAdmin) { await refreshDataAndRender(); return; }
         const memberId = evt.item?.dataset?.id;
         const newFraktionId = evt.to?.dataset?.fraktionId;
         if(!memberId || !newFraktionId) return;
 
-        // Update fraktion_id des Members
         const wasLeader = evt.item?.dataset?.leader === "1";
 
-        // Leader-Regel: Wenn Leader in neue Fraktion gezogen wird -> dort alle anderen leader=false, dann diesen true
         if(wasLeader){
           await db.from("fraktions_mitglieder").update({leader:false}).eq("fraktion_id", newFraktionId);
           await db.from("fraktions_mitglieder").update({fraktion_id:newFraktionId, leader:true}).eq("id", memberId);
@@ -588,7 +617,6 @@ function setupMembersDragAll(){
           await db.from("fraktions_mitglieder").update({fraktion_id:newFraktionId}).eq("id", memberId);
         }
 
-        // Sortierung in Ziel-Liste und Quell-Liste speichern
         await persistMemberOrder(evt.to);
         if(evt.from) await persistMemberOrder(evt.from);
       },
@@ -610,16 +638,21 @@ async function persistMemberOrder(listEl){
   }
 }
 
-/* ================== DRAG & DROP: FRAKTIONSBOXEN ================== */
+/* ================== DRAG & DROP: FRAKTIONSBOXEN + AUTOSCROLL ================== */
 function setupFactionDrag(){
   const container = document.getElementById("container");
   if(!container) return;
 
-  // Nur Admin darf global umsortieren
   new Sortable(container,{
     animation:180,
     draggable:".card",
     handle:"h3",
+
+    /* ✅ Auto-Scroll beim Drag */
+    scroll:true,
+    scrollSensitivity:90,
+    scrollSpeed:16,
+
     onEnd: async ()=>{
       if(!isAdmin) { await refreshDataAndRender(); return; }
 
@@ -627,11 +660,9 @@ function setupFactionDrag(){
       for(let i=0;i<cards.length;i++){
         const fid = cards[i].dataset.fraktionId;
         if(!fid) continue;
-        // benötigt Spalte sort_order in fraktionen (Fallback: Fehler wird ignoriert)
         const res = await db.from("fraktionen").update({sort_order:i}).eq("id", fid);
         if(res.error){
-          // wenn sort_order nicht existiert, einfach ignorieren (UI bleibt trotzdem sortiert bis reload)
-          // console.warn(res.error);
+          // wenn sort_order nicht existiert, ignorieren
         }
       }
     }
@@ -644,8 +675,6 @@ async function createFraktion(){
   const color=document.getElementById("fColor").value;
   if(!name) return;
 
-  // Wenn du global sortieren willst: fraktionen.sort_order nutzen
-  // wir setzen sie ans Ende (max + 1)
   let nextOrder = 0;
   try{
     const last = await db.from("fraktionen").select("sort_order").order("sort_order",{ascending:false}).limit(1);
@@ -654,7 +683,6 @@ async function createFraktion(){
 
   const ins = await db.from("fraktionen").insert([{name, color, sort_order: nextOrder}]);
   if(ins.error){
-    // fallback ohne sort_order
     await db.from("fraktionen").insert([{name, color}]);
   }
 
