@@ -82,15 +82,15 @@ body{
   letter-spacing:0.4px;
 }
 
-/* ===== MEMBER LIST WRAP ===== */
+/* ===== MEMBER LIST WRAP (GRAUEN BLOCK WEG) ===== */
 .memberList{
-  background:rgba(255,255,255,0.02);
-  border:1px solid rgba(255,255,255,0.05);
-  border-radius:16px;
-  padding:10px;
+  background:transparent;
+  border:none;
+  border-radius:0;
+  padding:0;
 }
 
-/* ===== MEMBER ROW (SCHÖNER SCHWARZER BLOCK) ===== */
+/* ===== MEMBER ROW ===== */
 .member{
   background:linear-gradient(145deg, rgba(35,35,35,0.92), rgba(12,12,12,0.92));
   border:1px solid rgba(255,255,255,0.06);
@@ -117,29 +117,38 @@ body{
   gap:10px;
   min-width:0;
 }
+
+/* Namen + Stern größer */
 .memberName{
-  font-size:14px;
-  font-weight:700;
+  font-size:16px;
+  font-weight:800;
   color:#f1f1f1;
-  letter-spacing:0.3px;
+  letter-spacing:0.2px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
-/* Leader Stern */
+/* ===== LEADER ===== */
 .leader-star{
   cursor:pointer;
-  font-size:16px;
-  opacity:0.9;
+  font-size:18px;
+  opacity:0.95;
   line-height:1;
 }
+
+/* Leader aktiv: Stern gold + Zeile goldener Rahmen */
 .leader-active{
   color:#ffd54a;
   text-shadow:0 0 10px rgba(255,213,74,0.35);
 }
 
-/* Small delete X */
+.member.leaderRow{
+  border:1px solid rgba(255,213,74,0.85);
+  box-shadow:0 0 16px rgba(255,213,74,0.18);
+}
+
+/* ===== DELETE BUTTON (SMALL) ===== */
 .delBtn{
   background:rgba(255,59,59,0.18);
   border:1px solid rgba(255,59,59,0.45);
@@ -155,7 +164,7 @@ body{
   color:#fff;
 }
 
-/* ===== BUTTONS WIE INDEX ===== */
+/* ===== BUTTONS ===== */
 button{
   padding:8px 14px;
   border:none;
@@ -165,20 +174,46 @@ button{
   font-family:Arial;
 }
 
-.primary{ background:#00ffc3; color:black; }
-.danger{ background:#ff3b3b; color:white; }
+.primary{
+  background:#00ffc3;
+  color:black;
+  box-shadow:0 0 18px #00ffc322;
+}
 
-/* kleiner/leichter Fraktion löschen */
+/* Outline-Style wie dangerSoft */
+.outline{
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.12);
+  padding:9px 10px;
+  border-radius:12px;
+  font-size:12px;
+}
+
+/* „Fraktion löschen“ (rot outline) */
 .dangerSoft{
   background:transparent;
   color:#ff6b6b;
   border:1px solid rgba(255,59,59,0.55);
-  padding:8px 10px;
+  padding:9px 10px;
   border-radius:12px;
   font-size:12px;
 }
 .dangerSoft:hover{
   background:rgba(255,59,59,0.12);
+  color:white;
+}
+
+/* „+ Mitglied“ soll wie dangerSoft aussehen, aber türkis */
+.addSoft{
+  background:transparent;
+  color:#00ffc3;
+  border:1px solid rgba(0,255,195,0.55);
+  padding:9px 10px;
+  border-radius:12px;
+  font-size:12px;
+}
+.addSoft:hover{
+  background:rgba(0,255,195,0.10);
   color:white;
 }
 
@@ -188,15 +223,6 @@ button{
   gap:12px;
   margin-top:12px;
   align-items:center;
-}
-.btnRow .primary{
-  flex:1;
-  padding:10px 14px;
-  border-radius:12px;
-  box-shadow:0 0 18px #00ffc322;
-}
-.btnRow .dangerSoft{
-  flex:0 0 auto;
 }
 
 /* Add form */
@@ -315,7 +341,6 @@ button{
 <div id="container"></div>
 
 <button id="backBtn" onclick="window.location='index.html'">⬅ Zurück</button>
-
 <button id="logoutBtn" onclick="logout()">Logout</button>
 <div id="adminToggle">Admin</div>
 
@@ -355,7 +380,6 @@ window.onload=async()=>{
   if(!data.session){ window.location="index.html"; return; }
 
   document.getElementById("logoutBtn").style.display="block";
-
   isAdmin = data.session.user.email.toLowerCase()==="admin@gta.local";
   if(isAdmin) document.getElementById("adminToggle").style.display="block";
 
@@ -405,8 +429,9 @@ async function renderFraktionen(list){
     html+=`<div class="memberList" id="list-${f.id}">`;
 
     for(const m of members){
+      const leaderRowClass = m.leader ? "leaderRow" : "";
       html+=`
-        <div class="member" data-id="${m.id}">
+        <div class="member ${leaderRowClass}" data-id="${m.id}">
           <div class="memberLeft">
             <span class="leader-star ${m.leader ? 'leader-active' : ''}"
                   title="Leader umschalten"
@@ -429,7 +454,7 @@ async function renderFraktionen(list){
         </div>
 
         <div class="btnRow">
-          <button class="primary" onclick="toggleForm('${f.id}')">+ Mitglied</button>
+          <button class="addSoft" onclick="toggleForm('${f.id}')">+ Mitglied</button>
           <button class="dangerSoft" onclick="deleteFraktion('${f.id}')">Fraktion löschen</button>
         </div>
       `;
@@ -439,7 +464,6 @@ async function renderFraktionen(list){
     container.appendChild(card);
 
     if(isAdmin){
-      // Enter -> save member
       const vor = card.querySelector(`#vor-${CSS.escape(f.id)}`);
       const nach = card.querySelector(`#nach-${CSS.escape(f.id)}`);
       const handler = (ev)=>{
@@ -451,7 +475,6 @@ async function renderFraktionen(list){
       if(vor) vor.addEventListener("keydown", handler);
       if(nach) nach.addEventListener("keydown", handler);
 
-      // Drag & Drop Sortierung
       new Sortable(document.getElementById("list-"+f.id),{
         animation:160,
         onEnd: async ()=>{
@@ -477,7 +500,6 @@ function toggleForm(id){
   }
 }
 
-/* CRUD: FRAKTION */
 async function createFraktion(){
   const name=document.getElementById("fName").value.trim();
   const color=document.getElementById("fColor").value;
@@ -491,7 +513,6 @@ async function deleteFraktion(id){
   await db.from("fraktionen").delete().eq("id",id);
 }
 
-/* CRUD: MEMBER */
 async function saveMember(fraktion_id){
   const vorEl=document.getElementById("vor-"+fraktion_id);
   const nachEl=document.getElementById("nach-"+fraktion_id);
@@ -534,14 +555,10 @@ async function toggleLeader(ev, fraktion_id, member_id, current){
   await db.from("fraktions_mitglieder").update({leader:true}).eq("id", member_id);
 }
 
-/* SEARCH (Fraktion + Mitglieder) */
+/* SEARCH */
 document.getElementById("searchBox").addEventListener("input", async (e)=>{
   const q = e.target.value.toLowerCase().trim();
-
-  if(!q){
-    await renderFraktionen(allFraktionen);
-    return;
-  }
+  if(!q){ await renderFraktionen(allFraktionen); return; }
 
   const filtered = allFraktionen.filter(f=>{
     if((f.name || "").toLowerCase().includes(q)) return true;
@@ -563,12 +580,10 @@ function setupRealtime(){
     .subscribe();
 }
 
-/* ADMIN TOGGLE */
 document.getElementById("adminToggle").onclick=()=>{
   document.getElementById("adminPanel").classList.toggle("open");
 };
 
-/* Helpers */
 function escapeHtml(str){
   return String(str)
     .replaceAll("&","&amp;")
