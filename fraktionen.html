@@ -124,15 +124,24 @@ html::after{
     inset 0 0 0 1px rgba(0,255,195,0.10);
 }
 
-/* ================= GRID ================= */
+/* ================= GRID (MASONRY) ================= */
+/* ✅ Das ist der Fix: Masonry per CSS Grid + JS row-span => 2. Reihe rückt hoch */
 #container{
   position:relative;
   z-index:10;
-  display:flex;
-  flex-wrap:wrap;
+
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 420px));
+  justify-content:start;
+
+  /* Abstand wie vorher */
   gap:22px;
+
   padding:10px 24px 110px 24px;
-  align-items:flex-start;
+  align-items:start;
+
+  /* Masonry-Basis */
+  grid-auto-rows: 8px; /* wird im JS genutzt */
 }
 
 /* ================= FRAKTIONS-CARD (GLAS + GLOW) ================= */
@@ -141,7 +150,6 @@ html::after{
   border-radius:22px;
   min-width:320px;
   max-width:420px;
-  flex:0 1 360px;
 
   background:rgba(22,22,28,0.62);
   border:1px solid rgba(255,255,255,0.10);
@@ -158,6 +166,9 @@ html::after{
   flex-direction:column;
   position:relative;
   overflow:hidden;
+
+  /* ✅ wichtig für Masonry */
+  align-self:start;
 }
 .card::before{
   content:"";
@@ -516,12 +527,11 @@ button{
 }
 
 /* ================= FLOATING RIGHT BUTTONS + PANEL ALIGN ================= */
-/* ✅ zentrale Maße für "gleichmäßigen Abstand" */
 :root{
-  --edge-gap: 0px;      /* ganz am Rand */
-  --btn-gap: 8px;       /* kleiner Abstand zwischen Logout und Admin */
-  --btn-h: 40px;        /* effektive Button-Höhe (für Panel-Start) */
-  --btn-top: 10px;      /* Abstand oben */
+  --edge-gap: 0px;
+  --btn-gap: 8px;
+  --btn-h: 40px;
+  --btn-top: 10px;
 }
 
 .pillBtn{
@@ -574,7 +584,6 @@ button{
   border:1px solid rgba(255,255,255,0.08);
 }
 
-/* ✅ Buttons: gleicher Abstand */
 #logoutBtn{ top:var(--btn-top); }
 #adminToggle{ top:calc(var(--btn-top) + var(--btn-h) + var(--btn-gap)); }
 
@@ -609,7 +618,7 @@ button{
     inset 0 0 0 1px rgba(0,255,195,0.12);
 }
 
-/* Back (bottom-right) */
+/* Back */
 #backBtn{
   position:fixed;
   bottom:18px;
@@ -640,14 +649,11 @@ button{
 }
 #backBtn:active{ transform: scale(0.99); transition:0.06s ease; }
 
-/* ================= ADMIN PANEL (aligned under Admin with same gap) ================= */
+/* ================= ADMIN PANEL ================= */
 #adminPanel{
   position:fixed;
-
-  /* ✅ exakt unter Admin-Button + gleicher Abstand */
   top:calc(var(--btn-top) + (var(--btn-h) + var(--btn-gap)) * 2);
   right:var(--edge-gap);
-
   width:320px;
 
   background:rgba(22,22,28,0.72);
@@ -923,10 +929,14 @@ button{
 .dragging{ opacity:0.55; }
 .sortable-ghost{ opacity:0.25; }
 
+/* Mobile */
 @media (max-width: 520px){
-  #container{ padding-left:14px; padding-right:14px; }
+  #container{
+    padding-left:14px; padding-right:14px;
+    grid-template-columns: 1fr;
+  }
   #topBar{ padding-left:14px; padding-right:14px; }
-  .card{ min-width: 100%; flex:1 1 100%; }
+  .card{ min-width: 100%; max-width: 100%; }
   .actionBtn{ padding:13px 14px; font-size:15px; }
   #adminPanel{ width: min(340px, calc(100vw - 14px)); }
 }
@@ -1048,6 +1058,43 @@ function scheduleRefresh(){
   refreshTimer = setTimeout(()=>{ refreshDataAndRender(); }, 140);
 }
 
+/* ✅ Masonry control */
+let masonryRaf = null;
+let isDragging = false;
+function scheduleMasonry(){
+  cancelAnimationFrame(masonryRaf);
+  masonryRaf = requestAnimationFrame(()=> applyMasonry());
+}
+function applyMasonry(){
+  if(isDragging) return;
+  const container = document.getElementById("container");
+  if(!container) return;
+
+  const rowHeight = parseInt(getComputedStyle(container).getPropertyValue("grid-auto-rows")) || 8;
+  const gap = parseInt(getComputedStyle(container).gap) || 22;
+
+  const cards = [...container.querySelectorAll(".card")];
+
+  // Reset first (important after search / rerender)
+  for(const c of cards){
+    c.style.gridRowEnd = "";
+  }
+
+  // Measure + set span
+  for(const c of cards){
+    const h = c.getBoundingClientRect().height;
+    const span = Math.ceil((h + gap) / rowHeight);
+    c.style.gridRowEnd = `span ${span}`;
+  }
+}
+
+/* Resize -> masonry */
+let resizeTimer = null;
+window.addEventListener("resize", ()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(()=> scheduleMasonry(), 80);
+});
+
 /* ================= AUTO LOGOUT (60 MIN INAKTIV) ================= */
 let inactivityTimer;
 function resetInactivityTimer(){
@@ -1082,6 +1129,10 @@ window.onload=async()=>{
   setupRealtime();
   setupModalUX();
   setupAdminPanelUX();
+
+  // Masonry once after initial paint + font/layout settle
+  setTimeout(()=> scheduleMasonry(), 50);
+  setTimeout(()=> scheduleMasonry(), 250);
 };
 
 async function logout(){
@@ -1089,15 +1140,18 @@ async function logout(){
   window.location="index.html";
 }
 
-/* Drag helper: realtime kurz pausieren */
+/* Drag helper: realtime kurz pausieren + Masonry pausieren */
 function setDragging(state){
   if(state){
+    isDragging = true;
     suppressRealtime = true;
     clearTimeout(refreshTimer);
   } else {
     setTimeout(()=>{
+      isDragging = false;
       suppressRealtime = false;
       scheduleRefresh();
+      scheduleMasonry();
     }, 350);
   }
 }
@@ -1183,6 +1237,10 @@ async function refreshDataAndRender(){
 
   // ✅ Admin Panel: Edit dropdown aktualisieren
   if(isAdmin) refreshEditDropdown();
+
+  // ✅ Masonry nach Render
+  scheduleMasonry();
+  setTimeout(()=> scheduleMasonry(), 120); // extra safe (fonts/layout)
 }
 
 function refreshEditDropdown(){
@@ -1280,6 +1338,9 @@ async function renderFraktionen(list){
     card.innerHTML=html;
     container.appendChild(card);
   }
+
+  // Masonry after DOM insert
+  scheduleMasonry();
 }
 
 /* ================= MODALS ================= */
@@ -1383,7 +1444,6 @@ function destroyMembersSortable(){
   try{ for(const s of sortableMembers){ s.destroy(); } }catch(e){}
   sortableMembers = [];
 }
-
 function setupMembersDragAll(){
   destroyMembersSortable();
 
@@ -1421,10 +1481,13 @@ function setupMembersDragAll(){
 
         await persistMemberOrder(evt.to);
         if(evt.from) await persistMemberOrder(evt.from);
+
+        scheduleMasonry();
       },
       onUpdate: async (evt)=>{
         if(!isAdmin) { await refreshDataAndRender(); return; }
         await persistMemberOrder(evt.to);
+        scheduleMasonry();
       }
     });
 
@@ -1457,7 +1520,6 @@ function destroyFactionsSortable(){
   try{ sortableFactions?.destroy(); }catch(e){}
   sortableFactions = null;
 }
-
 function setupFactionDrag(){
   destroyFactionsSortable();
 
@@ -1541,10 +1603,12 @@ async function toggleLeader(ev, fraktion_id, member_id, current){
 
   if(current){
     await db.from("fraktions_mitglieder").update({leader:false}).eq("id", member_id);
+    scheduleMasonry();
     return;
   }
   await db.from("fraktions_mitglieder").update({leader:false}).eq("fraktion_id", fraktion_id);
   await db.from("fraktions_mitglieder").update({leader:true}).eq("id", member_id);
+  scheduleMasonry();
 }
 
 /* SEARCH */
@@ -1560,6 +1624,7 @@ document.getElementById("searchBox").addEventListener("input", async (e)=>{
       destroyMembersSortable();
       destroyFactionsSortable();
     }
+    scheduleMasonry();
     return;
   }
 
@@ -1580,6 +1645,7 @@ document.getElementById("searchBox").addEventListener("input", async (e)=>{
     destroyMembersSortable();
     destroyFactionsSortable();
   }
+  scheduleMasonry();
 });
 
 /* REALTIME (debounced) */
