@@ -13,20 +13,26 @@
 
 body{
   margin:0;
-  background:#0e0e0e;
   font-family:Arial;
   color:white;
   overflow-x:hidden;
+
+  /* ✅ Neuer Premium Background (Gradient + Orbs) */
+  background:
+    radial-gradient(900px 520px at 18% 22%, rgba(0,255,170,0.10), transparent 60%),
+    radial-gradient(760px 520px at 82% 68%, rgba(0,140,255,0.10), transparent 62%),
+    radial-gradient(680px 480px at 62% 18%, rgba(255,70,180,0.06), transparent 60%),
+    linear-gradient(135deg, #0b0b10 0%, #11111a 55%, #0b0b10 100%);
 }
 
-/* ===== Subtiles Noise Overlay (Premium) ===== */
+/* ✅ Subtiles Noise Overlay (macht Glas teurer) */
 body::after{
   content:"";
   position:fixed;
   inset:0;
   pointer-events:none;
   z-index:5;
-  opacity:0.06;              /* 0.04–0.09 */
+  opacity:0.055; /* 0.04–0.09 */
   mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E");
 }
@@ -37,8 +43,8 @@ body::after{
   top:0;
   z-index:1100;
   padding:12px 24px 10px 24px;
-  background:linear-gradient(to bottom, rgba(14,14,14,0.95), rgba(14,14,14,0.7), rgba(14,14,14,0));
-  backdrop-filter: blur(10px);
+  background:linear-gradient(to bottom, rgba(14,14,18,0.92), rgba(14,14,18,0.70), rgba(14,14,18,0));
+  backdrop-filter: blur(12px);
 }
 
 #searchWrap{ position:relative; display:inline-block; }
@@ -54,11 +60,13 @@ body::after{
 #searchBox{
   width:min(340px, calc(100vw - 48px));
   padding:10px 12px 10px 34px;
-  border-radius:8px;
+  border-radius:10px;
   border:none;
-  background:#222;
+  background:rgba(20,20,26,0.75);
+  border:1px solid rgba(255,255,255,0.08);
   color:white;
   outline:none;
+  backdrop-filter: blur(10px);
 }
 
 /* ===== GRID ===== */
@@ -78,10 +86,10 @@ body::after{
   max-width:420px;
   flex:0 1 360px;
 
-  background:rgba(22,22,22,0.62);
+  background:rgba(22,22,28,0.62);
   border:1px solid rgba(255,255,255,0.10);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 
   box-shadow:
     0 18px 55px rgba(0,0,0,0.55),
@@ -94,7 +102,6 @@ body::after{
   position:relative;
   overflow:hidden;
 
-  /* Render Animation start */
   opacity:0;
   transform: translateY(8px);
 }
@@ -136,13 +143,11 @@ body::after{
   user-select:none;
   padding-right:6px;
 
-  /* Hierarchie */
   padding-bottom:10px;
   margin-bottom:14px;
 }
 .card h3:active{ cursor:grabbing; }
 
-/* Divider unter Header */
 .card h3::after{
   content:"";
   position:absolute;
@@ -167,12 +172,12 @@ body::after{
   position:relative;
   z-index:1;
   min-height: 10px;
-  flex:1; /* Buttons bleiben unten */
+  flex:1;
 }
 
 /* ===== MEMBER ROW ===== */
 .member{
-  background:linear-gradient(145deg, rgba(32,32,32,0.80), rgba(10,10,10,0.88));
+  background:linear-gradient(145deg, rgba(32,32,34,0.80), rgba(10,10,14,0.88));
   border:1px solid rgba(255,255,255,0.05);
   padding:12px 14px;
   border-radius:14px;
@@ -186,12 +191,10 @@ body::after{
 }
 .member:last-child{ margin-bottom:0; }
 
-/* ✅ Hover nimmt Card Glow */
 .card .member:hover{
   border:1px solid color-mix(in srgb, var(--glow, #00ffc3) 55%, rgba(255,255,255,0.12));
   box-shadow:0 0 18px color-mix(in srgb, var(--glow, #00ffc3) 22%, transparent);
 }
-
 .member:active{ cursor:grabbing; transform: scale(0.99); }
 
 /* Drag-Lift */
@@ -220,7 +223,7 @@ body::after{
   text-overflow:ellipsis;
 }
 
-/* ===== LEADER (als Chip) ===== */
+/* ===== LEADER (Chip) ===== */
 .leader-star{
   cursor:pointer;
   font-size:16px;
@@ -240,7 +243,6 @@ body::after{
 .member:hover .leader-star{
   border-color: color-mix(in srgb, var(--glow, #00ffc3) 22%, rgba(255,255,255,0.10));
 }
-
 .leader-active{
   color:#ffd54a;
   background:rgba(255,213,74,0.12);
@@ -252,7 +254,7 @@ body::after{
   box-shadow:0 0 16px rgba(255,213,74,0.18);
 }
 
-/* ===== DELETE BUTTON: NUR BEIM HOVER SICHTBAR ===== */
+/* ===== DELETE MEMBER BUTTON (hover only) ===== */
 .delBtn{
   background:rgba(255,59,59,0.18);
   border:1px solid rgba(255,59,59,0.45);
@@ -290,7 +292,7 @@ button{
   letter-spacing:0.2px;
 }
 
-/* ===== ACTION BUTTONS (optisch integriert) ===== */
+/* ===== ACTION BUTTONS ===== */
 .btnRow{
   display:flex;
   gap:12px;
@@ -299,13 +301,11 @@ button{
   position:relative;
   z-index:1;
 
-  /* Sticky am Card-Boden */
   position:sticky;
   bottom:0;
   padding-top:12px;
 
-  /* Footer-Fade */
-  background:linear-gradient(to top, rgba(22,22,22,0.95), rgba(22,22,22,0.0));
+  background:linear-gradient(to top, rgba(22,22,28,0.95), rgba(22,22,28,0.0));
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -332,15 +332,12 @@ button{
   transition:0.18s ease;
   user-select:none;
 }
-
 .actionBtn:hover{
   transform:translateY(-1px);
   box-shadow:
     0 14px 34px rgba(0,0,0,0.42),
     inset 0 0 0 1px rgba(255,255,255,0.06);
 }
-
-/* Press Feedback */
 .actionBtn:active{
   transform: translateY(0px) scale(0.985);
   transition:0.06s ease;
@@ -359,7 +356,7 @@ button{
   border:1px solid rgba(255,255,255,0.08);
 }
 
-/* ✅ + Mitglied: IMMER GRÜN (global) */
+/* ✅ + Mitglied: IMMER GRÜN */
 .addSoft{
   color:#00ff9d;
   border:1px solid rgba(0,255,157,0.55);
@@ -373,7 +370,7 @@ button{
   box-shadow: 0 0 26px rgba(0,255,157,0.14);
 }
 
-/* Fraktion löschen (rot bleibt global) */
+/* Delete: Text harmonischer -> nur "Löschen" */
 .dangerSoft{
   color:#ff6b6b;
   border:1px solid rgba(255,59,59,0.55);
@@ -388,68 +385,6 @@ button{
     0 0 26px rgba(255,59,59,0.14),
     inset 0 0 0 1px rgba(255,59,59,0.12);
   color:white;
-}
-
-/* Add form */
-.add-form{
-  display:none;
-  flex-direction:column;
-  gap:10px;
-  margin-top:12px;
-  padding:12px;
-  border-radius:16px;
-  background:rgba(0,0,0,0.18);
-  border:1px solid rgba(255,255,255,0.06);
-  position:relative;
-  z-index:1;
-}
-.add-form input{
-  width:100%;
-  padding:10px;
-  border-radius:8px;
-  border:none;
-  background:#222;
-  color:white;
-  outline:none;
-}
-
-/* ===== Save Button (Mitglied speichern) – angepasst ===== */
-.primary{
-  width:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-
-  padding:12px 14px;
-  border-radius:14px;
-  font-size:14px;
-
-  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.20));
-  border:1px solid rgba(0,255,157,0.55);
-  color:#00ff9d;
-
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
-  box-shadow:
-    0 10px 24px rgba(0,0,0,0.35),
-    0 0 20px rgba(0,255,157,0.10);
-
-  transition:0.18s ease;
-}
-
-.primary:hover{
-  background:rgba(0,255,157,0.08);
-  box-shadow:
-    0 0 26px rgba(0,255,157,0.18),
-    inset 0 0 0 1px rgba(0,255,157,0.12);
-  transform:translateY(-1px);
-}
-
-.primary:active{
-  transform:scale(0.985);
-  transition:0.06s ease;
 }
 
 /* ===== BACK BUTTON ===== */
@@ -467,7 +402,7 @@ button{
   box-shadow:0 0 20px #00ffc355;
 }
 
-/* ===== HEADER BUTTONS (wie Index) ===== */
+/* ===== HEADER BUTTONS ===== */
 #logoutBtn{
   position:fixed;
   top:10px;
@@ -502,10 +437,12 @@ button{
   top:90px;
   right:-340px;
   width:300px;
-  background:#161616;
+  background:rgba(18,18,22,0.85);
   padding:20px;
   border-radius:15px 0 0 15px;
-  box-shadow:0 0 25px #00ffc322;
+  box-shadow:0 0 25px rgba(0,255,195,0.12);
+  border:1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(14px);
   transition:0.4s;
   z-index:1190;
 }
@@ -522,11 +459,152 @@ button{
   width:100%;
   padding:10px;
   margin:8px 0;
-  border-radius:8px;
+  border-radius:10px;
   border:none;
-  background:#222;
+  background:rgba(20,20,26,0.75);
+  border:1px solid rgba(255,255,255,0.08);
   color:white;
 }
+
+/* Primary (Fraktion erstellen Button) */
+.primary{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+
+  padding:12px 14px;
+  border-radius:14px;
+  font-size:14px;
+
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.20));
+  border:1px solid rgba(0,255,195,0.55);
+  color:#00ffc3;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  box-shadow:
+    0 10px 24px rgba(0,0,0,0.35),
+    0 0 20px rgba(0,255,195,0.10);
+
+  transition:0.18s ease;
+}
+.primary:hover{
+  background:rgba(0,255,195,0.08);
+  box-shadow:
+    0 0 26px rgba(0,255,195,0.18),
+    inset 0 0 0 1px rgba(0,255,195,0.12);
+  transform:translateY(-1px);
+}
+.primary:active{
+  transform:scale(0.985);
+  transition:0.06s ease;
+}
+
+/* ===== MODALS ===== */
+.modalOverlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:3000;
+  background:rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+}
+.modal{
+  width:min(380px, calc(100vw - 32px));
+  border-radius:20px;
+  padding:18px;
+  background:rgba(22,22,28,0.82);
+  border:1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(18px);
+  box-shadow:0 30px 90px rgba(0,0,0,0.65);
+  position:relative;
+}
+.modalTitle{
+  margin:0 0 10px 0;
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:0.3px;
+}
+.modalSub{
+  margin:0 0 14px 0;
+  opacity:0.85;
+  font-size:13px;
+  line-height:1.35;
+}
+.modalInputs{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-bottom:14px;
+}
+.modal input{
+  width:100%;
+  padding:11px 12px;
+  border-radius:12px;
+  border:none;
+  background:rgba(20,20,26,0.80);
+  border:1px solid rgba(255,255,255,0.08);
+  color:white;
+  outline:none;
+}
+.modalActions{
+  display:flex;
+  gap:12px;
+}
+.modalBtn{
+  flex:1;
+  padding:12px 12px;
+  border-radius:14px;
+  font-weight:900;
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.20));
+  border:1px solid rgba(255,255,255,0.10);
+  color:white;
+  backdrop-filter: blur(10px);
+  transition:0.18s ease;
+}
+.modalBtn:hover{ transform:translateY(-1px); }
+.modalBtn:active{ transform:scale(0.985); transition:0.06s ease; }
+
+.modalBtnSave{
+  color:#00ff9d;
+  border:1px solid rgba(0,255,157,0.55);
+}
+.modalBtnSave:hover{
+  background:rgba(0,255,157,0.08);
+  box-shadow:0 0 26px rgba(0,255,157,0.16);
+}
+
+.modalBtnDanger{
+  color:#ff6b6b;
+  border:1px solid rgba(255,59,59,0.55);
+}
+.modalBtnDanger:hover{
+  background:rgba(255,59,59,0.10);
+  box-shadow:0 0 26px rgba(255,59,59,0.14);
+  color:white;
+}
+
+.modalCloseX{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.10);
+  user-select:none;
+}
+.modalCloseX:hover{ background:rgba(255,255,255,0.10); }
 
 @media (max-width: 520px){
   #container{ padding-left:14px; padding-right:14px; }
@@ -556,7 +634,40 @@ button{
   <h3>Fraktion erstellen</h3>
   <input id="fName" placeholder="Fraktionsname">
   <input id="fColor" type="color" value="#00ffc3">
-  <button class="primary" style="width:100%;" onclick="createFraktion()">Erstellen</button>
+  <button class="primary" onclick="createFraktion()">Erstellen</button>
+</div>
+
+<!-- ✅ MODAL: + Mitglied -->
+<div id="addModalOverlay" class="modalOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modalCloseX" onclick="closeAddModal()">✕</div>
+    <h3 class="modalTitle" style="color:#00ff9d;">Neues Mitglied</h3>
+    <p class="modalSub" id="addModalSub">Mitglied zu Fraktion hinzufügen.</p>
+
+    <div class="modalInputs">
+      <input id="addVor" placeholder="Vorname" autocomplete="off">
+      <input id="addNach" placeholder="Nachname" autocomplete="off">
+    </div>
+
+    <div class="modalActions">
+      <button class="modalBtn" onclick="closeAddModal()">Abbrechen</button>
+      <button class="modalBtn modalBtnSave" onclick="confirmAddMember()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ MODAL: Fraktion löschen Bestätigung -->
+<div id="delModalOverlay" class="modalOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modalCloseX" onclick="closeDeleteModal()">✕</div>
+    <h3 class="modalTitle" style="color:#ff6b6b;">Löschen</h3>
+    <p class="modalSub" id="delModalSub">Willst du diese Fraktion wirklich löschen?</p>
+
+    <div class="modalActions">
+      <button class="modalBtn" onclick="closeDeleteModal()">Abbrechen</button>
+      <button class="modalBtn modalBtnDanger" onclick="confirmDeleteFraktion()">Löschen</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -567,6 +678,10 @@ const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let isAdmin=false;
 let allFraktionen=[];
 let membersByFraktion = new Map();
+
+/* ===== Modal State ===== */
+let modalFraktionId = null;
+let modalFraktionName = "";
 
 /* ================= AUTO LOGOUT (60 MIN INAKTIV) ================= */
 let inactivityTimer;
@@ -594,8 +709,9 @@ window.onload=async()=>{
   resetInactivityTimer();
   await refreshDataAndRender();
   setupRealtime();
-
   setupFactionDrag();
+
+  setupModalUX();
 };
 
 async function logout(){
@@ -603,8 +719,46 @@ async function logout(){
   window.location="index.html";
 }
 
+function setupModalUX(){
+  // Backdrop click -> close
+  document.getElementById("addModalOverlay").addEventListener("click",(e)=>{
+    if(e.target.id==="addModalOverlay") closeAddModal();
+  });
+  document.getElementById("delModalOverlay").addEventListener("click",(e)=>{
+    if(e.target.id==="delModalOverlay") closeDeleteModal();
+  });
+
+  // ESC closes the topmost modal
+  document.addEventListener("keydown",(e)=>{
+    if(e.key==="Escape"){
+      if(isAddModalOpen()) closeAddModal();
+      if(isDeleteModalOpen()) closeDeleteModal();
+    }
+  });
+
+  // Enter in add modal -> save
+  const addVor = document.getElementById("addVor");
+  const addNach = document.getElementById("addNach");
+  const enterHandler = (e)=>{
+    if(e.key==="Enter"){
+      e.preventDefault();
+      confirmAddMember();
+    }
+  };
+  addVor.addEventListener("keydown", enterHandler);
+  addNach.addEventListener("keydown", enterHandler);
+}
+
+function isAddModalOpen(){
+  return document.getElementById("addModalOverlay").style.display==="flex";
+}
+function isDeleteModalOpen(){
+  return document.getElementById("delModalOverlay").style.display==="flex";
+}
+
+/* ================= DATA LOAD + RENDER ================= */
 async function refreshDataAndRender(){
-  // Für globale Reihenfolge: fraktionen.sort_order anlegen (int)
+  // Für globale Reihenfolge: fraktionen.sort_order (int)
   let fr = await db.from("fraktionen").select("*").order("sort_order", {ascending:true});
   if(fr.error){
     fr = await db.from("fraktionen").select("*").order("created_at", {ascending:true});
@@ -675,20 +829,12 @@ async function renderFraktionen(list){
 
     if(isAdmin){
       html+=`
-        <div class="add-form" id="form-${f.id}">
-          <input id="vor-${f.id}" placeholder="Vorname" autocomplete="off">
-          <input id="nach-${f.id}" placeholder="Nachname" autocomplete="off">
-          <button class="primary" onclick="saveMember('${f.id}')">
-  ✔ Speichern
-</button>
-        </div>
-
         <div class="btnRow">
-          <button class="actionBtn addSoft" onclick="toggleForm('${f.id}')">
+          <button class="actionBtn addSoft" onclick="openAddModal('${f.id}', '${escapeAttr(f.name)}')">
             <span class="actionIcon">＋</span>
             <span>Mitglied</span>
           </button>
-          <button class="actionBtn dangerSoft" onclick="deleteFraktion('${f.id}')">
+          <button class="actionBtn dangerSoft" onclick="openDeleteModal('${f.id}', '${escapeAttr(f.name)}')">
             <span class="actionIcon">🗑</span>
             <span>Löschen</span>
           </button>
@@ -699,36 +845,96 @@ async function renderFraktionen(list){
     card.innerHTML=html;
     container.appendChild(card);
 
-    /* ✅ Render Fade-in */
     requestAnimationFrame(()=> card.classList.add("mounted"));
-
-    if(isAdmin){
-      const vor = card.querySelector(`#vor-${CSS.escape(f.id)}`);
-      const nach = card.querySelector(`#nach-${CSS.escape(f.id)}`);
-      const handler = (ev)=>{
-        if(ev.key === "Enter"){
-          ev.preventDefault();
-          saveMember(f.id);
-        }
-      };
-      if(vor) vor.addEventListener("keydown", handler);
-      if(nach) nach.addEventListener("keydown", handler);
-    }
   }
 }
 
-function toggleForm(id){
-  const form=document.getElementById("form-"+id);
-  if(!form) return;
-  const open = (form.style.display==="flex");
-  form.style.display = open ? "none" : "flex";
-  if(!open){
-    const v=document.getElementById("vor-"+id);
-    if(v) v.focus();
-  }
+/* ================= MODALS ================= */
+function openAddModal(fraktionId, fraktionName){
+  if(!isAdmin) return;
+  modalFraktionId = fraktionId;
+  modalFraktionName = fraktionName || "";
+
+  document.getElementById("addModalSub").textContent =
+    `Mitglied zu „${modalFraktionName}“ hinzufügen.`;
+
+  document.getElementById("addVor").value = "";
+  document.getElementById("addNach").value = "";
+
+  const overlay = document.getElementById("addModalOverlay");
+  overlay.style.display = "flex";
+  overlay.setAttribute("aria-hidden","false");
+
+  setTimeout(()=> document.getElementById("addVor").focus(), 0);
 }
 
-/* ================== DRAG & DROP: MEMBER ZWISCHEN FRAKTIONEN + AUTOSCROLL ================== */
+function closeAddModal(){
+  const overlay = document.getElementById("addModalOverlay");
+  overlay.style.display = "none";
+  overlay.setAttribute("aria-hidden","true");
+  modalFraktionId = null;
+  modalFraktionName = "";
+}
+
+async function confirmAddMember(){
+  if(!isAdmin) return;
+  if(!modalFraktionId) return;
+
+  const vor = document.getElementById("addVor").value.trim();
+  const nach = document.getElementById("addNach").value.trim();
+  if(!vor || !nach) return;
+
+  const current = membersByFraktion.get(modalFraktionId) || [];
+  const next = current.length ? ((current[current.length-1].sort_order ?? (current.length-1)) + 1) : 0;
+
+  const ins = await db.from("fraktions_mitglieder").insert([{
+    fraktion_id: modalFraktionId,
+    vorname: vor,
+    nachname: nach,
+    sort_order: next,
+    leader: false
+  }]);
+
+  if(ins.error){ console.error(ins.error); return; }
+
+  closeAddModal();
+  await refreshDataAndRender();
+}
+
+function openDeleteModal(fraktionId, fraktionName){
+  if(!isAdmin) return;
+  modalFraktionId = fraktionId;
+  modalFraktionName = fraktionName || "";
+
+  document.getElementById("delModalSub").textContent =
+    `Willst du „${modalFraktionName}“ wirklich löschen?`;
+
+  const overlay = document.getElementById("delModalOverlay");
+  overlay.style.display = "flex";
+  overlay.setAttribute("aria-hidden","false");
+}
+
+function closeDeleteModal(){
+  const overlay = document.getElementById("delModalOverlay");
+  overlay.style.display = "none";
+  overlay.setAttribute("aria-hidden","true");
+  modalFraktionId = null;
+  modalFraktionName = "";
+}
+
+async function confirmDeleteFraktion(){
+  if(!isAdmin) return;
+  if(!modalFraktionId) return;
+
+  // Nur fraktionen löschen wie vorher (dein altes Verhalten)
+  const del = await db.from("fraktionen").delete().eq("id", modalFraktionId);
+  if(del.error){ console.error(del.error); return; }
+
+  closeDeleteModal();
+  await refreshDataAndRender();
+}
+
+/* ================== DRAG & DROP: MEMBER ================== */
 function setupMembersDragAll(){
   const lists = document.querySelectorAll(".memberList");
   lists.forEach(listEl=>{
@@ -777,7 +983,7 @@ async function persistMemberOrder(listEl){
   }
 }
 
-/* ================== DRAG & DROP: FRAKTIONSBOXEN + AUTOSCROLL ================== */
+/* ================== DRAG & DROP: FRAKTIONSBOXEN ================== */
 function setupFactionDrag(){
   const container = document.getElementById("container");
   if(!container) return;
@@ -827,39 +1033,12 @@ async function createFraktion(){
   document.getElementById("fName").value="";
 }
 
+/* (deleteFraktion Funktion bleibt aus Kompatibilität, wird aber nicht mehr direkt genutzt) */
 async function deleteFraktion(id){
-  if(!confirm("Fraktion wirklich löschen?")) return;
-  await db.from("fraktionen").delete().eq("id",id);
+  openDeleteModal(id, (allFraktionen.find(x=>x.id===id)?.name || ""));
 }
 
 /* ================== CRUD: MEMBER ================== */
-async function saveMember(fraktion_id){
-  if(!isAdmin) return;
-
-  const vorEl=document.getElementById("vor-"+fraktion_id);
-  const nachEl=document.getElementById("nach-"+fraktion_id);
-  if(!vorEl || !nachEl) return;
-
-  const vor=vorEl.value.trim();
-  const nach=nachEl.value.trim();
-  if(!vor || !nach) return;
-
-  const current = membersByFraktion.get(fraktion_id) || [];
-  const next = current.length ? ((current[current.length-1].sort_order ?? (current.length-1)) + 1) : 0;
-
-  await db.from("fraktions_mitglieder").insert([{
-    fraktion_id,
-    vorname: vor,
-    nachname: nach,
-    sort_order: next,
-    leader: false
-  }]);
-
-  vorEl.value="";
-  nachEl.value="";
-  toggleForm(fraktion_id);
-}
-
 async function deleteMember(ev, id){
   ev.stopPropagation();
   if(!isAdmin) return;
@@ -919,6 +1098,15 @@ document.getElementById("adminToggle").onclick=()=>{
 
 /* Helpers */
 function escapeHtml(str){
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+function escapeAttr(str){
+  // für HTML-Attribute in Template-Strings (single quotes)
   return String(str)
     .replaceAll("&","&amp;")
     .replaceAll("<","&lt;")
