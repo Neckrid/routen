@@ -544,6 +544,9 @@ const SUPABASE_URL="https://lleldalugvgmgqekcolx.supabase.co";
 const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc";
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
+/* ✅ DEINE MAP-URL */
+const MAP_IMAGE_URL = "https://pub-bf90b1dd998f46a68368bd4403249dc8.r2.dev/gta_map.png";
+
 let map, markerLayer;
 let isAdmin=false;
 
@@ -681,7 +684,10 @@ function setIconFromMarker(icon){
 function initMap(){
   map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2});
   const bounds=[[0,0],[8192,8192]];
-  L.imageOverlay("gta_map.png",bounds).addTo(map);
+
+  /* ✅ Map-Overlay jetzt über deine URL */
+  L.imageOverlay(MAP_IMAGE_URL, bounds, { crossOrigin: true }).addTo(map);
+
   map.fitBounds(bounds);
 
   markerLayer=L.layerGroup().addTo(map);
