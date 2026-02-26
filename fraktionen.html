@@ -124,27 +124,25 @@ html::after{
     inset 0 0 0 1px rgba(0,255,195,0.10);
 }
 
-/* ================= GRID (MASONRY) ================= */
-/* ✅ Das ist der Fix: Masonry per CSS Grid + JS row-span => 2. Reihe rückt hoch */
+/* ================= GRID (MASONRY FIX) ================= */
+/* ✅ Damit zweite Reihe “hoch rückt” und Lücken füllt */
 #container{
   position:relative;
   z-index:10;
 
   display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 420px));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 420px));
   justify-content:start;
-
-  /* Abstand wie vorher */
   gap:22px;
 
   padding:10px 24px 110px 24px;
   align-items:start;
 
-  /* Masonry-Basis */
-  grid-auto-rows: 8px; /* wird im JS genutzt */
+  grid-auto-rows: 10px;         /* Basis für spans */
+  grid-auto-flow: row dense;     /* ✅ Lücken auffüllen */
 }
 
-/* ================= FRAKTIONS-CARD (GLAS + GLOW) ================= */
+/* ================= FRAKTIONS-CARD ================= */
 .card{
   padding:18px;
   border-radius:22px;
@@ -166,8 +164,6 @@ html::after{
   flex-direction:column;
   position:relative;
   overflow:hidden;
-
-  /* ✅ wichtig für Masonry */
   align-self:start;
 }
 .card::before{
@@ -189,7 +185,7 @@ html::after{
     0 0 34px color-mix(in srgb, var(--glow, #00ffc3) 55%, transparent);
 }
 
-/* Handle zum Karten-Drag */
+/* Handle */
 .card h3{
   margin:0 0 12px 0;
   font-size:20px;
@@ -219,7 +215,7 @@ html::after{
   opacity:0.8;
 }
 
-/* ================= MEMBER LIST ================= */
+/* Member list */
 .memberList{
   background:transparent;
   border:none;
@@ -231,7 +227,7 @@ html::after{
   flex:1;
 }
 
-/* ================= MEMBER ROW (FARBLICH AN BOX ANGEPASST) ================= */
+/* Member row */
 .member{
   position:relative;
   overflow:hidden;
@@ -248,7 +244,6 @@ html::after{
       rgba(7,7,10,0.92));
 
   border:1px solid color-mix(in srgb, var(--glow, #00ffc3) 14%, rgba(255,255,255,0.08));
-
   padding:14px 14px;
   border-radius:16px;
   margin-bottom:10px;
@@ -258,7 +253,6 @@ html::after{
   align-items:center;
 
   user-select:none;
-
   box-shadow:
     0 14px 30px rgba(0,0,0,0.36),
     inset 0 0 0 1px rgba(255,255,255,0.03);
@@ -266,14 +260,9 @@ html::after{
   transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, filter .18s ease;
 }
 .member:last-child{ margin-bottom:0; }
-
 .isAdmin .member{ cursor:grab; }
-.isAdmin .member:active{
-  cursor:grabbing;
-  transform: scale(0.992);
-}
+.isAdmin .member:active{ cursor:grabbing; transform: scale(0.992); }
 
-/* Accent Stripe */
 .member::before{
   content:"";
   position:absolute;
@@ -286,8 +275,6 @@ html::after{
   opacity:0.65;
   pointer-events:none;
 }
-
-/* Sheen */
 .member::after{
   content:"";
   position:absolute;
@@ -299,7 +286,6 @@ html::after{
   opacity:0.70;
   pointer-events:none;
 }
-
 .card .member:hover{
   border-color: color-mix(in srgb, var(--glow, #00ffc3) 40%, rgba(255,255,255,0.12));
   box-shadow:
@@ -310,7 +296,6 @@ html::after{
   filter:saturate(1.05);
 }
 
-/* Left side: icon + name */
 .memberLeft{
   display:flex;
   align-items:center;
@@ -318,7 +303,6 @@ html::after{
   min-width:0;
 }
 
-/* Leader badge tinted to faction */
 .leader-star{
   width:28px;
   height:28px;
@@ -326,7 +310,6 @@ html::after{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-
   font-size:16px;
   line-height:1;
   cursor:pointer;
@@ -352,8 +335,6 @@ html::after{
     inset 0 0 0 1px rgba(255,255,255,0.03);
   transform: translateY(-1px);
 }
-
-/* Active leader stays gold */
 .leader-active{
   color:#ffd54a;
   background: rgba(255,213,74,0.14);
@@ -372,8 +353,6 @@ html::after{
   text-overflow:ellipsis;
   min-width:0;
 }
-
-/* mini accent underline in faction color */
 .memberName::after{
   content:"";
   display:block;
@@ -390,7 +369,6 @@ html::after{
   transition:0.18s ease;
 }
 
-/* Leader row highlight (gold) */
 .member.leaderRow{
   border-color: rgba(255,213,74,0.65);
   box-shadow:
@@ -419,20 +397,13 @@ html::after{
   pointer-events:none;
   transition:0.18s ease;
 }
-.member:hover .delBtn{
-  opacity:1;
-  transform:scale(1);
-  pointer-events:auto;
-}
-.delBtn:hover{
-  background:rgba(255,59,59,0.28);
-  color:#fff;
-}
+.member:hover .delBtn{ opacity:1; transform:scale(1); pointer-events:auto; }
+.delBtn:hover{ background:rgba(255,59,59,0.28); color:#fff; }
 @media (hover: none){
   .delBtn{ opacity:1; transform:none; pointer-events:auto; }
 }
 
-/* ================= BUTTONS ================= */
+/* Card action buttons */
 button{
   border:none;
   cursor:pointer;
@@ -440,7 +411,6 @@ button{
   font-family:Arial;
   letter-spacing:0.2px;
 }
-
 .btnRow{
   display:flex;
   gap:12px;
@@ -449,7 +419,6 @@ button{
   position:relative;
   z-index:1;
 }
-
 .actionBtn{
   flex:1;
   display:flex;
@@ -478,11 +447,7 @@ button{
     0 14px 34px rgba(0,0,0,0.42),
     inset 0 0 0 1px rgba(255,255,255,0.06);
 }
-.actionBtn:active{
-  transform: translateY(0px) scale(0.985);
-  transition:0.06s ease;
-}
-
+.actionBtn:active{ transform: translateY(0px) scale(0.985); transition:0.06s ease; }
 .actionIcon{
   width:26px;
   height:26px;
@@ -494,35 +459,15 @@ button{
   background:rgba(255,255,255,0.05);
   border:1px solid rgba(255,255,255,0.08);
 }
+.addSoft{ color:#00ff9d; border:1px solid rgba(0,255,157,0.55); }
+.addSoft .actionIcon{ background: rgba(0,255,157,0.10); border:1px solid rgba(0,255,157,0.22); }
+.addSoft:hover{ background: rgba(0,255,157,0.08); box-shadow: 0 0 26px rgba(0,255,157,0.14); }
 
-/* + Mitglied: immer grün */
-.addSoft{
-  color:#00ff9d;
-  border:1px solid rgba(0,255,157,0.55);
-}
-.addSoft .actionIcon{
-  background: rgba(0,255,157,0.10);
-  border:1px solid rgba(0,255,157,0.22);
-}
-.addSoft:hover{
-  background: rgba(0,255,157,0.08);
-  box-shadow: 0 0 26px rgba(0,255,157,0.14);
-}
-
-/* Löschen */
-.dangerSoft{
-  color:#ff6b6b;
-  border:1px solid rgba(255,59,59,0.55);
-}
-.dangerSoft .actionIcon{
-  background:rgba(255,59,59,0.10);
-  border:1px solid rgba(255,59,59,0.22);
-}
+.dangerSoft{ color:#ff6b6b; border:1px solid rgba(255,59,59,0.55); }
+.dangerSoft .actionIcon{ background:rgba(255,59,59,0.10); border:1px solid rgba(255,59,59,0.22); }
 .dangerSoft:hover{
   background:rgba(255,59,59,0.10);
-  box-shadow:
-    0 0 26px rgba(255,59,59,0.14),
-    inset 0 0 0 1px rgba(255,59,59,0.12);
+  box-shadow: 0 0 26px rgba(255,59,59,0.14), inset 0 0 0 1px rgba(255,59,59,0.12);
   color:white;
 }
 
@@ -533,7 +478,6 @@ button{
   --btn-h: 40px;
   --btn-top: 10px;
 }
-
 .pillBtn{
   position:fixed;
   right:var(--edge-gap);
@@ -571,7 +515,6 @@ button{
     inset 0 0 0 1px rgba(255,255,255,0.06);
 }
 .pillBtn:active{ transform: scale(0.99); transition:0.06s ease; }
-
 .pillIcon{
   width:24px;
   height:24px;
@@ -583,7 +526,6 @@ button{
   background:rgba(255,255,255,0.05);
   border:1px solid rgba(255,255,255,0.08);
 }
-
 #logoutBtn{ top:var(--btn-top); }
 #adminToggle{ top:calc(var(--btn-top) + var(--btn-h) + var(--btn-gap)); }
 
@@ -695,7 +637,7 @@ button{
   margin:10px 0 6px 0;
 }
 
-/* Dropdown: Text lesbar + Pfeil weiter links */
+/* Dropdown readable + arrow more left */
 #adminPanel select{
   appearance:none;
   -webkit-appearance:none;
@@ -743,17 +685,9 @@ button{
     0 14px 34px rgba(0,0,0,0.45),
     inset 0 0 0 1px rgba(0,255,195,0.10);
 }
-.row2{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
+.row2{ display:flex; gap:10px; align-items:center; }
 .row2 > *{ flex:1; }
-.colorWrap{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
+.colorWrap{ display:flex; align-items:center; gap:10px; }
 .colorWrap input[type="color"]{
   padding:0;
   height:42px;
@@ -775,7 +709,6 @@ button{
   align-items:center;
   justify-content:center;
   gap:8px;
-
   padding:12px 14px;
   border-radius:14px;
   font-size:14px;
@@ -800,10 +733,7 @@ button{
     inset 0 0 0 1px rgba(0,255,195,0.12);
   transform:translateY(-1px);
 }
-.primary:active{
-  transform:scale(0.985);
-  transition:0.06s ease;
-}
+.primary:active{ transform:scale(0.985); transition:0.06s ease; }
 
 /* ================= MODALS ================= */
 .modalOverlay{
@@ -826,24 +756,9 @@ button{
   box-shadow:0 30px 90px rgba(0,0,0,0.65);
   position:relative;
 }
-.modalTitle{
-  margin:0 0 10px 0;
-  font-size:18px;
-  font-weight:900;
-  letter-spacing:0.3px;
-}
-.modalSub{
-  margin:0 0 14px 0;
-  opacity:0.85;
-  font-size:13px;
-  line-height:1.35;
-}
-.modalInputs{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  margin-bottom:14px;
-}
+.modalTitle{ margin:0 0 10px 0; font-size:18px; font-weight:900; letter-spacing:0.3px; }
+.modalSub{ margin:0 0 14px 0; opacity:0.85; font-size:13px; line-height:1.35; }
+.modalInputs{ display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
 .modal input{
   width:100%;
   padding:12px 12px;
@@ -852,21 +767,14 @@ button{
   background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
   color:rgba(255,255,255,0.92);
   outline:none;
-
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-
   box-shadow:
     0 10px 24px rgba(0,0,0,0.35),
     inset 0 0 0 1px rgba(255,255,255,0.04);
-
   transition:0.18s ease;
 }
-.modal input::placeholder{
-  color:rgba(255,255,255,0.45);
-  font-weight:800;
-  letter-spacing:0.2px;
-}
+.modal input::placeholder{ color:rgba(255,255,255,0.45); font-weight:800; letter-spacing:0.2px; }
 .modal input:focus{
   border-color: rgba(0,255,157,0.55);
   box-shadow:
@@ -874,10 +782,7 @@ button{
     0 14px 34px rgba(0,0,0,0.45),
     inset 0 0 0 1px rgba(0,255,157,0.10);
 }
-.modalActions{
-  display:flex;
-  gap:12px;
-}
+.modalActions{ display:flex; gap:12px; }
 .modalBtn{
   flex:1;
   padding:12px 12px;
@@ -891,23 +796,10 @@ button{
 }
 .modalBtn:hover{ transform:translateY(-1px); }
 .modalBtn:active{ transform:scale(0.985); transition:0.06s ease; }
-.modalBtnSave{
-  color:#00ff9d;
-  border:1px solid rgba(0,255,157,0.55);
-}
-.modalBtnSave:hover{
-  background:rgba(0,255,157,0.08);
-  box-shadow:0 0 26px rgba(0,255,157,0.16);
-}
-.modalBtnDanger{
-  color:#ff6b6b;
-  border:1px solid rgba(255,59,59,0.55);
-}
-.modalBtnDanger:hover{
-  background:rgba(255,59,59,0.10);
-  box-shadow:0 0 26px rgba(255,59,59,0.14);
-  color:white;
-}
+.modalBtnSave{ color:#00ff9d; border:1px solid rgba(0,255,157,0.55); }
+.modalBtnSave:hover{ background:rgba(0,255,157,0.08); box-shadow:0 0 26px rgba(0,255,157,0.16); }
+.modalBtnDanger{ color:#ff6b6b; border:1px solid rgba(255,59,59,0.55); }
+.modalBtnDanger:hover{ background:rgba(255,59,59,0.10); box-shadow:0 0 26px rgba(255,59,59,0.14); color:white; }
 .modalCloseX{
   position:absolute;
   top:10px;
@@ -925,7 +817,7 @@ button{
 }
 .modalCloseX:hover{ background:rgba(255,255,255,0.10); }
 
-/* Sortable classes */
+/* Sortable */
 .dragging{ opacity:0.55; }
 .sortable-ghost{ opacity:0.25; }
 
@@ -969,7 +861,6 @@ button{
 <div id="adminPanel">
   <h3>Admin Panel</h3>
 
-  <!-- CREATE -->
   <div class="panelSection" style="border-top:none; padding-top:0; margin-top:0;">
     <div class="panelLabel">Fraktion erstellen</div>
     <input id="fName" placeholder="Fraktionsname">
@@ -981,7 +872,6 @@ button{
     </div>
   </div>
 
-  <!-- EDIT (ohne Löschen-Button) -->
   <div class="panelSection">
     <div class="panelLabel">Fraktion bearbeiten</div>
     <select id="editSelect"></select>
@@ -1058,41 +948,41 @@ function scheduleRefresh(){
   refreshTimer = setTimeout(()=>{ refreshDataAndRender(); }, 140);
 }
 
-/* ✅ Masonry control */
+/* ================= MASONRY (FIXED) ================= */
 let masonryRaf = null;
-let isDragging = false;
+let draggingNow = false;
+
 function scheduleMasonry(){
   cancelAnimationFrame(masonryRaf);
-  masonryRaf = requestAnimationFrame(()=> applyMasonry());
+  masonryRaf = requestAnimationFrame(applyMasonry);
 }
+
 function applyMasonry(){
-  if(isDragging) return;
+  if(draggingNow) return;
   const container = document.getElementById("container");
   if(!container) return;
 
-  const rowHeight = parseInt(getComputedStyle(container).getPropertyValue("grid-auto-rows")) || 8;
-  const gap = parseInt(getComputedStyle(container).gap) || 22;
+  const cs = getComputedStyle(container);
+  const autoRow = parseInt(cs.getPropertyValue("grid-auto-rows")) || 10;
+  const rowGap = parseInt(cs.getPropertyValue("row-gap")) || 22;
 
   const cards = [...container.querySelectorAll(".card")];
-
-  // Reset first (important after search / rerender)
   for(const c of cards){
     c.style.gridRowEnd = "";
   }
 
-  // Measure + set span
   for(const c of cards){
     const h = c.getBoundingClientRect().height;
-    const span = Math.ceil((h + gap) / rowHeight);
+    // ✅ korrekt: (height + gap) / (row + gap)
+    const span = Math.ceil((h + rowGap) / (autoRow + rowGap));
     c.style.gridRowEnd = `span ${span}`;
   }
 }
 
-/* Resize -> masonry */
-let resizeTimer = null;
+let resizeTimer=null;
 window.addEventListener("resize", ()=>{
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(()=> scheduleMasonry(), 80);
+  resizeTimer=setTimeout(()=> scheduleMasonry(), 80);
 });
 
 /* ================= AUTO LOGOUT (60 MIN INAKTIV) ================= */
@@ -1130,9 +1020,10 @@ window.onload=async()=>{
   setupModalUX();
   setupAdminPanelUX();
 
-  // Masonry once after initial paint + font/layout settle
-  setTimeout(()=> scheduleMasonry(), 50);
-  setTimeout(()=> scheduleMasonry(), 250);
+  // ✅ masonry mehrfach nach initial render (fonts/layout settle)
+  setTimeout(scheduleMasonry, 60);
+  setTimeout(scheduleMasonry, 240);
+  setTimeout(scheduleMasonry, 520);
 };
 
 async function logout(){
@@ -1140,15 +1031,15 @@ async function logout(){
   window.location="index.html";
 }
 
-/* Drag helper: realtime kurz pausieren + Masonry pausieren */
+/* Drag helper: realtime + masonry pausieren */
 function setDragging(state){
   if(state){
-    isDragging = true;
+    draggingNow = true;
     suppressRealtime = true;
     clearTimeout(refreshTimer);
   } else {
     setTimeout(()=>{
-      isDragging = false;
+      draggingNow = false;
       suppressRealtime = false;
       scheduleRefresh();
       scheduleMasonry();
@@ -1226,7 +1117,7 @@ async function refreshDataAndRender(){
 
   await renderFraktionen(allFraktionen);
 
-  // ✅ Drag & Drop nur für Admins
+  // Drag & Drop nur Admin
   if(isAdmin){
     setupMembersDragAll();
     setupFactionDrag();
@@ -1235,12 +1126,10 @@ async function refreshDataAndRender(){
     destroyFactionsSortable();
   }
 
-  // ✅ Admin Panel: Edit dropdown aktualisieren
   if(isAdmin) refreshEditDropdown();
 
-  // ✅ Masonry nach Render
   scheduleMasonry();
-  setTimeout(()=> scheduleMasonry(), 120); // extra safe (fonts/layout)
+  setTimeout(scheduleMasonry, 120);
 }
 
 function refreshEditDropdown(){
@@ -1339,7 +1228,6 @@ async function renderFraktionen(list){
     container.appendChild(card);
   }
 
-  // Masonry after DOM insert
   scheduleMasonry();
 }
 
@@ -1594,6 +1482,7 @@ async function deleteMember(ev, id){
   if(!isAdmin) return;
   const del = await db.from("fraktions_mitglieder").delete().eq("id",id);
   if(del.error) console.error(del.error);
+  scheduleMasonry();
 }
 
 /* ✅ NUR 1 LEADER PRO FRAKTION */
@@ -1651,8 +1540,8 @@ document.getElementById("searchBox").addEventListener("input", async (e)=>{
 /* REALTIME (debounced) */
 function setupRealtime(){
   db.channel("fraktionen-realtime")
-    .on("postgres_changes",{event:"*",schema:"public",table:"fraktionen"}, scheduleRefresh)
-    .on("postgres_changes",{event:"*",schema:"public",table:"fraktions_mitglieder"}, scheduleRefresh)
+    .on("postgres_changes",{event:"*",schema:"public",table:"fraktionen"}, ()=>{ scheduleRefresh(); scheduleMasonry(); })
+    .on("postgres_changes",{event:"*",schema:"public",table:"fraktions_mitglieder"}, ()=>{ scheduleRefresh(); scheduleMasonry(); })
     .subscribe();
 }
 
