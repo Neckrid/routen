@@ -359,18 +359,18 @@ button{
   border:1px solid rgba(255,255,255,0.08);
 }
 
-/* ✅ + Mitglied: nimmt Fraktionsfarbe über --glow */
-.card .addSoft{
-  color: color-mix(in srgb, var(--glow, #00ffc3) 92%, white 8%);
-  border:1px solid color-mix(in srgb, var(--glow, #00ffc3) 55%, rgba(255,255,255,0.16));
+/* ✅ + Mitglied: IMMER GRÜN (global) */
+.addSoft{
+  color:#00ff9d;
+  border:1px solid rgba(0,255,157,0.55);
 }
-.card .addSoft .actionIcon{
-  background: color-mix(in srgb, var(--glow, #00ffc3) 10%, rgba(255,255,255,0.04));
-  border:1px solid color-mix(in srgb, var(--glow, #00ffc3) 22%, rgba(255,255,255,0.10));
+.addSoft .actionIcon{
+  background: rgba(0,255,157,0.10);
+  border:1px solid rgba(0,255,157,0.22);
 }
-.card .addSoft:hover{
-  background: color-mix(in srgb, var(--glow, #00ffc3) 10%, rgba(0,0,0,0.10));
-  box-shadow: 0 0 26px color-mix(in srgb, var(--glow, #00ffc3) 18%, transparent);
+.addSoft:hover{
+  background: rgba(0,255,157,0.08);
+  box-shadow: 0 0 26px rgba(0,255,157,0.14);
 }
 
 /* Fraktion löschen (rot bleibt global) */
@@ -658,7 +658,7 @@ async function renderFraktionen(list){
           </button>
           <button class="actionBtn dangerSoft" onclick="deleteFraktion('${f.id}')">
             <span class="actionIcon">🗑</span>
-            <span>Fraktion löschen</span>
+            <span>Löschen</span>
           </button>
         </div>
       `;
