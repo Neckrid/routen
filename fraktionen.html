@@ -540,7 +540,7 @@ button{
   margin-bottom:14px;
 }
 
-/* ✅ Modal Inputs (optisch angepasst) */
+/* ✅ Modal Inputs (optisch passend) */
 .modal input{
   width:100%;
   padding:12px 12px;
@@ -626,33 +626,9 @@ button{
 }
 .modalCloseX:hover{ background:rgba(255,255,255,0.10); }
 
-/* ===== DRAG JITTER FIX =====
-   Während Drag: Hover-Transforms/Transitions ausschalten,
-   weil Sortable selbst mit transforms arbeitet. */
-body.is-dragging .card,
-body.is-dragging .member,
-body.is-dragging .actionBtn{
-  transition:none !important;
-}
-body.is-dragging .card:hover,
-body.is-dragging .actionBtn:hover{
-  transform:none !important;
-}
-body.is-dragging .card:hover{
-  box-shadow:
-    0 18px 55px rgba(0,0,0,0.55),
-    0 0 0 1px rgba(255,255,255,0.05) inset,
-    0 0 22px color-mix(in srgb, var(--glow, #00ffc3) 40%, transparent) !important;
-}
-
-/* Sortable states */
-.dragging{
-  opacity:0.55;
-  filter:saturate(1.05);
-}
-.sortable-ghost{
-  opacity:0.25;
-}
+/* Sortable classes (nur optisch) */
+.dragging{ opacity:0.55; }
+.sortable-ghost{ opacity:0.25; }
 
 @media (max-width: 520px){
   #container{ padding-left:14px; padding-right:14px; }
@@ -731,6 +707,16 @@ let membersByFraktion = new Map();
 let modalFraktionId = null;
 let modalFraktionName = "";
 
+/* ===== Realtime / Refresh Control (gegen Zittern nach Drop) ===== */
+let suppressRealtime = false;
+let refreshTimer = null;
+
+function scheduleRefresh(){
+  if(suppressRealtime) return;
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(()=>{ refreshDataAndRender(); }, 140);
+}
+
 /* ================= AUTO LOGOUT (60 MIN INAKTIV) ================= */
 let inactivityTimer;
 function resetInactivityTimer(){
@@ -766,9 +752,18 @@ async function logout(){
   window.location="index.html";
 }
 
-/* ===== Drag state helper (Jitter Fix) ===== */
+/* ===== Drag state helper (nur Realtime-Pause, KEIN alter CSS-Jitter-Fix) ===== */
 function setDragging(state){
-  document.body.classList.toggle("is-dragging", !!state);
+  if(state){
+    suppressRealtime = true;
+    clearTimeout(refreshTimer);
+  } else {
+    // nach Drop kurz warten, dann 1 sauberer Refresh
+    setTimeout(()=>{
+      suppressRealtime = false;
+      scheduleRefresh();
+    }, 350);
+  }
 }
 
 /* ===== Modal UX ===== */
@@ -888,7 +883,13 @@ async function renderFraktionen(list){
 
     card.innerHTML=html;
     container.appendChild(card);
-    requestAnimationFrame(()=> card.classList.add("mounted"));
+
+    // Wenn wir gerade Realtime-suppress haben (z.B. nach Drag), keine extra Animation-Bursts
+    if(suppressRealtime){
+      card.classList.add("mounted");
+    }else{
+      requestAnimationFrame(()=> card.classList.add("mounted"));
+    }
   }
 }
 
@@ -992,7 +993,6 @@ function setupMembersDragAll(){
       scrollSensitivity:80,
       scrollSpeed:16,
 
-      // ✅ jitter fix
       onStart: ()=> setDragging(true),
       onEnd: ()=> setDragging(false),
 
@@ -1024,12 +1024,17 @@ function setupMembersDragAll(){
 
 async function persistMemberOrder(listEl){
   if(!listEl) return;
-  const items = listEl.querySelectorAll(".member");
-  for(let i=0;i<items.length;i++){
-    const id = items[i].dataset.id;
-    if(!id) continue;
-    await db.from("fraktions_mitglieder").update({sort_order:i}).eq("id", id);
-  }
+
+  const items = [...listEl.querySelectorAll(".member")];
+  const updates = items.map((el, i)=>({
+    id: el.dataset.id,
+    sort_order: i
+  })).filter(x=>x.id);
+
+  if(!updates.length) return;
+
+  const res = await db.from("fraktions_mitglieder").upsert(updates, { onConflict: "id" });
+  if(res.error) console.error("persistMemberOrder upsert error:", res.error);
 }
 
 /* ================== DRAG & DROP: FRAKTIONSBOXEN ================== */
@@ -1049,22 +1054,22 @@ function setupFactionDrag(){
     scrollSensitivity:90,
     scrollSpeed:16,
 
-    // ✅ jitter fix
     onStart: ()=> setDragging(true),
 
     onEnd: async ()=>{
       try{
         if(!isAdmin) { await refreshDataAndRender(); return; }
 
-        const cards = container.querySelectorAll(".card");
-        for(let i=0;i<cards.length;i++){
-          const fid = cards[i].dataset.fraktionId;
-          if(!fid) continue;
-          const res = await db.from("fraktionen").update({sort_order:i}).eq("id", fid);
-          if(res.error){
-            console.error("sort_order update failed:", res.error);
-          }
-        }
+        const cards = [...container.querySelectorAll(".card")];
+        const updates = cards.map((c, i)=>({
+          id: c.dataset.fraktionId,
+          sort_order: i
+        })).filter(x=>x.id);
+
+        const res = await db.from("fraktionen").upsert(updates, { onConflict: "id" });
+        if(res.error) console.error("fraktionen order upsert error:", res.error);
+
+        scheduleRefresh();
       } finally {
         setDragging(false);
       }
@@ -1142,11 +1147,11 @@ document.getElementById("searchBox").addEventListener("input", async (e)=>{
   setupFactionDrag();
 });
 
-/* REALTIME */
+/* REALTIME (debounced) */
 function setupRealtime(){
   db.channel("fraktionen-realtime")
-    .on("postgres_changes",{event:"*",schema:"public",table:"fraktionen"}, refreshDataAndRender)
-    .on("postgres_changes",{event:"*",schema:"public",table:"fraktions_mitglieder"}, refreshDataAndRender)
+    .on("postgres_changes",{event:"*",schema:"public",table:"fraktionen"}, scheduleRefresh)
+    .on("postgres_changes",{event:"*",schema:"public",table:"fraktions_mitglieder"}, scheduleRefresh)
     .subscribe();
 }
 
