@@ -515,18 +515,26 @@ button{
   color:white;
 }
 
-/* ================= FLOATING RIGHT BUTTONS (LOOK MATCH) ================= */
+/* ================= FLOATING RIGHT BUTTONS + PANEL ALIGN ================= */
+/* ✅ zentrale Maße für "gleichmäßigen Abstand" */
+:root{
+  --edge-gap: 0px;      /* ganz am Rand */
+  --btn-gap: 8px;       /* kleiner Abstand zwischen Logout und Admin */
+  --btn-h: 40px;        /* effektive Button-Höhe (für Panel-Start) */
+  --btn-top: 10px;      /* Abstand oben */
+}
+
 .pillBtn{
   position:fixed;
-  right:0;                 /* ✅ ganz an den Rand */
+  right:var(--edge-gap);
   display:flex;
   align-items:center;
   justify-content:center;
   gap:8px;
 
-  padding:8px 10px;        /* ✅ etwas kleiner */
+  padding:8px 10px;
   border-radius:14px 0 0 14px;
-  font-size:13px;          /* ✅ etwas kleiner */
+  font-size:13px;
 
   background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
   border:1px solid rgba(255,255,255,0.10);
@@ -543,6 +551,7 @@ button{
   z-index:1200;
   transition:0.18s ease;
   user-select:none;
+  height:var(--btn-h);
 }
 .pillBtn:hover{
   transform: translateY(-1px);
@@ -554,7 +563,7 @@ button{
 .pillBtn:active{ transform: scale(0.99); transition:0.06s ease; }
 
 .pillIcon{
-  width:24px;              /* ✅ etwas kleiner */
+  width:24px;
   height:24px;
   border-radius:9px;
   display:flex;
@@ -565,9 +574,9 @@ button{
   border:1px solid rgba(255,255,255,0.08);
 }
 
-/* ✅ sauber getrennt */
-#logoutBtn{ top:10px; }
-#adminToggle{ top:52px; }  /* Abstand zum Logout */
+/* ✅ Buttons: gleicher Abstand */
+#logoutBtn{ top:var(--btn-top); }
+#adminToggle{ top:calc(var(--btn-top) + var(--btn-h) + var(--btn-gap)); }
 
 #logoutBtn{
   color:#ffb3b3;
@@ -631,12 +640,14 @@ button{
 }
 #backBtn:active{ transform: scale(0.99); transition:0.06s ease; }
 
-/* ================= ADMIN PANEL (MATCHED) ================= */
-/* ✅ Panel startet deutlich unter den Buttons, damit es NICHT "rein schiebt" */
+/* ================= ADMIN PANEL (aligned under Admin with same gap) ================= */
 #adminPanel{
   position:fixed;
-  top:110px;               /* ✅ Abstand zu Logout/Admin Buttons */
-  right:0;
+
+  /* ✅ exakt unter Admin-Button + gleicher Abstand */
+  top:calc(var(--btn-top) + (var(--btn-h) + var(--btn-gap)) * 2);
+  right:var(--edge-gap);
+
   width:320px;
 
   background:rgba(22,22,28,0.72);
@@ -652,7 +663,7 @@ button{
     0 0 0 1px rgba(255,255,255,0.05) inset,
     0 0 22px rgba(0,255,195,0.08);
 
-  transform: translateX(106%); /* ✅ statt right:-... => kein "reinschieben" */
+  transform: translateX(106%);
   transition:0.35s ease;
   z-index:1190;
 }
@@ -678,26 +689,24 @@ button{
   margin:10px 0 6px 0;
 }
 
-/* ✅ Dropdown: Text lesbar + Pfeil weiter links */
+/* Dropdown: Text lesbar + Pfeil weiter links */
 #adminPanel select{
   appearance:none;
   -webkit-appearance:none;
   -moz-appearance:none;
 
-  padding-right:46px !important; /* Platz für Pfeil */
+  padding-right:46px !important;
   background-image:
     linear-gradient(45deg, transparent 50%, rgba(255,255,255,0.78) 50%),
     linear-gradient(135deg, rgba(255,255,255,0.78) 50%, transparent 50%);
   background-position:
-    calc(100% - 22px) 50%,        /* ✅ Pfeil weiter nach links */
+    calc(100% - 22px) 50%,
     calc(100% - 16px) 50%;
   background-size:6px 6px, 6px 6px;
   background-repeat:no-repeat;
 
   color:rgba(255,255,255,0.92);
 }
-
-/* ✅ Optionen im Dropdown lesbar (native UI variiert je Browser, aber hilft in vielen) */
 #adminPanel select option{
   background:#0f0f14;
   color:#ffffff;
@@ -1580,6 +1589,12 @@ function setupRealtime(){
     .on("postgres_changes",{event:"*",schema:"public",table:"fraktions_mitglieder"}, scheduleRefresh)
     .subscribe();
 }
+
+/* Admin toggle */
+document.getElementById("adminToggle").onclick=()=>{
+  if(!isAdmin) return;
+  document.getElementById("adminPanel").classList.toggle("open");
+};
 
 /* Helpers */
 function escapeHtml(str){
