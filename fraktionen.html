@@ -220,7 +220,7 @@ button{
   letter-spacing:0.2px;
 }
 
-/* ===== NEW: SCHÖNERE, GRÖSSERE ACTION BUTTONS ===== */
+/* ===== ACTION BUTTONS (optisch besser integriert) ===== */
 .btnRow{
   display:flex;
   gap:12px;
@@ -236,43 +236,32 @@ button{
   align-items:center;
   justify-content:center;
   gap:10px;
-  padding:12px 14px;            /* größer */
-  border-radius:14px;           /* runder */
-  font-size:14px;               /* größer */
+  padding:12px 14px;
+  border-radius:14px;
+  font-size:14px;
   line-height:1;
-  background:rgba(0,0,0,0.18);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+
+  /* mehr "Card"-Feeling */
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.20));
+  border:1px solid rgba(255,255,255,0.10);
+  box-shadow:
+    0 10px 24px rgba(0,0,0,0.35),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   transition:0.18s ease;
   user-select:none;
 }
 
-/* + Mitglied (türkis outline, glow) */
-.addSoft{
-  color:#00ffc3;
-  border:1px solid rgba(0,255,195,0.55);
-  box-shadow:0 0 0 rgba(0,255,195,0);
-}
-.addSoft:hover{
-  background:rgba(0,255,195,0.08);
-  box-shadow:0 0 22px rgba(0,255,195,0.12);
+.actionBtn:hover{
   transform:translateY(-1px);
+  box-shadow:
+    0 14px 34px rgba(0,0,0,0.42),
+    inset 0 0 0 1px rgba(255,255,255,0.06);
 }
 
-/* Fraktion löschen (rot outline, glow) */
-.dangerSoft{
-  color:#ff6b6b;
-  border:1px solid rgba(255,59,59,0.55);
-  box-shadow:0 0 0 rgba(255,59,59,0);
-}
-.dangerSoft:hover{
-  background:rgba(255,59,59,0.10);
-  box-shadow:0 0 22px rgba(255,59,59,0.12);
-  color:white;
-  transform:translateY(-1px);
-}
-
-/* icon chip */
+/* icon chip (neutral base) */
 .actionIcon{
   width:26px;
   height:26px;
@@ -282,7 +271,40 @@ button{
   justify-content:center;
   font-size:14px;
   background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+/* ✅ + Mitglied (JETZT GRÜN) */
+.addSoft{
+  color:#00ff9d;
+  border:1px solid rgba(0,255,157,0.55);
+}
+.addSoft .actionIcon{
+  background:rgba(0,255,157,0.08);
+  border:1px solid rgba(0,255,157,0.20);
+}
+.addSoft:hover{
+  background:rgba(0,255,157,0.08);
+  box-shadow:
+    0 0 26px rgba(0,255,157,0.14),
+    inset 0 0 0 1px rgba(0,255,157,0.12);
+}
+
+/* Fraktion löschen (rot) */
+.dangerSoft{
+  color:#ff6b6b;
+  border:1px solid rgba(255,59,59,0.55);
+}
+.dangerSoft .actionIcon{
+  background:rgba(255,59,59,0.10);
+  border:1px solid rgba(255,59,59,0.22);
+}
+.dangerSoft:hover{
+  background:rgba(255,59,59,0.10);
+  box-shadow:
+    0 0 26px rgba(255,59,59,0.14),
+    inset 0 0 0 1px rgba(255,59,59,0.12);
+  color:white;
 }
 
 /* Add form */
@@ -397,7 +419,7 @@ button{
   #container{ padding-left:14px; padding-right:14px; }
   #topBar{ padding-left:14px; padding-right:14px; }
   .card{ min-width: 100%; flex:1 1 100%; }
-  .actionBtn{ padding:13px 14px; font-size:15px; } /* Mobile minimal größer */
+  .actionBtn{ padding:13px 14px; font-size:15px; }
 }
 </style>
 </head>
@@ -599,7 +621,7 @@ function setupMembersDragAll(){
 
       /* ✅ Auto-Scroll beim Drag */
       scroll:true,
-      scrollSensitivity:80,  // je kleiner, desto früher scrollt es
+      scrollSensitivity:80,
       scrollSpeed:16,
 
       onAdd: async (evt)=>{
