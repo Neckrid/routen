@@ -682,39 +682,34 @@ function setIconFromMarker(icon){
 
 /* ================= MAP ================= */
 function initMap(){
-  map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2});
-  const bounds=[[0,0],[8192,8192]];
+  map = L.map('map', { crs: L.CRS.Simple, minZoom: -2, maxZoom: 2 });
+  const bounds = [[0,0],[8192,8192]];
 
-  // ✅ Cachebuster (hilft bei CDN/Browser-Cache)
+  // ✅ Cachebuster gegen CDN-Cache-Zicken
   const url = MAP_IMAGE_URL + (MAP_IMAGE_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
 
-  // ✅ Preload mit onerror, damit du nicht "blind" bleibst
-  const img = new Image();
-  img.crossOrigin = "anonymous";
-  img.onload = () => {
-    L.imageOverlay(url, bounds, { crossOrigin: "anonymous" }).addTo(map);
-    map.fitBounds(bounds);
-  };
-  img.onerror = () => {
-    alert("Map-Image konnte nicht geladen werden. Prüfe: public Zugriff / Hotlink-Schutz / Content-Type. URL: " + MAP_IMAGE_URL);
-    // trotzdem bounds setzen, damit die Karte bedienbar bleibt
-    map.fitBounds(bounds);
-  };
-  img.src = url;
+  const overlay = L.imageOverlay(url, bounds).addTo(map);
+  map.fitBounds(bounds);
 
-  markerLayer=L.layerGroup().addTo(map);
+  // ✅ Fehlermeldung direkt am Overlay-Image (ohne CORS-Mode)
+  overlay.once("add", () => {
+    const img = overlay.getElement && overlay.getElement();
+    if(!img) return;
+    img.onerror = () => alert("Map-Overlay konnte nicht geladen werden (404/403/Hotlink/Blocked). URL: " + MAP_IMAGE_URL);
+  });
 
-  map.on("mousemove",e=>{
+  markerLayer = L.layerGroup().addTo(map);
+
+  map.on("mousemove", e => {
     document.getElementById("coords").innerText =
-      "X:"+Math.round(e.latlng.lng)+" | Y:"+Math.round(e.latlng.lat);
+      "X:" + Math.round(e.latlng.lng) + " | Y:" + Math.round(e.latlng.lat);
   });
 
   if(isAdmin){
-    map.on("click",e=>{
+    map.on("click", e => {
       clearForm();
-      selectedCoords=e.latlng;
-      currentEditId=null;
-
+      selectedCoords = e.latlng;
+      currentEditId = null;
       document.getElementById("adminPanel").classList.add("open");
       updateCoordBadge();
     });
