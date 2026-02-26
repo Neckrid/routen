@@ -176,12 +176,13 @@ button{
  display:none;
 }
 
+/* Wichtig: Leaflet divIcon default styles neutralisieren */
 .leaflet-div-icon{
  background:transparent !important;
  border:none !important;
 }
 
-/* ✅ Icon Picker */
+/* Icon Picker */
 .iconPickerTitle{
  margin:10px 0 6px 0;
  font-size:13px;
@@ -245,16 +246,14 @@ button{
 <input id="mTitle" placeholder="Titel">
 <input id="mDesc" placeholder="Beschreibung">
 
-<!-- ✅ Icon Auswahl -->
 <div class="iconPickerTitle">Icon (optional)</div>
 <div class="iconPicker">
   <div class="iconPick active" id="pickDot" onclick="setIcon('')">
-    <div style="width:16px;height:16px;border-radius:50%;border:2px solid #fff;background:#666;box-shadow:0 0 10px #666;"></div>
+    <div id="dotPreview" style="width:16px;height:16px;border-radius:50%;border:2px solid #fff;background:#666;"></div>
     <small>Punkt</small>
   </div>
 
   <div class="iconPick" id="pickHouse" onclick="setIcon('house')">
-    <!-- House SVG -->
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path fill="currentColor" d="M12 3.2 3 10.2v10.2c0 .9.7 1.6 1.6 1.6H9.8v-6.3c0-.7.5-1.2 1.2-1.2h2c.7 0 1.2.5 1.2 1.2V22h5.2c.9 0 1.6-.7 1.6-1.6V10.2L12 3.2z"/>
     </svg>
@@ -262,9 +261,8 @@ button{
   </div>
 
   <div class="iconPick" id="pickLab" onclick="setIcon('lab')">
-    <!-- Flask / Lab SVG -->
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="currentColor" d="M9 2h6v2h-1v5.1l4.9 8.5c1 1.7-.2 3.4-2.1 3.4H7.2c-1.9 0-3.1-1.7-2.1-3.4L10 9.1V4H9V2zm2.2 8.1-4.4 7.6c-.2.4.1.8.4.8h9.6c.4 0 .7-.4.4-.8l-4.4-7.6V4h-1.6v6.1z"/>
+      <path fill="currentColor" d="M9 2h6v2h-1v5l5 8.5c1 1.7-.2 3.5-2.2 3.5H7.2c-2 0-3.2-1.8-2.2-3.5L10 9V4H9V2z"/>
     </svg>
     <small>Labor</small>
   </div>
@@ -292,8 +290,7 @@ const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let map,markerLayer,isAdmin=false,selectedCoords=null,currentEditId=null,allMarkers=[];
 let inactivityTimer;
 
-// ✅ Icon state ("" = Punkt)
-let selectedIcon = "";
+let selectedIcon = ""; // "" = Punkt
 
 /* ================= AUTO LOGOUT ================= */
 function resetInactivityTimer(){
@@ -424,55 +421,68 @@ function initMap(){
  }
 }
 
-/* ================= MARKER ICON HTML ================= */
-function markerIconHTML(color, icon){
+/* ================= ICON SPECS (FIX: Anchor/Size korrekt) ================= */
+function buildMarkerIcon(color, icon){
  const safeColor = color || "#ff0000";
 
+ // Punkt: 22px + border 3px => visuell ca. 28px
+ if(!icon){
+  const size = [28,28];
+  return {
+   html: `<div style="
+      width:22px;height:22px;
+      border-radius:50%;
+      background:${safeColor};
+      border:3px solid white;
+      box-sizing:content-box;
+    "></div>`,
+   iconSize: size,
+   iconAnchor: [size[0]/2, size[1]/2],
+   popupAnchor: [0, -(size[1]/2)]
+  };
+ }
+
+ // Haus/Labor: 42px (Outline via stroke)
+ const size = [42,42];
+ const commonWrap = `style="width:${size[0]}px;height:${size[1]}px;display:flex;align-items:center;justify-content:center;"`;
+ const strokeW = 1.2;
+
  if(icon==="house"){
-  return `
-   <div style="
-     width:42px;
-     height:42px;
-     display:flex;
-     align-items:center;
-     justify-content:center;
-     transform: translate(-13px,-13px);
-   ">
-     <svg viewBox="0 0 24 24" width="42" height="42">
-       <path fill="${safeColor}"
-             stroke="white"
-             stroke-width="1.2"
+  return {
+   html: `<div ${commonWrap}>
+     <svg viewBox="0 0 24 24" width="${size[0]}" height="${size[1]}">
+       <path fill="${safeColor}" stroke="white" stroke-width="${strokeW}"
         d="M12 3.2 3 10.2v10.2c0 .9.7 1.6 1.6 1.6H9.8v-6.3c0-.7.5-1.2 1.2-1.2h2c.7 0 1.2.5 1.2 1.2V22h5.2c.9 0 1.6-.7 1.6-1.6V10.2L12 3.2z"/>
      </svg>
-   </div>`;
+   </div>`,
+   iconSize: size,
+   iconAnchor: [size[0]/2, size[1]/2],
+   popupAnchor: [0, -(size[1]/2)]
+  };
  }
 
  if(icon==="lab"){
-  return `
-   <div style="
-     width:42px;
-     height:42px;
-     display:flex;
-     align-items:center;
-     justify-content:center;
-     transform: translate(-13px,-13px);
-   ">
-     <svg viewBox="0 0 24 24" width="42" height="42">
-       <path fill="${safeColor}"
-             stroke="white"
-             stroke-width="1.2"
+  return {
+   html: `<div ${commonWrap}>
+     <svg viewBox="0 0 24 24" width="${size[0]}" height="${size[1]}">
+       <path fill="${safeColor}" stroke="white" stroke-width="${strokeW}"
         d="M9 2h6v2h-1v5l5 8.5c1 1.7-.2 3.5-2.2 3.5H7.2c-2 0-3.2-1.8-2.2-3.5L10 9V4H9V2z"/>
      </svg>
-   </div>`;
+   </div>`,
+   iconSize: size,
+   iconAnchor: [size[0]/2, size[1]/2],
+   popupAnchor: [0, -(size[1]/2)]
+  };
  }
 
- // Default Punkt
- return `<div style="
-    background:${safeColor};
-    width:22px;height:22px;
-    border-radius:50%;
-    border:3px solid white;
-    box-shadow:0 0 10px ${safeColor};"></div>`;
+ // Fallback
+ const fallbackSize = [28,28];
+ return {
+  html: `<div style="width:22px;height:22px;border-radius:50%;background:${safeColor};border:3px solid white;"></div>`,
+  iconSize: fallbackSize,
+  iconAnchor: [fallbackSize[0]/2, fallbackSize[1]/2],
+  popupAnchor: [0, -(fallbackSize[1]/2)]
+ };
 }
 
 /* ================= MARKER ================= */
@@ -486,9 +496,14 @@ function renderMarkers(data){
  markerLayer.clearLayers();
 
  data.forEach(m=>{
+  const spec = buildMarkerIcon(m.color, m.icon);
+
   const icon=L.divIcon({
-   html: markerIconHTML(m.color, m.icon),
-   className: "" // wichtig: Leaflet default styles aus
+   html: spec.html,
+   className: "",              // keine Leaflet default box
+   iconSize: spec.iconSize,     // ✅ Fix: Leaflet weiß jetzt die Größe
+   iconAnchor: spec.iconAnchor, // ✅ Fix: exakt zentriert
+   popupAnchor: spec.popupAnchor
   });
 
   const marker=L.marker([m.y,m.x],{
@@ -498,14 +513,13 @@ function renderMarkers(data){
 
   if(isAdmin){
    marker.on("click",()=>{
-    selectedCoords=null; // kein Insert mit alten Koords
+    selectedCoords=null;
 
     currentEditId=m.id;
     document.getElementById("mTitle").value=m.title || "";
     document.getElementById("mDesc").value=m.description || "";
     document.getElementById("mColor").value=m.color || "#ff0000";
     updateColorPreview();
-
     setIconFromMarker(m.icon);
 
     document.getElementById("adminPanel").classList.add("open");
@@ -528,7 +542,7 @@ async function saveMarker(){
  const title=document.getElementById("mTitle").value.trim();
  const description=document.getElementById("mDesc").value.trim();
  const color=document.getElementById("mColor").value;
- const icon = selectedIcon || null; // null => Punkt
+ const icon = selectedIcon || null;
 
  if(!title){ alert("Titel fehlt"); return; }
 
@@ -566,8 +580,6 @@ function clearForm(){
  document.getElementById("mTitle").value="";
  document.getElementById("mDesc").value="";
  currentEditId=null;
-
- // Default wieder Punkt
  setIcon("");
 }
 
@@ -595,15 +607,10 @@ document.getElementById("adminToggle").onclick=()=>{
 };
 
 function updateColorPreview(){
- document.getElementById("colorPreview").style.background=
-  document.getElementById("mColor").value;
-
- // Optional: Punkt-Preview Farbe passend machen (nur optisch)
- const dot = document.querySelector("#pickDot > div");
- if(dot){
-  dot.style.background = document.getElementById("mColor").value;
-  dot.style.boxShadow = "0 0 10px " + document.getElementById("mColor").value;
- }
+ const v = document.getElementById("mColor").value;
+ document.getElementById("colorPreview").style.background = v;
+ const dot = document.getElementById("dotPreview");
+ if(dot) dot.style.background = v;
 }
 </script>
 </body>
