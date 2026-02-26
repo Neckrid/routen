@@ -413,13 +413,43 @@ button{
   outline:none;
 }
 
-/* Save button (Primary) */
+/* ===== Save Button (Mitglied speichern) – angepasst ===== */
 .primary{
-  background:#00ffc3;
-  color:black;
-  padding:11px 14px;
-  border-radius:12px;
-  box-shadow:0 0 18px #00ffc322;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+
+  padding:12px 14px;
+  border-radius:14px;
+  font-size:14px;
+
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.20));
+  border:1px solid rgba(0,255,157,0.55);
+  color:#00ff9d;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  box-shadow:
+    0 10px 24px rgba(0,0,0,0.35),
+    0 0 20px rgba(0,255,157,0.10);
+
+  transition:0.18s ease;
+}
+
+.primary:hover{
+  background:rgba(0,255,157,0.08);
+  box-shadow:
+    0 0 26px rgba(0,255,157,0.18),
+    inset 0 0 0 1px rgba(0,255,157,0.12);
+  transform:translateY(-1px);
+}
+
+.primary:active{
+  transform:scale(0.985);
+  transition:0.06s ease;
 }
 
 /* ===== BACK BUTTON ===== */
@@ -648,7 +678,9 @@ async function renderFraktionen(list){
         <div class="add-form" id="form-${f.id}">
           <input id="vor-${f.id}" placeholder="Vorname" autocomplete="off">
           <input id="nach-${f.id}" placeholder="Nachname" autocomplete="off">
-          <button class="primary" onclick="saveMember('${f.id}')">Mitglied speichern</button>
+          <button class="primary" onclick="saveMember('${f.id}')">
+  ✔ Speichern
+</button>
         </div>
 
         <div class="btnRow">
