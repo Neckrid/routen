@@ -208,15 +208,25 @@ html::after{
   flex:1;
 }
 
-/* ================= MEMBER ROW (schöner) ================= */
+/* ================= MEMBER ROW (FARBLICH AN BOX ANGEPASST) ================= */
+/* Wichtig: nutzt --glow vom .card */
 .member{
   position:relative;
   overflow:hidden;
 
+  /* ✅ Tint in Fraktionsfarbe + Glass Layers */
   background:
-    radial-gradient(120% 120% at 18% 0%, rgba(255,255,255,0.08), transparent 52%),
-    linear-gradient(145deg, rgba(26,26,32,0.78), rgba(7,7,10,0.92));
-  border:1px solid rgba(255,255,255,0.07);
+    radial-gradient(120% 120% at 12% 0%,
+      color-mix(in srgb, var(--glow, #00ffc3) 16%, transparent),
+      transparent 58%),
+    radial-gradient(120% 120% at 90% 10%,
+      rgba(255,255,255,0.08),
+      transparent 60%),
+    linear-gradient(145deg,
+      rgba(26,26,32,0.78),
+      rgba(7,7,10,0.92));
+
+  border:1px solid color-mix(in srgb, var(--glow, #00ffc3) 14%, rgba(255,255,255,0.08));
 
   padding:14px 14px;
   border-radius:16px;
@@ -233,10 +243,11 @@ html::after{
     0 14px 30px rgba(0,0,0,0.36),
     inset 0 0 0 1px rgba(255,255,255,0.03);
 
-  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, filter .18s ease;
 }
 .member:last-child{ margin-bottom:0; }
 
+/* Accent Stripe */
 .member::before{
   content:"";
   position:absolute;
@@ -245,8 +256,21 @@ html::after{
   bottom:10px;
   width:3px;
   border-radius:999px;
-  background:color-mix(in srgb, var(--glow, #00ffc3) 55%, transparent);
-  opacity:0.55;
+  background:color-mix(in srgb, var(--glow, #00ffc3) 65%, transparent);
+  opacity:0.65;
+  pointer-events:none;
+}
+
+/* Sheen */
+.member::after{
+  content:"";
+  position:absolute;
+  inset:-40% -25% auto auto;
+  width:240px;
+  height:180px;
+  background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.10), transparent 60%);
+  transform:rotate(18deg);
+  opacity:0.70;
   pointer-events:none;
 }
 
@@ -254,15 +278,18 @@ html::after{
   border-color: color-mix(in srgb, var(--glow, #00ffc3) 40%, rgba(255,255,255,0.12));
   box-shadow:
     0 18px 44px rgba(0,0,0,0.48),
-    0 0 22px color-mix(in srgb, var(--glow, #00ffc3) 14%, transparent),
-    inset 0 0 0 1px rgba(255,255,255,0.04);
+    0 0 26px color-mix(in srgb, var(--glow, #00ffc3) 18%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--glow, #00ffc3) 14%, rgba(255,255,255,0.04));
   transform: translateY(-1px);
+  filter:saturate(1.05);
 }
+
 .member:active{
   cursor:grabbing;
   transform: scale(0.992);
 }
 
+/* Left side: icon + name */
 .memberLeft{
   display:flex;
   align-items:center;
@@ -270,6 +297,7 @@ html::after{
   min-width:0;
 }
 
+/* Leader badge tinted to faction */
 .leader-star{
   width:28px;
   height:28px;
@@ -283,19 +311,28 @@ html::after{
   cursor:pointer;
 
   background:
-    radial-gradient(120% 120% at 20% 10%, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
-  border:1px solid rgba(255,255,255,0.10);
+    radial-gradient(120% 120% at 20% 10%,
+      rgba(255,255,255,0.10),
+      color-mix(in srgb, var(--glow, #00ffc3) 10%, rgba(255,255,255,0.03)));
+
+  border:1px solid color-mix(in srgb, var(--glow, #00ffc3) 18%, rgba(255,255,255,0.10));
   box-shadow:
     0 10px 20px rgba(0,0,0,0.28),
+    0 0 14px color-mix(in srgb, var(--glow, #00ffc3) 8%, transparent),
     inset 0 0 0 1px rgba(255,255,255,0.03);
 
-  transition: transform .14s ease, border-color .14s ease, background .14s ease;
+  transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease;
 }
 .member:hover .leader-star{
-  border-color: color-mix(in srgb, var(--glow, #00ffc3) 28%, rgba(255,255,255,0.10));
+  border-color: color-mix(in srgb, var(--glow, #00ffc3) 32%, rgba(255,255,255,0.10));
+  box-shadow:
+    0 10px 22px rgba(0,0,0,0.28),
+    0 0 18px color-mix(in srgb, var(--glow, #00ffc3) 14%, transparent),
+    inset 0 0 0 1px rgba(255,255,255,0.03);
   transform: translateY(-1px);
 }
 
+/* Active leader stays gold */
 .leader-active{
   color:#ffd54a;
   background: rgba(255,213,74,0.14);
@@ -315,6 +352,24 @@ html::after{
   min-width:0;
 }
 
+/* Optional: mini accent underline in faction color */
+.memberName::after{
+  content:"";
+  display:block;
+  height:1px;
+  width:28px;
+  margin-top:6px;
+  border-radius:999px;
+  background:color-mix(in srgb, var(--glow, #00ffc3) 55%, transparent);
+  opacity:0.22;
+}
+.member:hover .memberName::after{
+  opacity:0.40;
+  width:40px;
+  transition:0.18s ease;
+}
+
+/* Leader row highlight (gold) */
 .member.leaderRow{
   border-color: rgba(255,213,74,0.65);
   box-shadow:
@@ -810,7 +865,7 @@ async function logout(){
   window.location="index.html";
 }
 
-/* Drag helper: nur realtime kurz pausieren */
+/* Drag helper: realtime kurz pausieren */
 function setDragging(state){
   if(state){
     suppressRealtime = true;
@@ -855,7 +910,6 @@ function isDeleteModalOpen(){ return document.getElementById("delModalOverlay").
 
 /* ================= LOAD + RENDER ================= */
 async function refreshDataAndRender(){
-  // Fraktionen sort_order bevorzugt
   let fr = await db.from("fraktionen").select("*").order("sort_order", {ascending:true});
   if(fr.error){
     fr = await db.from("fraktionen").select("*").order("created_at", {ascending:true});
@@ -1077,7 +1131,7 @@ function setupMembersDragAll(){
   });
 }
 
-/* ✅ kein upsert: nur UPDATE batch (kein INSERT policy nötig) */
+/* ✅ kein upsert: nur UPDATE batch */
 async function persistMemberOrder(listEl){
   if(!listEl) return;
 
@@ -1164,7 +1218,6 @@ async function createFraktion(){
 
   const ins = await db.from("fraktionen").insert([{name, color, sort_order: nextOrder}]);
   if(ins.error){
-    // fallback falls sort_order-policy/spalte mal zickt
     await db.from("fraktionen").insert([{name, color}]);
   }
 
