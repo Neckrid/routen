@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>GTA 5 Interactive Map</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -144,11 +144,9 @@ html::after{
   left:80px;
   z-index:1100;
   display:none;
-  /* ✅ wichtig: Icon relativ zur Box */
-  position:absolute;
 }
 .searchInner{
-  position:relative; /* ✅ Icon sitzt relativ zum Input */
+  position:relative;
 }
 #searchBox{
   width:min(380px, calc(100vw - 160px));
@@ -544,8 +542,12 @@ const SUPABASE_URL="https://lleldalugvgmgqekcolx.supabase.co";
 const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc";
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-/* ✅ DEINE MAP-URL */
+/* ✅ DEINE MAP-URL (Cloudflare R2) */
 const MAP_IMAGE_URL = "https://pub-bf90b1dd998f46a68368bd4403249dc8.r2.dev/gta_map.png";
+
+/* ✅ Bildmaße in Pixeln (Breite x Höhe) */
+const IMG_W = 10000;
+const IMG_H = 14999;
 
 let map, markerLayer;
 let isAdmin=false;
@@ -682,20 +684,31 @@ function setIconFromMarker(icon){
 
 /* ================= MAP ================= */
 function initMap(){
-  map = L.map('map', { crs: L.CRS.Simple, minZoom: -2, maxZoom: 2 });
-  const bounds = [[0,0],[8192,8192]];
+  map = L.map('map', { crs: L.CRS.Simple, minZoom: -2, maxZoom: 2, preferCanvas:true });
 
-  // ✅ Cachebuster gegen CDN-Cache-Zicken
+  /* ✅ Bounds an echte Bildgröße anpassen: [[0,0],[Höhe,Breite]] */
+  const bounds = [[0,0],[IMG_H, IMG_W]];
+
+  /* ✅ Cachebuster (optional, hilft beim Testen) */
   const url = MAP_IMAGE_URL + (MAP_IMAGE_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
 
-  const overlay = L.imageOverlay(url, bounds).addTo(map);
+  /* ✅ Wichtig für R2 -> GitHub Pages: crossOrigin + CORS-Header im Bucket */
+  const overlay = L.imageOverlay(url, bounds, { crossOrigin:true }).addTo(map);
   map.fitBounds(bounds);
 
-  // ✅ Fehlermeldung direkt am Overlay-Image (ohne CORS-Mode)
+  /* ✅ Nicht “wegziehen” */
+  map.setMaxBounds(bounds);
+  map.on("drag", () => map.panInsideBounds(bounds, { animate:false }));
+
+  /* ✅ Fehler am Overlay melden */
   overlay.once("add", () => {
     const img = overlay.getElement && overlay.getElement();
     if(!img) return;
-    img.onerror = () => alert("Map-Overlay konnte nicht geladen werden (404/403/Hotlink/Blocked). URL: " + MAP_IMAGE_URL);
+    img.onerror = () => alert(
+      "Map-Overlay konnte nicht geladen werden.\n\n" +
+      "Ursache meist: R2 CORS nicht gesetzt.\n\n" +
+      "URL:\n" + MAP_IMAGE_URL
+    );
   });
 
   markerLayer = L.layerGroup().addTo(map);
