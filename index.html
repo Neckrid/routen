@@ -26,14 +26,12 @@ body{
     radial-gradient(760px 520px at 72% 20%, rgba(0,140,255,0.08), transparent 60%),
     linear-gradient(135deg, #07070b 0%, #0c0c12 45%, #07070b 100%);
 }
-
-/* Grid */
 body::before{
   content:"";
   position:fixed;
   inset:0;
   pointer-events:none;
-  z-index:0;
+  z-index:1;
   opacity:0.16;
   background:
     linear-gradient(to right, rgba(255,255,255,0.035) 1px, transparent 1px),
@@ -41,14 +39,12 @@ body::before{
   background-size: 64px 64px;
   mask-image: radial-gradient(circle at 50% 30%, rgba(0,0,0,1), rgba(0,0,0,0.0) 68%);
 }
-
-/* Animated glow fog */
 body::after{
   content:"";
   position:fixed;
   inset:-20%;
   pointer-events:none;
-  z-index:0;
+  z-index:2;
   background:
     radial-gradient(700px 520px at 18% 30%, rgba(0,255,195,0.12), transparent 65%),
     radial-gradient(680px 520px at 78% 66%, rgba(0,140,255,0.10), transparent 65%),
@@ -63,23 +59,21 @@ body::after{
   50%  { transform: translate3d(1.2%, 0.8%, 0) scale(1.03); }
   100% { transform: translate3d(-0.8%, 1.2%, 0) scale(1.02); }
 }
-
-/* Noise */
 html::after{
   content:"";
   position:fixed;
   inset:0;
   pointer-events:none;
-  z-index:0;
+  z-index:3;
   opacity:0.06;
   mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E");
 }
 
 /* Map */
-#map{ height:100vh; display:none; position:relative; z-index:1; }
+#map{height:100vh;display:none;position:relative;z-index:10;}
 
-/* ================= GLASS BASE ================= */
+/* ================= GLASS ================= */
 .glass{
   background:rgba(22,22,28,0.84);
   border:1px solid rgba(255,255,255,0.12);
@@ -93,7 +87,7 @@ html::after{
 /* ================= LOGIN ================= */
 #loginPanel{
   position:absolute;
-  top:50%; left:50%;
+  top:50%;left:50%;
   transform:translate(-50%,-50%);
   width:min(420px, calc(100vw - 28px));
   padding:22px;
@@ -143,40 +137,35 @@ html::after{
   color:#ffb3b3;
 }
 
-/* ====== Search Wrapper (Position bleibt) ====== */
+/* ================= SEARCH (Position bleibt) ================= */
 .searchWrapper{
   position:absolute;
   top:10px;
   left:80px;
   z-index:1100;
   display:none;
+  /* ✅ wichtig: Icon relativ zur Box */
+  position:absolute;
 }
-
-/* Search input look */
+.searchInner{
+  position:relative; /* ✅ Icon sitzt relativ zum Input */
+}
 #searchBox{
   width:min(380px, calc(100vw - 160px));
   height:42px;
-  padding:0 14px 0 40px; /* Platz fürs Icon */
+  padding:0 14px 0 40px;
   border-radius:14px;
   border:none;
-  color:rgba(255,255,255,0.92);
   outline:none;
+  color:rgba(255,255,255,0.92);
 }
 #searchBox::placeholder{ color:rgba(255,255,255,0.55); font-weight:900; }
-#searchBox:focus{
-  border-color: rgba(0,255,195,0.55);
-  box-shadow:
-    0 0 0 3px rgba(0,255,195,0.12),
-    0 18px 55px rgba(0,0,0,0.55),
-    inset 0 0 0 1px rgba(0,255,195,0.10);
-}
-
-/* Search icon inside input */
 #searchIcon{
   position:absolute;
   left:14px;
   top:50%;
   transform:translateY(-50%);
+  z-index:2;
   pointer-events:none;
   color:#00ffc3;
   opacity:0.95;
@@ -184,7 +173,7 @@ html::after{
   text-shadow:0 2px 10px rgba(0,0,0,0.55);
 }
 
-/* ====== Floating Buttons / Panel Alignment ====== */
+/* ====== Right pills ====== */
 :root{
   --edge-gap: 0px;
   --btn-gap: 8px;
@@ -198,17 +187,25 @@ html::after{
   align-items:center;
   justify-content:center;
   gap:8px;
+
   padding:8px 10px;
   border-radius:14px 0 0 14px;
   font-size:13px;
+
   cursor:pointer;
   z-index:1200;
+  transition:0.18s ease;
   user-select:none;
   height:var(--btn-h);
-  transition:.15s ease;
 }
-.pillBtn:hover{ transform:translateY(-1px); }
-.pillBtn:active{ transform:scale(0.99); }
+.pillBtn:hover{
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,0.16);
+  box-shadow:
+    0 18px 46px rgba(0,0,0,0.50),
+    inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+.pillBtn:active{ transform: scale(0.99); transition:0.06s ease; }
 
 .pillIcon{
   width:24px;
@@ -222,36 +219,39 @@ html::after{
   border:1px solid rgba(255,255,255,0.10);
 }
 
-/* Logout / Admin Positionen */
-#logoutBtn{ top:var(--btn-top); }
-#adminToggle{ top:calc(var(--btn-top) + var(--btn-h) + var(--btn-gap)); }
+#logoutBtn{ top:var(--btn-top); color:#ffb3b3; border-color: rgba(255,59,59,0.35); }
+#logoutBtn .pillIcon{ background:rgba(255,59,59,0.10); border-color: rgba(255,59,59,0.20); }
+#logoutBtn:hover{ box-shadow:0 18px 46px rgba(0,0,0,0.50), 0 0 26px rgba(255,59,59,0.10), inset 0 0 0 1px rgba(255,59,59,0.12); color:#fff; }
 
-#logoutBtn{
-  color:#ffb3b3;
-  border-color: rgba(255,59,59,0.35);
-}
-#adminToggle{
-  color:#00ffc3;
-  border-color: rgba(0,255,195,0.35);
-}
+#adminToggle{ top:calc(var(--btn-top) + var(--btn-h) + var(--btn-gap)); color:#00ffc3; border-color: rgba(0,255,195,0.35); }
+#adminToggle .pillIcon{ background:rgba(0,255,195,0.10); border-color: rgba(0,255,195,0.20); }
+#adminToggle:hover{ box-shadow:0 18px 46px rgba(0,0,0,0.50), 0 0 26px rgba(0,255,195,0.10), inset 0 0 0 1px rgba(0,255,195,0.12); }
 
-/* Fraktionen Button */
+/* Fraktionen */
 #fraktionenBtn{
   position:fixed;
   bottom:18px;
   right:18px;
   padding:12px 14px;
   border-radius:16px;
+
   border:1px solid rgba(0,255,195,0.35);
   color:#00ffc3;
+
   z-index:1200;
-  transition:.15s ease;
+  transition:0.18s ease;
   display:none;
   font-weight:900;
   cursor:pointer;
 }
-#fraktionenBtn:hover{ transform:translateY(-1px); }
-#fraktionenBtn:active{ transform:scale(0.99); }
+#fraktionenBtn:hover{
+  transform: translateY(-1px);
+  box-shadow:
+    0 20px 52px rgba(0,0,0,0.58),
+    0 0 30px rgba(0,255,195,0.14),
+    inset 0 0 0 1px rgba(0,255,195,0.12);
+}
+#fraktionenBtn:active{ transform: scale(0.99); transition:0.06s ease; }
 
 /* Coords */
 #coords{
@@ -265,13 +265,13 @@ html::after{
   z-index:1000;
 }
 
-/* Admin Panel */
+/* ================= ADMIN PANEL ================= */
 #adminPanel{
   position:fixed;
   top:calc(var(--btn-top) + (var(--btn-h) + var(--btn-gap)) * 2);
   right:var(--edge-gap);
-
   width:320px;
+
   padding:18px;
   border-radius:18px 0 0 18px;
 
@@ -319,7 +319,7 @@ html::after{
   box-shadow: 0 0 0 3px rgba(0,255,195,0.12);
 }
 
-/* Badge */
+/* Coord badge */
 #coordBadge{
   margin:10px 0 14px 0;
   padding:14px 16px;
@@ -329,6 +329,7 @@ html::after{
   display:flex;
   flex-direction:column;
   gap:4px;
+
   background:rgba(255,255,255,0.05);
   border:1px solid rgba(255,255,255,0.12);
   transition:0.2s ease;
@@ -352,7 +353,7 @@ html::after{
   color:#ffd54a;
 }
 
-/* Icon Picker */
+/* Icon picker */
 .iconPickerTitle{
   margin:10px 0 6px 0;
   font-size:12px;
@@ -375,6 +376,7 @@ html::after{
   border-radius:14px;
   cursor:pointer;
   user-select:none;
+
   background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
   border:1px solid rgba(255,255,255,0.10);
   color:rgba(255,255,255,0.92);
@@ -395,7 +397,7 @@ html::after{
     inset 0 0 0 1px rgba(0,255,195,0.10);
 }
 
-/* Color row */
+/* Color row (no preview box) */
 .colorRow{
   display:flex;
   align-items:center;
@@ -416,7 +418,7 @@ html::after{
 .colorRow input[type="color"]::-webkit-color-swatch-wrapper{ padding:0; }
 .colorRow input[type="color"]::-webkit-color-swatch{ border:none; border-radius:14px; }
 
-/* Save/Delete buttons row */
+/* Save/Delete */
 .panelBtnRow{
   display:flex;
   gap:10px;
@@ -439,12 +441,9 @@ html::after{
 .panelBtnRow .delBtn{ color:#ff6b6b; border-color: rgba(255,59,59,0.35); }
 
 /* Leaflet divIcon defaults neutralisieren */
-.leaflet-div-icon{
-  background:transparent !important;
-  border:none !important;
-}
+.leaflet-div-icon{ background:transparent !important; border:none !important; }
 
-/* Popup Premium */
+/* Popup premium */
 .leaflet-popup-content-wrapper{
   background:rgba(22,22,28,0.90);
   color:white;
@@ -467,11 +466,15 @@ html::after{
   <p id="msg"></p>
 </div>
 
+<!-- Suche (Position bleibt, Icon sitzt im Input) -->
 <div class="searchWrapper" id="searchWrapper">
-  <div id="searchIcon">🔎</div>
-  <input id="searchBox" class="glass" placeholder="Suche...">
+  <div class="searchInner">
+    <div id="searchIcon">🔎</div>
+    <input id="searchBox" class="glass" placeholder="Suche...">
+  </div>
 </div>
 
+<!-- Right pills -->
 <button id="logoutBtn" class="pillBtn glass" onclick="logout()" style="display:none;">
   <span class="pillIcon">⎋</span>
   <span>Logout</span>
@@ -482,6 +485,7 @@ html::after{
   <span>Admin</span>
 </div>
 
+<!-- Admin Panel -->
 <div id="adminPanel" class="glass">
   <h3>Marker Verwaltung</h3>
 
@@ -535,21 +539,24 @@ html::after{
 <button id="fraktionenBtn" class="glass" onclick="window.location='fraktionen.html'">🏴 Fraktionen</button>
 
 <script>
+/* ================= CONFIG ================= */
 const SUPABASE_URL="https://lleldalugvgmgqekcolx.supabase.co";
 const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc";
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let map, markerLayer;
 let isAdmin=false;
-let selectedCoords=null;
-let currentEditId=null;
+
+let selectedCoords=null;     // nur für NEU
+let currentEditId=null;      // für EDIT
 let allMarkers=[];
+
 let inactivityTimer;
 
-// Desktop Hover Erkennung
+// Desktop Hover Erkennung: nur wenn echte Hover-Maus vorhanden
 const isDesktopHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
-// Icon state
+// Icon state ("" => Punkt)
 let selectedIcon = "";
 
 /* ================= AUTO LOGOUT ================= */
@@ -588,7 +595,7 @@ async function login(){
   });
 
   if(error){
-    document.getElementById("msg").innerText="Login fehlgeschlagen: " + error.message;
+    document.getElementById("msg").innerText="Login fehlgeschlagen";
   }else{
     isAdmin = (username === "admin");
     startApp();
@@ -680,7 +687,7 @@ function initMap(){
   markerLayer=L.layerGroup().addTo(map);
 
   map.on("mousemove",e=>{
-    document.getElementById("coords").innerText=
+    document.getElementById("coords").innerText =
       "X:"+Math.round(e.latlng.lng)+" | Y:"+Math.round(e.latlng.lat);
   });
 
@@ -689,26 +696,35 @@ function initMap(){
       clearForm();
       selectedCoords=e.latlng;
       currentEditId=null;
+
       document.getElementById("adminPanel").classList.add("open");
       updateCoordBadge();
     });
   }
 }
 
-/* ================= ICON SPECS ================= */
+/* ================= ICON SPECS (Anchor fix gegen Drift) ================= */
 function buildMarkerIconSpec(color, icon){
   const safeColor = color || "#ff0000";
 
+  // Punkt
   if(!icon){
     const size = [28,28];
     return {
-      html: `<div style="width:22px;height:22px;border-radius:50%;background:${safeColor};border:3px solid white;box-sizing:content-box;"></div>`,
+      html: `<div style="
+        width:22px;height:22px;
+        border-radius:50%;
+        background:${safeColor};
+        border:3px solid white;
+        box-sizing:content-box;
+      "></div>`,
       iconSize: size,
       iconAnchor: [size[0]/2, size[1]/2],
       popupAnchor: [0, -(size[1]/2)]
     };
   }
 
+  // Haus/Labor
   const size = [42,42];
   const strokeW = 1.2;
 
@@ -740,6 +756,7 @@ function buildMarkerIconSpec(color, icon){
     };
   }
 
+  // Fallback
   const size2=[28,28];
   return {
     html: `<div style="width:22px;height:22px;border-radius:50%;background:${safeColor};border:3px solid white;"></div>`,
@@ -782,6 +799,7 @@ function renderMarkers(data){
 
     marker.bindPopup("<b>"+(m.title||"")+"</b><br>"+(m.description||""));
 
+    // Hover nur Desktop
     if(isDesktopHover){
       marker.on("mouseover", function(){ this.openPopup(); });
       marker.on("mouseout", function(){ this.closePopup(); });
@@ -877,7 +895,7 @@ function setupRealtime(){
     ).subscribe();
 }
 
-/* ================= COLOR PREVIEW (nur Punkt Preview) ================= */
+/* ================= COLOR PREVIEW (nur Punkt-Preview) ================= */
 function updateColorPreview(){
   const v=document.getElementById("mColor").value;
   const dot=document.getElementById("dotPreview");
