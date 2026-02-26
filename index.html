@@ -302,12 +302,12 @@ html::after{
 
 #adminPanel input{
   width:100%;
-  padding:12px 12px;
-  margin:0 0 10px 0;
+  padding:12px 14px;
+  margin:0 0 12px 0;
   border-radius:14px;
-  border:none;
-  background:rgba(255,255,255,0.06);
   border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.06);
+  color:rgba(255,255,255,0.92);
   color:rgba(255,255,255,0.92);
   outline:none;
 }
@@ -351,14 +351,18 @@ html::after{
   align-items:center;
   justify-content:center;
   gap:8px;
-  padding:10px 10px;
+
+  padding:12px 14px;
+
   border-radius:14px;
-  cursor:pointer;
-  user-select:none;
-  background:rgba(255,255,255,0.06);
   border:1px solid rgba(255,255,255,0.12);
+
+  background:rgba(255,255,255,0.06);
   color:rgba(255,255,255,0.92);
+
   transition:0.15s ease;
+  cursor:pointer;
+}
 }
 .iconPick:hover{ transform: translateY(-1px); }
 .iconPick:active{ transform: scale(0.99); }
@@ -371,21 +375,20 @@ html::after{
 
 /* Color row: ✅ Preview entfernt */
 .colorRow{
-  display:flex;
-  align-items:center;
-  margin-bottom:10px;
+  width:100%;
+  margin-bottom:12px;
 }
+
 .colorRow input[type="color"]{
   width:100%;
-  height:42px;
+  height:44px;
+
   border-radius:14px;
   border:1px solid rgba(255,255,255,0.12);
-  background:transparent;
+
   padding:0;
+  background:transparent;
   cursor:pointer;
-  overflow:hidden;
-  appearance:none;
-  -webkit-appearance:none;
 }
 .colorRow input[type="color"]::-webkit-color-swatch-wrapper{ padding:0; }
 .colorRow input[type="color"]::-webkit-color-swatch{ border:none; border-radius:14px; }
@@ -398,14 +401,18 @@ html::after{
 }
 .panelBtnRow button{
   flex:1;
-  padding:12px 12px;
+  padding:12px 14px;
+
   border-radius:14px;
-  font-weight:900;
-  background:rgba(255,255,255,0.06);
   border:1px solid rgba(255,255,255,0.12);
+
+  background:rgba(255,255,255,0.06);
   color:white;
-  cursor:pointer;
+
+  font-weight:900;
   transition:0.15s ease;
+  cursor:pointer;
+}
 }
 .panelBtnRow button:hover{ transform: translateY(-1px); }
 .panelBtnRow button:active{ transform: scale(0.985); }
