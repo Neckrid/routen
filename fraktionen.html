@@ -16,14 +16,67 @@ body{
   font-family:Arial;
   color:white;
   overflow-x:hidden;
+  min-height:100vh;
 
-  /* ✅ Neuer Premium Background (Gradient + Orbs) */
+  /* Base */
   background:
-    radial-gradient(900px 520px at 18% 22%, rgba(0,255,170,0.10), transparent 60%),
-    radial-gradient(760px 520px at 82% 68%, rgba(0,140,255,0.10), transparent 62%),
-    radial-gradient(680px 480px at 62% 18%, rgba(255,70,180,0.06), transparent 60%),
-    linear-gradient(135deg, #0b0b10 0%, #11111a 55%, #0b0b10 100%);
+    radial-gradient(1200px 700px at 12% 18%, rgba(0,255,195,0.10), transparent 60%),
+    radial-gradient(900px 650px at 88% 72%, rgba(255,70,180,0.07), transparent 62%),
+    radial-gradient(760px 520px at 72% 20%, rgba(0,140,255,0.08), transparent 60%),
+    linear-gradient(135deg, #07070b 0%, #0c0c12 45%, #07070b 100%);
 }
+
+/* Subtle grid (gibt Tiefe, wie HUD) */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:1;
+  opacity:0.20;
+  background:
+    linear-gradient(to right, rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.028) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(circle at 50% 30%, rgba(0,0,0,1), rgba(0,0,0,0.0) 68%);
+}
+
+/* Animated glow fog (sehr dezent) */
+body::after{
+  content:"";
+  position:fixed;
+  inset:-20%;
+  pointer-events:none;
+  z-index:2;
+
+  background:
+    radial-gradient(700px 520px at 18% 30%, rgba(0,255,195,0.12), transparent 65%),
+    radial-gradient(680px 520px at 78% 66%, rgba(0,140,255,0.10), transparent 65%),
+    radial-gradient(520px 420px at 64% 18%, rgba(255,70,180,0.07), transparent 65%);
+
+  filter: blur(22px);
+  opacity:0.75;
+  animation: bgFloat 14s ease-in-out infinite alternate;
+  transform: translate3d(0,0,0);
+}
+
+/* Extra noise layer (optional aber nice) */
+html::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:3;
+  opacity:0.06;
+  mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E");
+}
+
+@keyframes bgFloat{
+  0%   { transform: translate3d(-1.5%, -1%, 0) scale(1.02); }
+  50%  { transform: translate3d(1.2%, 0.8%, 0) scale(1.03); }
+  100% { transform: translate3d(-0.8%, 1.2%, 0) scale(1.02); }
+}  
 
 /* ✅ Subtiles Noise Overlay */
 body::after{
