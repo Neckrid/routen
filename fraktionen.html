@@ -57,7 +57,6 @@ body::after{
   animation: bgFloat 14s ease-in-out infinite alternate;
   transform: translate3d(0,0,0);
 }
-
 @keyframes bgFloat{
   0%   { transform: translate3d(-1.5%, -1%, 0) scale(1.02); }
   50%  { transform: translate3d(1.2%, 0.8%, 0) scale(1.03); }
@@ -97,15 +96,32 @@ html::after{
   opacity:0.9;
 }
 #searchBox{
-  width:min(340px, calc(100vw - 48px));
-  padding:10px 12px 10px 34px;
-  border-radius:10px;
+  width:min(380px, calc(100vw - 48px));
+  padding:11px 14px 11px 36px;
+  border-radius:14px;
   border:none;
-  background:rgba(20,20,26,0.75);
-  border:1px solid rgba(255,255,255,0.08);
-  color:white;
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+  border:1px solid rgba(255,255,255,0.10);
+  color:rgba(255,255,255,0.92);
   outline:none;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 12px 28px rgba(0,0,0,0.40),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+  transition:0.18s ease;
+}
+#searchBox::placeholder{
+  color:rgba(255,255,255,0.45);
+  font-weight:800;
+  letter-spacing:0.15px;
+}
+#searchBox:focus{
+  border-color: rgba(0,255,195,0.55);
+  box-shadow:
+    0 0 0 3px rgba(0,255,195,0.12),
+    0 14px 34px rgba(0,0,0,0.45),
+    inset 0 0 0 1px rgba(0,255,195,0.10);
 }
 
 /* ================= GRID ================= */
@@ -143,7 +159,6 @@ html::after{
   position:relative;
   overflow:hidden;
 }
-
 .card::before{
   content:"";
   position:absolute;
@@ -155,7 +170,6 @@ html::after{
     radial-gradient(90% 70% at 100% 30%, color-mix(in srgb, var(--glow, #00ffc3) 18%, transparent), transparent 55%);
   opacity:0.9;
 }
-
 .card:hover{
   transform:translateY(-6px);
   box-shadow:
@@ -172,15 +186,13 @@ html::after{
   letter-spacing:0.4px;
   position:relative;
   z-index:1;
-  cursor:grab;
   user-select:none;
   padding-right:6px;
-
   padding-bottom:10px;
   margin-bottom:14px;
 }
-.card h3:active{ cursor:grabbing; }
-
+.isAdmin .card h3{ cursor:grab; }
+.isAdmin .card h3:active{ cursor:grabbing; }
 .card h3::after{
   content:"";
   position:absolute;
@@ -209,12 +221,10 @@ html::after{
 }
 
 /* ================= MEMBER ROW (FARBLICH AN BOX ANGEPASST) ================= */
-/* Wichtig: nutzt --glow vom .card */
 .member{
   position:relative;
   overflow:hidden;
 
-  /* ✅ Tint in Fraktionsfarbe + Glass Layers */
   background:
     radial-gradient(120% 120% at 12% 0%,
       color-mix(in srgb, var(--glow, #00ffc3) 16%, transparent),
@@ -236,7 +246,6 @@ html::after{
   justify-content:space-between;
   align-items:center;
 
-  cursor:grab;
   user-select:none;
 
   box-shadow:
@@ -246,6 +255,12 @@ html::after{
   transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, filter .18s ease;
 }
 .member:last-child{ margin-bottom:0; }
+
+.isAdmin .member{ cursor:grab; }
+.isAdmin .member:active{
+  cursor:grabbing;
+  transform: scale(0.992);
+}
 
 /* Accent Stripe */
 .member::before{
@@ -282,11 +297,6 @@ html::after{
     inset 0 0 0 1px color-mix(in srgb, var(--glow, #00ffc3) 14%, rgba(255,255,255,0.04));
   transform: translateY(-1px);
   filter:saturate(1.05);
-}
-
-.member:active{
-  cursor:grabbing;
-  transform: scale(0.992);
 }
 
 /* Left side: icon + name */
@@ -352,7 +362,7 @@ html::after{
   min-width:0;
 }
 
-/* Optional: mini accent underline in faction color */
+/* mini accent underline in faction color */
 .memberName::after{
   content:"";
   display:block;
@@ -505,82 +515,213 @@ button{
   color:white;
 }
 
-/* Back */
+/* ================= FLOATING RIGHT BUTTONS (LOOK MATCH) ================= */
+.pillBtn{
+  position:fixed;
+  right:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:10px 12px;
+  border-radius:14px 0 0 14px;
+
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+  border:1px solid rgba(255,255,255,0.10);
+  color:rgba(255,255,255,0.92);
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  box-shadow:
+    0 14px 34px rgba(0,0,0,0.45),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+
+  cursor:pointer;
+  z-index:1200;
+  transition:0.18s ease;
+  user-select:none;
+}
+.pillBtn:hover{
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,0.14);
+  box-shadow:
+    0 18px 46px rgba(0,0,0,0.50),
+    inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+.pillBtn:active{ transform: scale(0.99); transition:0.06s ease; }
+
+.pillIcon{
+  width:26px;
+  height:26px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+#logoutBtn{
+  top:10px;
+  color:#ffb3b3;
+  border-color: rgba(255,59,59,0.35);
+}
+#logoutBtn .pillIcon{
+  background:rgba(255,59,59,0.10);
+  border-color: rgba(255,59,59,0.20);
+}
+#logoutBtn:hover{
+  box-shadow:
+    0 18px 46px rgba(0,0,0,0.50),
+    0 0 26px rgba(255,59,59,0.10),
+    inset 0 0 0 1px rgba(255,59,59,0.12);
+  color:#fff;
+}
+
+#adminToggle{
+  top:54px;
+  color:#00ffc3;
+  border-color: rgba(0,255,195,0.35);
+}
+#adminToggle .pillIcon{
+  background:rgba(0,255,195,0.10);
+  border-color: rgba(0,255,195,0.20);
+}
+#adminToggle:hover{
+  box-shadow:
+    0 18px 46px rgba(0,0,0,0.50),
+    0 0 26px rgba(0,255,195,0.10),
+    inset 0 0 0 1px rgba(0,255,195,0.12);
+}
+
+/* Back (bottom-right) */
 #backBtn{
   position:fixed;
-  bottom:20px;
-  right:20px;
-  background:#00ffc3;
-  color:black;
-  padding:12px 16px;
-  border-radius:12px;
-  font-weight:900;
-  cursor:pointer;
-  z-index:1200;
-  box-shadow:0 0 20px #00ffc355;
-}
+  bottom:18px;
+  right:18px;
+  padding:12px 14px;
+  border-radius:16px;
 
-/* Header buttons */
-#logoutBtn{
-  position:fixed;
-  top:10px;
-  right:0;
-  background:#ff3b3b;
-  color:white;
-  padding:8px 12px;
-  border-radius:8px 0 0 8px;
-  cursor:pointer;
-  font-weight:900;
-  display:none;
-  z-index:1200;
-}
-#adminToggle{
-  position:fixed;
-  top:50px;
-  right:0;
-  background:#00ffc3;
-  color:black;
-  padding:8px 12px;
-  border-radius:8px 0 0 8px;
-  cursor:pointer;
-  font-weight:900;
-  display:none;
-  z-index:1200;
-}
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+  border:1px solid rgba(0,255,195,0.35);
+  color:#00ffc3;
 
-/* Admin panel */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  box-shadow:
+    0 16px 40px rgba(0,0,0,0.52),
+    0 0 24px rgba(0,255,195,0.10),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+  z-index:1200;
+  transition:0.18s ease;
+}
+#backBtn:hover{
+  transform: translateY(-1px);
+  box-shadow:
+    0 20px 52px rgba(0,0,0,0.58),
+    0 0 30px rgba(0,255,195,0.14),
+    inset 0 0 0 1px rgba(0,255,195,0.12);
+}
+#backBtn:active{ transform: scale(0.99); transition:0.06s ease; }
+
+/* ================= ADMIN PANEL (MATCHED) ================= */
 #adminPanel{
   position:fixed;
-  top:90px;
-  right:-340px;
-  width:300px;
-  background:rgba(18,18,22,0.85);
-  padding:20px;
-  border-radius:15px 0 0 15px;
-  box-shadow:0 0 25px rgba(0,255,195,0.12);
-  border:1px solid rgba(255,255,255,0.08);
-  backdrop-filter: blur(14px);
-  transition:0.4s;
+  top:96px;
+  right:-360px;
+  width:320px;
+
+  background:rgba(22,22,28,0.72);
+  padding:18px;
+  border-radius:18px 0 0 18px;
+
+  border:1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  box-shadow:
+    0 24px 70px rgba(0,0,0,0.62),
+    0 0 0 1px rgba(255,255,255,0.05) inset,
+    0 0 22px rgba(0,255,195,0.08);
+
+  transition:0.35s ease;
   z-index:1190;
 }
 #adminPanel.open{ right:0; }
+
 #adminPanel h3{
   margin:0 0 10px 0;
   text-align:center;
   color:#00ffc3;
   font-weight:900;
+  letter-spacing:0.25px;
 }
-#adminPanel input{
+.panelSection{
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid rgba(255,255,255,0.08);
+}
+.panelLabel{
+  font-size:12px;
+  opacity:0.75;
+  font-weight:800;
+  letter-spacing:0.18px;
+  margin:10px 0 6px 0;
+}
+#adminPanel input, #adminPanel select{
   width:100%;
-  padding:10px;
-  margin:8px 0;
-  border-radius:10px;
+  padding:12px 12px;
+  margin:0;
+  border-radius:14px;
   border:none;
-  background:rgba(20,20,26,0.75);
-  border:1px solid rgba(255,255,255,0.08);
-  color:white;
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+  border:1px solid rgba(255,255,255,0.10);
+  color:rgba(255,255,255,0.92);
   outline:none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 10px 24px rgba(0,0,0,0.35),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+  transition:0.18s ease;
 }
+#adminPanel input::placeholder{ color:rgba(255,255,255,0.45); font-weight:800; }
+#adminPanel input:focus, #adminPanel select:focus{
+  border-color: rgba(0,255,195,0.55);
+  box-shadow:
+    0 0 0 3px rgba(0,255,195,0.12),
+    0 14px 34px rgba(0,0,0,0.45),
+    inset 0 0 0 1px rgba(0,255,195,0.10);
+}
+.row2{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.row2 > *{ flex:1; }
+.colorWrap{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.colorWrap input[type="color"]{
+  padding:0;
+  height:42px;
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.10);
+  background:transparent;
+  box-shadow:
+    0 10px 24px rgba(0,0,0,0.35),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+  cursor:pointer;
+}
+.colorWrap input[type="color"]::-webkit-color-swatch-wrapper{ padding:0; }
+.colorWrap input[type="color"]::-webkit-color-swatch{ border:none; border-radius:14px; }
+
 .primary{
   width:100%;
   display:flex;
@@ -615,6 +756,39 @@ button{
 .primary:active{
   transform:scale(0.985);
   transition:0.06s ease;
+}
+.softDanger{
+  width:100%;
+  margin-top:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+
+  padding:12px 14px;
+  border-radius:14px;
+  font-size:14px;
+
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.20));
+  border:1px solid rgba(255,59,59,0.55);
+  color:#ff6b6b;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  box-shadow:
+    0 10px 24px rgba(0,0,0,0.35),
+    0 0 20px rgba(255,59,59,0.07);
+
+  transition:0.18s ease;
+}
+.softDanger:hover{
+  background:rgba(255,59,59,0.10);
+  box-shadow:
+    0 0 26px rgba(255,59,59,0.14),
+    inset 0 0 0 1px rgba(255,59,59,0.12);
+  color:#fff;
+  transform:translateY(-1px);
 }
 
 /* ================= MODALS ================= */
@@ -746,6 +920,7 @@ button{
   #topBar{ padding-left:14px; padding-right:14px; }
   .card{ min-width: 100%; flex:1 1 100%; }
   .actionBtn{ padding:13px 14px; font-size:15px; }
+  #adminPanel{ width: min(340px, calc(100vw - 14px)); }
 }
 </style>
 </head>
@@ -762,14 +937,50 @@ button{
 <div id="container"></div>
 
 <button id="backBtn" onclick="window.location='index.html'">⬅ Zurück</button>
-<button id="logoutBtn" onclick="logout()">Logout</button>
-<div id="adminToggle">Admin</div>
+
+<button id="logoutBtn" class="pillBtn" onclick="logout()" style="display:none;">
+  <span class="pillIcon">⎋</span>
+  <span>Logout</span>
+</button>
+
+<button id="adminToggle" class="pillBtn" style="display:none;">
+  <span class="pillIcon">⚙</span>
+  <span>Admin</span>
+</button>
 
 <div id="adminPanel">
-  <h3>Fraktion erstellen</h3>
-  <input id="fName" placeholder="Fraktionsname">
-  <input id="fColor" type="color" value="#00ffc3">
-  <button class="primary" onclick="createFraktion()">Erstellen</button>
+  <h3>Admin Panel</h3>
+
+  <!-- CREATE -->
+  <div class="panelSection" style="border-top:none; padding-top:0; margin-top:0;">
+    <div class="panelLabel">Fraktion erstellen</div>
+    <input id="fName" placeholder="Fraktionsname">
+    <div class="row2" style="margin-top:10px;">
+      <div class="colorWrap">
+        <input id="fColor" type="color" value="#00ffc3" title="Farbe">
+      </div>
+      <button class="primary" onclick="createFraktion()">Erstellen</button>
+    </div>
+  </div>
+
+  <!-- EDIT -->
+  <div class="panelSection">
+    <div class="panelLabel">Fraktion bearbeiten</div>
+    <select id="editSelect"></select>
+
+    <div class="panelLabel">Name</div>
+    <input id="editName" placeholder="Neuer Name">
+
+    <div class="panelLabel">Farbe</div>
+    <div class="row2">
+      <div class="colorWrap">
+        <input id="editColor" type="color" value="#00ffc3" title="Farbe">
+      </div>
+      <button class="primary" onclick="saveFraktionEdits()">Speichern</button>
+    </div>
+
+    <button class="softDanger" onclick="deleteSelectedFraktionFromPanel()">🗑 Fraktion löschen</button>
+  </div>
 </div>
 
 <!-- MODAL: + Mitglied -->
@@ -814,7 +1025,7 @@ let isAdmin=false;
 let allFraktionen=[];
 let membersByFraktion = new Map();
 
-/* Sortable refs (damit es nicht doppelt initialisiert) */
+/* Sortable refs */
 let sortableMembers = [];
 let sortableFactions = null;
 
@@ -850,14 +1061,21 @@ window.onload=async()=>{
   const {data}=await db.auth.getSession();
   if(!data.session){ window.location="index.html"; return; }
 
-  document.getElementById("logoutBtn").style.display="block";
+  document.getElementById("logoutBtn").style.display="flex";
+
   isAdmin = (data.session.user.email || "").toLowerCase()==="admin@gta.local";
-  if(isAdmin) document.getElementById("adminToggle").style.display="block";
+  if(isAdmin){
+    document.getElementById("adminToggle").style.display="flex";
+    document.body.classList.add("isAdmin");
+  }else{
+    document.body.classList.remove("isAdmin");
+  }
 
   resetInactivityTimer();
   await refreshDataAndRender();
   setupRealtime();
   setupModalUX();
+  setupAdminPanelUX();
 };
 
 async function logout(){
@@ -908,6 +1126,23 @@ function setupModalUX(){
 function isAddModalOpen(){ return document.getElementById("addModalOverlay").style.display==="flex"; }
 function isDeleteModalOpen(){ return document.getElementById("delModalOverlay").style.display==="flex"; }
 
+/* ===== Admin Panel UX ===== */
+function setupAdminPanelUX(){
+  document.getElementById("adminToggle").onclick=()=>{
+    if(!isAdmin) return;
+    document.getElementById("adminPanel").classList.toggle("open");
+  };
+
+  const sel = document.getElementById("editSelect");
+  sel.addEventListener("change", ()=>{
+    const id = sel.value;
+    const f = allFraktionen.find(x=>String(x.id)===String(id));
+    if(!f) return;
+    document.getElementById("editName").value = f.name || "";
+    document.getElementById("editColor").value = normalizeColor(f.color);
+  });
+}
+
 /* ================= LOAD + RENDER ================= */
 async function refreshDataAndRender(){
   let fr = await db.from("fraktionen").select("*").order("sort_order", {ascending:true});
@@ -931,8 +1166,53 @@ async function refreshDataAndRender(){
 
   await renderFraktionen(allFraktionen);
 
-  setupMembersDragAll();
-  setupFactionDrag();
+  // ✅ Drag & Drop nur für Admins
+  if(isAdmin){
+    setupMembersDragAll();
+    setupFactionDrag();
+  }else{
+    destroyMembersSortable();
+    destroyFactionsSortable();
+  }
+
+  // ✅ Admin Panel: Edit dropdown aktualisieren
+  if(isAdmin) refreshEditDropdown();
+}
+
+function refreshEditDropdown(){
+  const sel = document.getElementById("editSelect");
+  if(!sel) return;
+
+  const current = sel.value;
+  sel.innerHTML = "";
+
+  if(!allFraktionen.length){
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = "Keine Fraktionen";
+    sel.appendChild(opt);
+    document.getElementById("editName").value = "";
+    document.getElementById("editColor").value = "#00ffc3";
+    return;
+  }
+
+  for(const f of allFraktionen){
+    const opt = document.createElement("option");
+    opt.value = f.id;
+    opt.textContent = f.name || "(ohne Name)";
+    sel.appendChild(opt);
+  }
+
+  // Auswahl beibehalten falls möglich
+  const stillExists = allFraktionen.some(x=>String(x.id)===String(current));
+  sel.value = stillExists ? current : String(allFraktionen[0].id);
+
+  // Felder füllen
+  const f = allFraktionen.find(x=>String(x.id)===String(sel.value));
+  if(f){
+    document.getElementById("editName").value = f.name || "";
+    document.getElementById("editColor").value = normalizeColor(f.color);
+  }
 }
 
 function normalizeColor(hex){
@@ -1075,11 +1355,38 @@ async function confirmDeleteFraktion(){
   await refreshDataAndRender();
 }
 
-/* ================== DRAG & DROP: MEMBERS ================== */
+/* ================= ADMIN: EDIT FRAKTION ================= */
+async function saveFraktionEdits(){
+  if(!isAdmin) return;
+  const id = document.getElementById("editSelect").value;
+  if(!id) return;
+
+  const name = document.getElementById("editName").value.trim();
+  const color = document.getElementById("editColor").value;
+
+  const upd = await db.from("fraktionen").update({
+    name: name || "Unbenannt",
+    color: normalizeColor(color)
+  }).eq("id", id);
+
+  if(upd.error){ console.error(upd.error); return; }
+
+  await refreshDataAndRender();
+}
+
+async function deleteSelectedFraktionFromPanel(){
+  if(!isAdmin) return;
+  const id = document.getElementById("editSelect").value;
+  if(!id) return;
+
+  // Gleicher Flow wie Modal: wir nutzen das Modal für Konsistenz
+  const f = allFraktionen.find(x=>String(x.id)===String(id));
+  openDeleteModal(id, f?.name || "");
+}
+
+/* ================== DRAG & DROP: MEMBERS (ADMIN ONLY) ================== */
 function destroyMembersSortable(){
-  try{
-    for(const s of sortableMembers){ s.destroy(); }
-  }catch(e){}
+  try{ for(const s of sortableMembers){ s.destroy(); } }catch(e){}
   sortableMembers = [];
 }
 
@@ -1151,7 +1458,7 @@ async function persistMemberOrder(listEl){
   if(err) console.error("persistMemberOrder update error:", err);
 }
 
-/* ================== DRAG & DROP: FRAKTIONEN ================== */
+/* ================== DRAG & DROP: FRAKTIONEN (ADMIN ONLY) ================== */
 function destroyFactionsSortable(){
   try{ sortableFactions?.destroy(); }catch(e){}
   sortableFactions = null;
@@ -1222,6 +1529,7 @@ async function createFraktion(){
   }
 
   document.getElementById("fName").value="";
+  await refreshDataAndRender();
 }
 
 /* ================== CRUD: MEMBER ================== */
@@ -1251,8 +1559,13 @@ document.getElementById("searchBox").addEventListener("input", async (e)=>{
 
   if(!q){
     await renderFraktionen(allFraktionen);
-    setupMembersDragAll();
-    setupFactionDrag();
+    if(isAdmin){
+      setupMembersDragAll();
+      setupFactionDrag();
+    }else{
+      destroyMembersSortable();
+      destroyFactionsSortable();
+    }
     return;
   }
 
@@ -1266,8 +1579,13 @@ document.getElementById("searchBox").addEventListener("input", async (e)=>{
   });
 
   await renderFraktionen(filtered);
-  setupMembersDragAll();
-  setupFactionDrag();
+  if(isAdmin){
+    setupMembersDragAll();
+    setupFactionDrag();
+  }else{
+    destroyMembersSortable();
+    destroyFactionsSortable();
+  }
 });
 
 /* REALTIME (debounced) */
@@ -1277,11 +1595,6 @@ function setupRealtime(){
     .on("postgres_changes",{event:"*",schema:"public",table:"fraktions_mitglieder"}, scheduleRefresh)
     .subscribe();
 }
-
-/* ADMIN TOGGLE */
-document.getElementById("adminToggle").onclick=()=>{
-  document.getElementById("adminPanel").classList.toggle("open");
-};
 
 /* Helpers */
 function escapeHtml(str){
