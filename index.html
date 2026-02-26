@@ -144,11 +144,11 @@ html::after{
   color:#ffb3b3;
 }
 
-/* ====== Suche: Position bleibt gleich, aber besser sichtbar ====== */
+/* ====== Suche (Position bleibt) ====== */
 #searchBox{
   position:absolute;
   top:10px;
-  left:80px; /* ✅ Position bleibt */
+  left:80px;
   z-index:1100;
   display:none;
   width:min(380px, calc(100vw - 160px));
@@ -169,7 +169,7 @@ html::after{
 #searchIcon{
   position:absolute;
   top:10px;
-  left:92px; /* 80 + 12 */
+  left:92px;
   z-index:1101;
   display:none;
   width:20px;
@@ -302,12 +302,12 @@ html::after{
 
 #adminPanel input{
   width:100%;
-  padding:12px 14px;
-  margin:0 0 12px 0;
+  padding:12px 12px;
+  margin:0 0 10px 0;
   border-radius:14px;
-  border:1px solid rgba(255,255,255,0.12);
+  border:none;
   background:rgba(255,255,255,0.06);
-  color:rgba(255,255,255,0.92);
+  border:1px solid rgba(255,255,255,0.12);
   color:rgba(255,255,255,0.92);
   outline:none;
 }
@@ -317,22 +317,44 @@ html::after{
   box-shadow: 0 0 0 3px rgba(0,255,195,0.12);
 }
 
-/* Badge */
+/* ✅ Symmetrisches Badge */
 #coordBadge{
   margin:10px 0 14px 0;
-  padding:10px 12px;
-  border-radius:14px;
-  font-size:13px;
-  line-height:1.25;
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.12);
-  color:rgba(255,255,255,0.88);
-}
-#coordBadge.ready{ border-color: rgba(0,255,195,0.35); color:#00ffc3; }
-#coordBadge.editing{ border-color: rgba(255,213,74,0.45); color:#ffd54a; }
-#coordBadge b{ color:white; }
+  padding:14px 16px;
 
-/* Icon Picker */
+  border-radius:16px;
+  font-size:13px;
+  line-height:1.4;
+
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.12);
+
+  transition:0.2s ease;
+}
+#coordBadge b{
+  font-weight:900;
+  font-size:14px;
+  letter-spacing:0.2px;
+  color:white;
+}
+#coordBadge.ready{
+  border-color: rgba(0,255,195,0.45);
+  background: linear-gradient(145deg, rgba(0,255,195,0.10), rgba(0,255,195,0.05));
+  box-shadow: 0 0 22px rgba(0,255,195,0.08);
+  color:#00ffc3;
+}
+#coordBadge.editing{
+  border-color: rgba(255,213,74,0.55);
+  background: linear-gradient(145deg, rgba(255,213,74,0.12), rgba(255,213,74,0.05));
+  box-shadow: 0 0 22px rgba(255,213,74,0.08);
+  color:#ffd54a;
+}
+
+/* Icon Picker: ✅ Grid + pill look */
 .iconPickerTitle{
   margin:10px 0 6px 0;
   font-size:12px;
@@ -352,7 +374,7 @@ html::after{
   justify-content:center;
   gap:8px;
 
-  padding:10px 10px;          /* ✅ wieder kompakter */
+  padding:10px 10px;
   border-radius:14px;
   cursor:pointer;
   user-select:none;
@@ -371,7 +393,6 @@ html::after{
 .iconPick:active{ transform: scale(0.99); transition:0.06s ease; }
 .iconPick svg{ width:20px; height:20px; display:block; opacity:0.95; }
 .iconPick small{ font-weight:900; letter-spacing:.2px; opacity:.95; }
-
 .iconPick.active{
   border-color: rgba(0,255,195,0.35);
   box-shadow:
@@ -380,22 +401,23 @@ html::after{
     inset 0 0 0 1px rgba(0,255,195,0.10);
 }
 
-/* Color row: ✅ Preview entfernt */
+/* Color row (no preview) */
 .colorRow{
-  width:100%;
-  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  margin-bottom:10px;
 }
-
 .colorRow input[type="color"]{
   width:100%;
-  height:44px;
-
+  height:42px;
   border-radius:14px;
   border:1px solid rgba(255,255,255,0.12);
-
-  padding:0;
   background:transparent;
+  padding:0;
   cursor:pointer;
+  overflow:hidden;
+  appearance:none;
+  -webkit-appearance:none;
 }
 .colorRow input[type="color"]::-webkit-color-swatch-wrapper{ padding:0; }
 .colorRow input[type="color"]::-webkit-color-swatch{ border:none; border-radius:14px; }
@@ -408,18 +430,14 @@ html::after{
 }
 .panelBtnRow button{
   flex:1;
-  padding:12px 14px;
-
+  padding:12px 12px;
   border-radius:14px;
-  border:1px solid rgba(255,255,255,0.12);
-
-  background:rgba(255,255,255,0.06);
-  color:white;
-
   font-weight:900;
-  transition:0.15s ease;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  color:white;
   cursor:pointer;
-}
+  transition:0.15s ease;
 }
 .panelBtnRow button:hover{ transform: translateY(-1px); }
 .panelBtnRow button:active{ transform: scale(0.985); }
@@ -471,7 +489,10 @@ html::after{
 <div id="adminPanel" class="glass">
   <h3>Marker Verwaltung</h3>
 
-  <div id="coordBadge">🖱️ <b>Keine Koordinate gewählt</b><br>Klicke in die Karte, um einen neuen Marker zu platzieren.</div>
+  <div id="coordBadge">
+    <b>🖱️ Keine Koordinate gewählt</b>
+    <span>Klicke in die Karte, um einen neuen Marker zu platzieren.</span>
+  </div>
 
   <div class="panelLabel">Titel</div>
   <input id="mTitle" placeholder="Titel">
@@ -524,17 +545,15 @@ const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let map, markerLayer;
 let isAdmin=false;
-
 let selectedCoords=null;
 let currentEditId=null;
 let allMarkers=[];
-
 let inactivityTimer;
 
-// Desktop Hover Erkennung: nur wenn echte Hover-Maus vorhanden
+// Desktop Hover Erkennung
 const isDesktopHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
-// Icon state ("" => Punkt)
+// Icon state
 let selectedIcon = "";
 
 /* ================= AUTO LOGOUT ================= */
@@ -564,8 +583,7 @@ window.onload=async()=>{
 };
 
 async function login(){
-  const usernameRaw=document.getElementById("username").value;
-  const username=usernameRaw.toLowerCase().trim();
+  const username=document.getElementById("username").value.toLowerCase().trim();
   const password=document.getElementById("password").value;
 
   const {error}=await db.auth.signInWithPassword({
@@ -625,17 +643,24 @@ function updateCoordBadge(mode){
 
   if(mode==="editing"){
     badge.classList.add("editing");
-    badge.innerHTML="✏️ <b>Bearbeiten-Modus</b><br>Du bearbeitest einen bestehenden Marker.";
+    badge.innerHTML = `
+      <b>✏️ Bearbeiten-Modus</b>
+      <span>Du bearbeitest einen bestehenden Marker.</span>
+    `;
     return;
   }
 
   if(selectedCoords){
     badge.classList.add("ready");
-    badge.innerHTML=
-      "✅ <b>Koordinate gewählt</b><br>" +
-      "X: "+Math.round(selectedCoords.lng)+" &nbsp; | &nbsp; Y: "+Math.round(selectedCoords.lat);
+    badge.innerHTML = `
+      <b>✅ Koordinate gewählt</b>
+      <span>X: ${Math.round(selectedCoords.lng)} &nbsp; | &nbsp; Y: ${Math.round(selectedCoords.lat)}</span>
+    `;
   }else{
-    badge.innerHTML="🖱️ <b>Keine Koordinate gewählt</b><br>Klicke in die Karte, um einen neuen Marker zu platzieren.";
+    badge.innerHTML = `
+      <b>🖱️ Keine Koordinate gewählt</b>
+      <span>Klicke in die Karte, um einen neuen Marker zu platzieren.</span>
+    `;
   }
 }
 
@@ -669,35 +694,26 @@ function initMap(){
       clearForm();
       selectedCoords=e.latlng;
       currentEditId=null;
-
       document.getElementById("adminPanel").classList.add("open");
       updateCoordBadge();
     });
   }
 }
 
-/* ================= ICON SPECS (Anchor fix gegen Drift) ================= */
+/* ================= ICON SPECS ================= */
 function buildMarkerIconSpec(color, icon){
   const safeColor = color || "#ff0000";
 
-  // Punkt
   if(!icon){
     const size = [28,28];
     return {
-      html: `<div style="
-        width:22px;height:22px;
-        border-radius:50%;
-        background:${safeColor};
-        border:3px solid white;
-        box-sizing:content-box;
-      "></div>`,
+      html: `<div style="width:22px;height:22px;border-radius:50%;background:${safeColor};border:3px solid white;box-sizing:content-box;"></div>`,
       iconSize: size,
       iconAnchor: [size[0]/2, size[1]/2],
       popupAnchor: [0, -(size[1]/2)]
     };
   }
 
-  // Haus/Labor
   const size = [42,42];
   const strokeW = 1.2;
 
@@ -729,7 +745,6 @@ function buildMarkerIconSpec(color, icon){
     };
   }
 
-  // Fallback
   const size2=[28,28];
   return {
     html: `<div style="width:22px;height:22px;border-radius:50%;background:${safeColor};border:3px solid white;"></div>`,
@@ -772,7 +787,6 @@ function renderMarkers(data){
 
     marker.bindPopup("<b>"+(m.title||"")+"</b><br>"+(m.description||""));
 
-    // Hover nur Desktop
     if(isDesktopHover){
       marker.on("mouseover", function(){ this.openPopup(); });
       marker.on("mouseout", function(){ this.closePopup(); });
@@ -801,8 +815,8 @@ function renderMarkers(data){
           .eq("id", m.id);
       });
     }
-  }); // ✅ forEach zu
-} // ✅ renderMarkers zu
+  });
+}
 
 async function saveMarker(){
   const title=document.getElementById("mTitle").value.trim();
@@ -868,7 +882,7 @@ function setupRealtime(){
     ).subscribe();
 }
 
-/* ================= COLOR PREVIEW (ohne Preview Box) ================= */
+/* ================= COLOR PREVIEW (nur Punkt Preview) ================= */
 function updateColorPreview(){
   const v=document.getElementById("mColor").value;
   const dot=document.getElementById("dotPreview");
