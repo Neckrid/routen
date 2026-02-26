@@ -11,6 +11,8 @@
 <style>
 *{ box-sizing:border-box; }
 
+/* ================= PREMIUM BACKGROUND ================= */
+
 body{
   margin:0;
   font-family:Arial;
@@ -18,7 +20,6 @@ body{
   overflow-x:hidden;
   min-height:100vh;
 
-  /* Base */
   background:
     radial-gradient(1200px 700px at 12% 18%, rgba(0,255,195,0.10), transparent 60%),
     radial-gradient(900px 650px at 88% 72%, rgba(255,70,180,0.07), transparent 62%),
@@ -26,112 +27,52 @@ body{
     linear-gradient(135deg, #07070b 0%, #0c0c12 45%, #07070b 100%);
 }
 
-/* Subtle grid (gibt Tiefe, wie HUD) */
 body::before{
   content:"";
   position:fixed;
   inset:0;
   pointer-events:none;
-  z-index:1;
   opacity:0.20;
   background:
     linear-gradient(to right, rgba(255,255,255,0.035) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255,255,255,0.028) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(circle at 50% 30%, rgba(0,0,0,1), rgba(0,0,0,0.0) 68%);
+  background-size:64px 64px;
+  mask-image: radial-gradient(circle at 50% 30%, black, transparent 68%);
 }
 
-/* Animated glow fog (sehr dezent) */
 body::after{
   content:"";
   position:fixed;
   inset:-20%;
   pointer-events:none;
-  z-index:2;
-
   background:
     radial-gradient(700px 520px at 18% 30%, rgba(0,255,195,0.12), transparent 65%),
     radial-gradient(680px 520px at 78% 66%, rgba(0,140,255,0.10), transparent 65%),
     radial-gradient(520px 420px at 64% 18%, rgba(255,70,180,0.07), transparent 65%);
-
-  filter: blur(22px);
+  filter:blur(22px);
   opacity:0.75;
-  animation: bgFloat 14s ease-in-out infinite alternate;
-  transform: translate3d(0,0,0);
-}
-
-/* Extra noise layer (optional aber nice) */
-html::after{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:3;
-  opacity:0.06;
-  mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E");
+  animation:bgFloat 14s ease-in-out infinite alternate;
 }
 
 @keyframes bgFloat{
-  0%   { transform: translate3d(-1.5%, -1%, 0) scale(1.02); }
-  50%  { transform: translate3d(1.2%, 0.8%, 0) scale(1.03); }
-  100% { transform: translate3d(-0.8%, 1.2%, 0) scale(1.02); }
-}  
-
-/* ✅ Subtiles Noise Overlay */
-body::after{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:5;
-  opacity:0.055;
-  mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E");
+  0%{ transform:translate(-1%, -1%) scale(1.02); }
+  50%{ transform:translate(1%, 1%) scale(1.03); }
+  100%{ transform:translate(-1%, 1%) scale(1.02); }
 }
 
-/* ===== TOPBAR / SEARCH ===== */
-#topBar{
-  position:sticky;
-  top:0;
-  z-index:1100;
-  padding:12px 24px 10px 24px;
-  background:linear-gradient(to bottom, rgba(14,14,18,0.92), rgba(14,14,18,0.70), rgba(14,14,18,0));
-  backdrop-filter: blur(12px);
-}
+/* ================= GRID ================= */
 
-#searchWrap{ position:relative; display:inline-block; }
-#searchIcon{
-  position:absolute;
-  left:12px;
-  top:50%;
-  transform:translateY(-50%);
-  color:#00ffc3;
-  font-size:14px;
-  opacity:0.9;
-}
-#searchBox{
-  width:min(340px, calc(100vw - 48px));
-  padding:10px 12px 10px 34px;
-  border-radius:10px;
-  border:none;
-  background:rgba(20,20,26,0.75);
-  border:1px solid rgba(255,255,255,0.08);
-  color:white;
-  outline:none;
-  backdrop-filter: blur(10px);
-}
-
-/* ===== GRID ===== */
 #container{
   display:flex;
   flex-wrap:wrap;
   gap:22px;
-  padding:10px 24px 110px 24px;
-  align-items:flex-start;
+  padding:20px 24px 110px 24px;
+  position:relative;
+  z-index:10;
 }
 
-/* ===== FRAKTIONS-CARD (GLAS + GLOW) ===== */
+/* ================= FRAKTIONS CARD ================= */
+
 .card{
   padding:18px;
   border-radius:22px;
@@ -139,1171 +80,256 @@ body::after{
   max-width:420px;
   flex:0 1 360px;
 
-  background:rgba(22,22,28,0.62);
+  background:rgba(22,22,28,0.65);
   border:1px solid rgba(255,255,255,0.10);
   backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
 
   box-shadow:
     0 18px 55px rgba(0,0,0,0.55),
-    0 0 0 1px rgba(255,255,255,0.05) inset,
     0 0 22px color-mix(in srgb, var(--glow, #00ffc3) 40%, transparent);
 
   transition:0.25s ease;
   display:flex;
   flex-direction:column;
-  position:relative;
-  overflow:hidden;
-
-  opacity:0;
-  transform: translateY(8px);
-}
-.card.mounted{
-  opacity:1;
-  transform: translateY(0);
-  transition: opacity .22s ease, transform .22s ease;
 }
 
-.card::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:22px;
-  pointer-events:none;
-  background:
-    radial-gradient(120% 80% at 20% 0%, rgba(255,255,255,0.06), transparent 45%),
-    radial-gradient(90% 70% at 100% 30%, color-mix(in srgb, var(--glow, #00ffc3) 18%, transparent), transparent 55%);
-  opacity:0.9;
-}
-
-.card:hover{
-  transform:translateY(-6px);
-  box-shadow:
-    0 26px 75px rgba(0,0,0,0.65),
-    0 0 0 1px rgba(255,255,255,0.06) inset,
-    0 0 34px color-mix(in srgb, var(--glow, #00ffc3) 55%, transparent);
-}
-
-/* Handle zum Karten-Drag */
 .card h3{
-  margin:0 0 12px 0;
+  margin:0 0 14px 0;
   font-size:20px;
-  font-weight:800;
-  letter-spacing:0.4px;
-  position:relative;
-  z-index:1;
+  font-weight:900;
   cursor:grab;
-  user-select:none;
-  padding-right:6px;
-
-  padding-bottom:10px;
-  margin-bottom:14px;
 }
+
 .card h3:active{ cursor:grabbing; }
 
-.card h3::after{
-  content:"";
-  position:absolute;
-  left:0; right:0;
-  bottom:0;
-  height:1px;
-  background:linear-gradient(
-    to right,
-    transparent,
-    color-mix(in srgb, var(--glow, #00ffc3) 45%, rgba(255,255,255,0.10)),
-    transparent
-  );
-  opacity:0.8;
-}
+/* ================= MEMBER ROW ================= */
 
-/* ===== MEMBER LIST WRAP ===== */
-.memberList{
-  background:transparent;
-  border:none;
-  border-radius:0;
-  padding:0;
-  position:relative;
-  z-index:1;
-  min-height: 10px;
-  flex:1;
-}
-
-/* ===== MEMBER ROW (Premium Glass + Accent + bessere Tiefe) ===== */
 .member{
   position:relative;
-  overflow:hidden;
-
   background:
-    radial-gradient(120% 120% at 18% 0%, rgba(255,255,255,0.08), transparent 52%),
-    linear-gradient(145deg, rgba(26,26,32,0.78), rgba(7,7,10,0.92));
+    linear-gradient(145deg, rgba(28,28,34,0.78), rgba(7,7,10,0.92));
   border:1px solid rgba(255,255,255,0.07);
-
-  padding:14px 14px;
+  padding:14px;
   border-radius:16px;
   margin-bottom:10px;
-
   display:flex;
   justify-content:space-between;
   align-items:center;
-
   cursor:grab;
-  user-select:none;
-
-  box-shadow:
-    0 14px 30px rgba(0,0,0,0.36),
-    inset 0 0 0 1px rgba(255,255,255,0.03);
-
-  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-}
-
-/* Glow “sheen” oben rechts */
-.member::after{
-  content:"";
-  position:absolute;
-  inset:-40% -25% auto auto;
-  width:240px;
-  height:180px;
-  background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.10), transparent 60%);
-  transform:rotate(18deg);
-  opacity:0.75;
-  pointer-events:none;
-}
-
-/* Linker Accent-Streifen (passt zur Fraktionsfarbe) */
-.member::before{
-  content:"";
-  position:absolute;
-  left:0;
-  top:10px;
-  bottom:10px;
-  width:3px;
-  border-radius:999px;
-  background:color-mix(in srgb, var(--glow, #00ffc3) 55%, transparent);
-  opacity:0.55;
-  pointer-events:none;
-}
-
-.card .member:hover{
-  border-color: color-mix(in srgb, var(--glow, #00ffc3) 40%, rgba(255,255,255,0.12));
-  box-shadow:
-    0 18px 44px rgba(0,0,0,0.48),
-    0 0 22px color-mix(in srgb, var(--glow, #00ffc3) 14%, transparent),
-    inset 0 0 0 1px rgba(255,255,255,0.04);
-  transform: translateY(-1px);
-}
-
-.member:active{
-  cursor:grabbing;
-  transform: scale(0.992);
-}
-
-/* links: icon + name */
-.memberLeft{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  min-width:0;
-}
-
-/* Leader-Stern als “Badge” */
-.leader-star{
-  width:28px;
-  height:28px;
-  border-radius:11px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-
-  font-size:16px;
-  line-height:1;
-  cursor:pointer;
-
-  background:
-    radial-gradient(120% 120% at 20% 10%, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
-  border:1px solid rgba(255,255,255,0.10);
-  box-shadow:
-    0 10px 20px rgba(0,0,0,0.28),
-    inset 0 0 0 1px rgba(255,255,255,0.03);
-
-  transition: transform .14s ease, border-color .14s ease, background .14s ease;
-}
-.member:hover .leader-star{
-  border-color: color-mix(in srgb, var(--glow, #00ffc3) 28%, rgba(255,255,255,0.10));
-  transform: translateY(-1px);
-}
-
-.leader-active{
-  color:#ffd54a;
-  background: rgba(255,213,74,0.14);
-  border:1px solid rgba(255,213,74,0.60);
-  box-shadow:0 0 16px rgba(255,213,74,0.18);
-}
-
-/* Name typografisch “cleaner” */
-.memberName{
-  font-size:15.5px;
-  font-weight:900;
-  letter-spacing:0.25px;
-  color:rgba(255,255,255,0.92);
-  text-shadow: 0 1px 0 rgba(0,0,0,0.35);
-
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  min-width:0;
-}
-
-/* Optional: leichte “Highlight”-Schrift beim Hover */
-.member:hover .memberName{
-  color:rgba(255,255,255,0.98);
-}
-
-/* Leader Row bleibt goldig, aber cleaner */
-.member.leaderRow{
-  border-color: rgba(255,213,74,0.65);
-  box-shadow:
-    0 18px 44px rgba(0,0,0,0.48),
-    0 0 18px rgba(255,213,74,0.10),
-    inset 0 0 0 1px rgba(255,213,74,0.10);
-}
-.member.leaderRow::before{
-  background: rgba(255,213,74,0.80);
-  opacity:0.65;
-}
-
-/* ===== DELETE MEMBER BUTTON (hover only) ===== */
-.delBtn{
-  background:rgba(255,59,59,0.18);
-  border:1px solid rgba(255,59,59,0.45);
-  color:#ff6b6b;
-  border-radius:10px;
-  padding:6px 9px;
-  font-weight:900;
-  font-size:12px;
-  cursor:pointer;
-
-  opacity:0;
-  transform:scale(0.95);
-  pointer-events:none;
   transition:0.18s ease;
 }
-.member:hover .delBtn{
-  opacity:1;
-  transform:scale(1);
-  pointer-events:auto;
-}
-.delBtn:hover{
-  background:rgba(255,59,59,0.28);
-  color:#fff;
-}
-@media (hover: none){
-  .delBtn{ opacity:1; transform:none; pointer-events:auto; }
+
+.member:hover{
+  border-color: color-mix(in srgb, var(--glow, #00ffc3) 40%, rgba(255,255,255,0.12));
+  box-shadow:0 0 22px color-mix(in srgb, var(--glow, #00ffc3) 20%, transparent);
+  transform:translateY(-1px);
 }
 
-/* ===== BUTTONS BASE ===== */
-button{
-  border:none;
-  cursor:pointer;
+.memberName{
   font-weight:900;
-  font-family:Arial;
-  letter-spacing:0.2px;
+  letter-spacing:0.3px;
 }
 
-/* ===== ACTION BUTTONS ===== */
+.leader-star{
+  margin-right:10px;
+  cursor:pointer;
+}
+
+.leader-active{ color:#ffd54a; }
+
+/* ================= BUTTONS ================= */
+
 .btnRow{
   display:flex;
   gap:12px;
   margin-top:14px;
-  align-items:center;
-  position:relative;
-  z-index:1;
-
-  position:sticky;
-  bottom:0;
-  padding-top:12px;
-
-  background:linear-gradient(to top, rgba(22,22,28,0.95), rgba(22,22,28,0.0));
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
 }
 
 .actionBtn{
   flex:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  padding:12px 14px;
+  padding:12px;
   border-radius:14px;
-  font-size:14px;
-  line-height:1;
-
-  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.20));
-  border:1px solid rgba(255,255,255,0.10);
-  box-shadow:
-    0 10px 24px rgba(0,0,0,0.35),
-    inset 0 0 0 1px rgba(255,255,255,0.04);
-
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  font-weight:900;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  backdrop-filter:blur(10px);
+  cursor:pointer;
   transition:0.18s ease;
-  user-select:none;
-}
-.actionBtn:hover{
-  transform:translateY(-1px);
-  box-shadow:
-    0 14px 34px rgba(0,0,0,0.42),
-    inset 0 0 0 1px rgba(255,255,255,0.06);
-}
-.actionBtn:active{
-  transform: translateY(0px) scale(0.985);
-  transition:0.06s ease;
 }
 
-/* icon chip */
-.actionIcon{
-  width:26px;
-  height:26px;
-  border-radius:10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:14px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.08);
-}
+.actionBtn:hover{ transform:translateY(-1px); }
 
-/* ✅ + Mitglied: IMMER GRÜN */
 .addSoft{
   color:#00ff9d;
   border:1px solid rgba(0,255,157,0.55);
 }
-.addSoft .actionIcon{
-  background: rgba(0,255,157,0.10);
-  border:1px solid rgba(0,255,157,0.22);
-}
-.addSoft:hover{
-  background: rgba(0,255,157,0.08);
-  box-shadow: 0 0 26px rgba(0,255,157,0.14);
-}
 
-/* Delete */
 .dangerSoft{
   color:#ff6b6b;
   border:1px solid rgba(255,59,59,0.55);
 }
-.dangerSoft .actionIcon{
-  background:rgba(255,59,59,0.10);
-  border:1px solid rgba(255,59,59,0.22);
-}
-.dangerSoft:hover{
-  background:rgba(255,59,59,0.10);
-  box-shadow:
-    0 0 26px rgba(255,59,59,0.14),
-    inset 0 0 0 1px rgba(255,59,59,0.12);
-  color:white;
-}
 
-/* ===== BACK BUTTON ===== */
-#backBtn{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  background:#00ffc3;
-  color:black;
-  padding:12px 16px;
-  border-radius:12px;
-  font-weight:900;
-  cursor:pointer;
-  z-index:1200;
-  box-shadow:0 0 20px #00ffc355;
-}
+/* ================= MODAL ================= */
 
-/* ===== HEADER BUTTONS ===== */
-#logoutBtn{
-  position:fixed;
-  top:10px;
-  right:0;
-  background:#ff3b3b;
-  color:white;
-  padding:8px 12px;
-  border-radius:8px 0 0 8px;
-  cursor:pointer;
-  font-weight:900;
-  display:none;
-  z-index:1200;
-}
-
-#adminToggle{
-  position:fixed;
-  top:50px;
-  right:0;
-  background:#00ffc3;
-  color:black;
-  padding:8px 12px;
-  border-radius:8px 0 0 8px;
-  cursor:pointer;
-  font-weight:900;
-  display:none;
-  z-index:1200;
-}
-
-/* Admin Panel */
-#adminPanel{
-  position:fixed;
-  top:90px;
-  right:-340px;
-  width:300px;
-  background:rgba(18,18,22,0.85);
-  padding:20px;
-  border-radius:15px 0 0 15px;
-  box-shadow:0 0 25px rgba(0,255,195,0.12);
-  border:1px solid rgba(255,255,255,0.08);
-  backdrop-filter: blur(14px);
-  transition:0.4s;
-  z-index:1190;
-}
-#adminPanel.open{ right:0; }
-
-#adminPanel h3{
-  margin:0 0 10px 0;
-  text-align:center;
-  color:#00ffc3;
-  font-weight:900;
-}
-
-#adminPanel input{
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-  border-radius:10px;
-  border:none;
-  background:rgba(20,20,26,0.75);
-  border:1px solid rgba(255,255,255,0.08);
-  color:white;
-}
-
-/* Primary (Fraktion erstellen Button) */
-.primary{
-  width:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-
-  padding:12px 14px;
-  border-radius:14px;
-  font-size:14px;
-
-  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.20));
-  border:1px solid rgba(0,255,195,0.55);
-  color:#00ffc3;
-
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
-  box-shadow:
-    0 10px 24px rgba(0,0,0,0.35),
-    0 0 20px rgba(0,255,195,0.10);
-
-  transition:0.18s ease;
-}
-.primary:hover{
-  background:rgba(0,255,195,0.08);
-  box-shadow:
-    0 0 26px rgba(0,255,195,0.18),
-    inset 0 0 0 1px rgba(0,255,195,0.12);
-  transform:translateY(-1px);
-}
-.primary:active{
-  transform:scale(0.985);
-  transition:0.06s ease;
-}
-
-/* ===== MODALS ===== */
 .modalOverlay{
   position:fixed;
   inset:0;
   display:none;
   align-items:center;
   justify-content:center;
-  z-index:3000;
-  background:rgba(0,0,0,0.55);
-  backdrop-filter: blur(8px);
-}
-.modal{
-  width:min(380px, calc(100vw - 32px));
-  border-radius:20px;
-  padding:18px;
-  background:rgba(22,22,28,0.82);
-  border:1px solid rgba(255,255,255,0.10);
-  backdrop-filter: blur(18px);
-  box-shadow:0 30px 90px rgba(0,0,0,0.65);
-  position:relative;
-}
-.modalTitle{
-  margin:0 0 10px 0;
-  font-size:18px;
-  font-weight:900;
-  letter-spacing:0.3px;
-}
-.modalSub{
-  margin:0 0 14px 0;
-  opacity:0.85;
-  font-size:13px;
-  line-height:1.35;
-}
-.modalInputs{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  margin-bottom:14px;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(8px);
+  z-index:1000;
 }
 
-/* ✅ Modal Inputs (optisch passend) */
+.modal{
+  width:360px;
+  background:rgba(22,22,28,0.85);
+  border-radius:20px;
+  padding:20px;
+  backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,0.1);
+}
+
 .modal input{
   width:100%;
-  padding:12px 12px;
+  padding:12px;
+  margin-bottom:10px;
   border-radius:14px;
-  border:1px solid rgba(255,255,255,0.10);
-  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
-  color:rgba(255,255,255,0.92);
-  outline:none;
-
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-
-  box-shadow:
-    0 10px 24px rgba(0,0,0,0.35),
-    inset 0 0 0 1px rgba(255,255,255,0.04);
-
-  transition:0.18s ease;
-}
-.modal input::placeholder{
-  color:rgba(255,255,255,0.45);
-  font-weight:800;
-  letter-spacing:0.2px;
-}
-.modal input:focus{
-  border-color: rgba(0,255,157,0.55);
-  box-shadow:
-    0 0 0 3px rgba(0,255,157,0.12),
-    0 14px 34px rgba(0,0,0,0.45),
-    inset 0 0 0 1px rgba(0,255,157,0.10);
+  border:1px solid rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.05);
+  color:white;
 }
 
-.modalActions{
-  display:flex;
-  gap:12px;
-}
 .modalBtn{
-  flex:1;
-  padding:12px 12px;
+  width:100%;
+  padding:12px;
   border-radius:14px;
   font-weight:900;
-  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.20));
-  border:1px solid rgba(255,255,255,0.10);
-  color:white;
-  backdrop-filter: blur(10px);
-  transition:0.18s ease;
+  margin-top:10px;
 }
-.modalBtn:hover{ transform:translateY(-1px); }
-.modalBtn:active{ transform:scale(0.985); transition:0.06s ease; }
 
 .modalBtnSave{
   color:#00ff9d;
   border:1px solid rgba(0,255,157,0.55);
-}
-.modalBtnSave:hover{
-  background:rgba(0,255,157,0.08);
-  box-shadow:0 0 26px rgba(0,255,157,0.16);
 }
 
 .modalBtnDanger{
   color:#ff6b6b;
   border:1px solid rgba(255,59,59,0.55);
 }
-.modalBtnDanger:hover{
-  background:rgba(255,59,59,0.10);
-  box-shadow:0 0 26px rgba(255,59,59,0.14);
-  color:white;
-}
-
-.modalCloseX{
-  position:absolute;
-  top:10px;
-  right:10px;
-  width:34px;
-  height:34px;
-  border-radius:12px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.10);
-  user-select:none;
-}
-.modalCloseX:hover{ background:rgba(255,255,255,0.10); }
-
-/* Sortable classes (nur optisch) */
-.dragging{ opacity:0.55; }
-.sortable-ghost{ opacity:0.25; }
-
-@media (max-width: 520px){
-  #container{ padding-left:14px; padding-right:14px; }
-  #topBar{ padding-left:14px; padding-right:14px; }
-  .card{ min-width: 100%; flex:1 1 100%; }
-  .actionBtn{ padding:13px 14px; font-size:15px; }
-}
 </style>
 </head>
 
 <body>
 
-<div id="topBar">
-  <div id="searchWrap">
-    <span id="searchIcon">🔎</span>
-    <input id="searchBox" placeholder="Fraktion oder Mitglied suchen...">
-  </div>
-</div>
-
 <div id="container"></div>
 
-<button id="backBtn" onclick="window.location='index.html'">⬅ Zurück</button>
-<button id="logoutBtn" onclick="logout()">Logout</button>
-<div id="adminToggle">Admin</div>
-
-<div id="adminPanel">
-  <h3>Fraktion erstellen</h3>
-  <input id="fName" placeholder="Fraktionsname">
-  <input id="fColor" type="color" value="#00ffc3">
-  <button class="primary" onclick="createFraktion()">Erstellen</button>
-</div>
-
-<!-- ✅ MODAL: + Mitglied -->
-<div id="addModalOverlay" class="modalOverlay" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true">
-    <div class="modalCloseX" onclick="closeAddModal()">✕</div>
-    <h3 class="modalTitle" style="color:#00ff9d;">Neues Mitglied</h3>
-    <p class="modalSub" id="addModalSub">Mitglied zu Fraktion hinzufügen.</p>
-
-    <div class="modalInputs">
-      <input id="addVor" placeholder="Vorname" autocomplete="off">
-      <input id="addNach" placeholder="Nachname" autocomplete="off">
-    </div>
-
-    <div class="modalActions">
-      <button class="modalBtn" onclick="closeAddModal()">Abbrechen</button>
-      <button class="modalBtn modalBtnSave" onclick="confirmAddMember()">Speichern</button>
-    </div>
+<!-- Add Member Modal -->
+<div id="addModalOverlay" class="modalOverlay">
+  <div class="modal">
+    <h3>Neues Mitglied</h3>
+    <input id="addVor" placeholder="Vorname">
+    <input id="addNach" placeholder="Nachname">
+    <button class="modalBtn modalBtnSave" onclick="confirmAddMember()">Speichern</button>
   </div>
 </div>
 
-<!-- ✅ MODAL: Fraktion löschen Bestätigung -->
-<div id="delModalOverlay" class="modalOverlay" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true">
-    <div class="modalCloseX" onclick="closeDeleteModal()">✕</div>
-    <h3 class="modalTitle" style="color:#ff6b6b;">Löschen</h3>
-    <p class="modalSub" id="delModalSub">Willst du diese Fraktion wirklich löschen?</p>
-
-    <div class="modalActions">
-      <button class="modalBtn" onclick="closeDeleteModal()">Abbrechen</button>
-      <button class="modalBtn modalBtnDanger" onclick="confirmDeleteFraktion()">Löschen</button>
-    </div>
+<!-- Delete Modal -->
+<div id="delModalOverlay" class="modalOverlay">
+  <div class="modal">
+    <h3>Fraktion löschen?</h3>
+    <button class="modalBtn modalBtnDanger" onclick="confirmDeleteFraktion()">Löschen</button>
   </div>
 </div>
 
 <script>
-const SUPABASE_URL="https://lleldalugvgmgqekcolx.supabase.co";
-const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc";
+const SUPABASE_URL="DEINE_URL";
+const SUPABASE_KEY="DEIN_KEY";
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let isAdmin=false;
 let allFraktionen=[];
-let membersByFraktion = new Map();
+let membersByFraktion=new Map();
+let modalFraktionId=null;
 
-/* ===== Modal State ===== */
-let modalFraktionId = null;
-let modalFraktionName = "";
+/* ===== DATA ===== */
 
-/* ===== Realtime / Refresh Control (gegen Zittern nach Drop) ===== */
-let suppressRealtime = false;
-let refreshTimer = null;
-
-function scheduleRefresh(){
-  if(suppressRealtime) return;
-  clearTimeout(refreshTimer);
-  refreshTimer = setTimeout(()=>{ refreshDataAndRender(); }, 140);
-}
-
-/* ================= AUTO LOGOUT (60 MIN INAKTIV) ================= */
-let inactivityTimer;
-function resetInactivityTimer(){
-  clearTimeout(inactivityTimer);
-  inactivityTimer = setTimeout(()=>{
-    alert("Automatischer Logout wegen Inaktivität (60 Minuten)");
-    logout();
-  }, 60*60*1000);
-}
-document.addEventListener("mousemove", resetInactivityTimer);
-document.addEventListener("keydown", resetInactivityTimer);
-document.addEventListener("click", resetInactivityTimer);
-document.addEventListener("touchstart", resetInactivityTimer);
-/* =============================================================== */
-
-window.onload=async()=>{
-  const {data}=await db.auth.getSession();
-  if(!data.session){ window.location="index.html"; return; }
-
-  document.getElementById("logoutBtn").style.display="block";
-  isAdmin = (data.session.user.email || "").toLowerCase()==="admin@gta.local";
-  if(isAdmin) document.getElementById("adminToggle").style.display="block";
-
-  resetInactivityTimer();
-  await refreshDataAndRender();
-  setupRealtime();
-  setupFactionDrag();
-  setupModalUX();
-};
-
-async function logout(){
-  await db.auth.signOut();
-  window.location="index.html";
-}
-
-/* ===== Drag state helper (Realtime-Pause, kein altes CSS jitter fix) ===== */
-function setDragging(state){
-  if(state){
-    suppressRealtime = true;
-    clearTimeout(refreshTimer);
-  } else {
-    setTimeout(()=>{
-      suppressRealtime = false;
-      scheduleRefresh();
-    }, 350);
-  }
-}
-
-/* ===== Modal UX ===== */
-function setupModalUX(){
-  document.getElementById("addModalOverlay").addEventListener("click",(e)=>{
-    if(e.target.id==="addModalOverlay") closeAddModal();
-  });
-  document.getElementById("delModalOverlay").addEventListener("click",(e)=>{
-    if(e.target.id==="delModalOverlay") closeDeleteModal();
-  });
-
-  document.addEventListener("keydown",(e)=>{
-    if(e.key==="Escape"){
-      if(isAddModalOpen()) closeAddModal();
-      if(isDeleteModalOpen()) closeDeleteModal();
-    }
-  });
-
-  const addVor = document.getElementById("addVor");
-  const addNach = document.getElementById("addNach");
-  const enterHandler = (e)=>{
-    if(e.key==="Enter"){
-      e.preventDefault();
-      confirmAddMember();
-    }
-  };
-  addVor.addEventListener("keydown", enterHandler);
-  addNach.addEventListener("keydown", enterHandler);
-}
-function isAddModalOpen(){ return document.getElementById("addModalOverlay").style.display==="flex"; }
-function isDeleteModalOpen(){ return document.getElementById("delModalOverlay").style.display==="flex"; }
-
-/* ================= DATA LOAD + RENDER ================= */
 async function refreshDataAndRender(){
-  let fr = await db.from("fraktionen").select("*").order("sort_order", {ascending:true});
-  if(fr.error){
-    fr = await db.from("fraktionen").select("*").order("created_at", {ascending:true});
-  }
-  if(fr.error){ console.error(fr.error); return; }
-  allFraktionen = fr.data || [];
+  const fr=await db.from("fraktionen").select("*").order("sort_order",{ascending:true});
+  const mem=await db.from("fraktions_mitglieder").select("*");
 
-  const mem = await db.from("fraktions_mitglieder").select("*");
-  if(mem.error){ console.error(mem.error); return; }
+  allFraktionen=fr.data||[];
+  membersByFraktion=new Map();
 
-  membersByFraktion = new Map();
-  for(const m of (mem.data || [])){
-    if(!membersByFraktion.has(m.fraktion_id)) membersByFraktion.set(m.fraktion_id, []);
+  mem.data.forEach(m=>{
+    if(!membersByFraktion.has(m.fraktion_id)) membersByFraktion.set(m.fraktion_id,[]);
     membersByFraktion.get(m.fraktion_id).push(m);
-  }
-  for(const [fid, arr] of membersByFraktion.entries()){
-    arr.sort((a,b)=> (a.sort_order ?? 0) - (b.sort_order ?? 0));
-  }
+  });
 
-  await renderFraktionen(allFraktionen);
-
-  setupMembersDragAll();
-  setupFactionDrag();
+  renderFraktionen();
 }
 
-function normalizeColor(hex){
-  if(!hex) return "#00ffc3";
-  let c = String(hex).trim();
-  if(!c.startsWith("#")) return "#00ffc3";
-  if(c.length===4) c = "#" + c[1]+c[1] + c[2]+c[2] + c[3]+c[3];
-  if(c.length!==7) return "#00ffc3";
-  return c;
-}
-
-async function renderFraktionen(list){
+function renderFraktionen(){
   const container=document.getElementById("container");
   container.innerHTML="";
 
-  for(const f of list){
-    const members = membersByFraktion.get(f.id) || [];
-    const glow = normalizeColor(f.color);
-
+  allFraktionen.forEach(f=>{
+    const glow=f.color||"#00ffc3";
     const card=document.createElement("div");
     card.className="card";
-    card.dataset.fraktionId = f.id;
-    card.style.setProperty("--glow", glow);
-    card.style.border = "1px solid " + "color-mix(in srgb, " + glow + " 35%, rgba(255,255,255,0.10))";
+    card.style.setProperty("--glow",glow);
 
-    let html=`<h3 style="color:${glow}">${escapeHtml(f.name)}</h3>`;
-    html+=`<div class="memberList" id="list-${f.id}" data-fraktion-id="${f.id}">`;
+    let html=`<h3 style="color:${glow}">${f.name}</h3>`;
+    const members=membersByFraktion.get(f.id)||[];
 
-    for(const m of members){
-      const leaderRowClass = m.leader ? "leaderRow" : "";
+    members.forEach(m=>{
       html+=`
-        <div class="member ${leaderRowClass}" data-id="${m.id}" data-leader="${m.leader ? "1" : "0"}">
-          <div class="memberLeft">
-            <span class="leader-star ${m.leader ? 'leader-active' : ''}"
-                  title="Leader umschalten"
-                  onclick="toggleLeader(event, '${f.id}', '${m.id}', ${m.leader})">★</span>
-            <div class="memberName">${escapeHtml(m.vorname)} ${escapeHtml(m.nachname)}</div>
-          </div>
-          ${isAdmin ? `<button class="delBtn" onclick="deleteMember(event, '${m.id}')">✕</button>` : ``}
+      <div class="member" data-id="${m.id}">
+        <div>
+          <span class="leader-star ${m.leader?"leader-active":""}"
+          onclick="toggleLeader('${f.id}','${m.id}',${m.leader})">★</span>
+          <span class="memberName">${m.vorname} ${m.nachname}</span>
         </div>
-      `;
-    }
+      </div>`;
+    });
 
-    html+=`</div>`;
-
-    if(isAdmin){
-      html+=`
-        <div class="btnRow">
-          <button class="actionBtn addSoft" onclick="openAddModal('${f.id}', '${escapeAttr(f.name)}')">
-            <span class="actionIcon">＋</span>
-            <span>Mitglied</span>
-          </button>
-          <button class="actionBtn dangerSoft" onclick="openDeleteModal('${f.id}', '${escapeAttr(f.name)}')">
-            <span class="actionIcon">🗑</span>
-            <span>Löschen</span>
-          </button>
-        </div>
-      `;
-    }
+    html+=`
+    <div class="btnRow">
+      <button class="actionBtn addSoft" onclick="openAddModal('${f.id}')">+ Mitglied</button>
+      <button class="actionBtn dangerSoft" onclick="openDeleteModal('${f.id}')">Löschen</button>
+    </div>`;
 
     card.innerHTML=html;
     container.appendChild(card);
-
-    if(suppressRealtime){
-      card.classList.add("mounted");
-    }else{
-      requestAnimationFrame(()=> card.classList.add("mounted"));
-    }
-  }
-}
-
-/* ================= MODALS ================= */
-function openAddModal(fraktionId, fraktionName){
-  if(!isAdmin) return;
-  modalFraktionId = fraktionId;
-  modalFraktionName = fraktionName || "";
-
-  document.getElementById("addModalSub").textContent =
-    `Mitglied zu „${modalFraktionName}“ hinzufügen.`;
-
-  document.getElementById("addVor").value = "";
-  document.getElementById("addNach").value = "";
-
-  const overlay = document.getElementById("addModalOverlay");
-  overlay.style.display = "flex";
-  overlay.setAttribute("aria-hidden","false");
-
-  setTimeout(()=> document.getElementById("addVor").focus(), 0);
-}
-
-function closeAddModal(){
-  const overlay = document.getElementById("addModalOverlay");
-  overlay.style.display = "none";
-  overlay.setAttribute("aria-hidden","true");
-  modalFraktionId = null;
-  modalFraktionName = "";
-}
-
-async function confirmAddMember(){
-  if(!isAdmin) return;
-  if(!modalFraktionId) return;
-
-  const vor = document.getElementById("addVor").value.trim();
-  const nach = document.getElementById("addNach").value.trim();
-  if(!vor || !nach) return;
-
-  const current = membersByFraktion.get(modalFraktionId) || [];
-  const next = current.length ? ((current[current.length-1].sort_order ?? (current.length-1)) + 1) : 0;
-
-  const ins = await db.from("fraktions_mitglieder").insert([{
-    fraktion_id: modalFraktionId,
-    vorname: vor,
-    nachname: nach,
-    sort_order: next,
-    leader: false
-  }]);
-
-  if(ins.error){ console.error(ins.error); return; }
-
-  closeAddModal();
-  await refreshDataAndRender();
-}
-
-function openDeleteModal(fraktionId, fraktionName){
-  if(!isAdmin) return;
-  modalFraktionId = fraktionId;
-  modalFraktionName = fraktionName || "";
-
-  document.getElementById("delModalSub").textContent =
-    `Willst du „${modalFraktionName}“ wirklich löschen?`;
-
-  const overlay = document.getElementById("delModalOverlay");
-  overlay.style.display = "flex";
-  overlay.setAttribute("aria-hidden","false");
-}
-
-function closeDeleteModal(){
-  const overlay = document.getElementById("delModalOverlay");
-  overlay.style.display = "none";
-  overlay.setAttribute("aria-hidden","true");
-  modalFraktionId = null;
-  modalFraktionName = "";
-}
-
-async function confirmDeleteFraktion(){
-  if(!isAdmin) return;
-  if(!modalFraktionId) return;
-
-  const del = await db.from("fraktionen").delete().eq("id", modalFraktionId);
-  if(del.error){ console.error(del.error); return; }
-
-  closeDeleteModal();
-  await refreshDataAndRender();
-}
-
-/* ================== DRAG & DROP: MEMBER ================== */
-function setupMembersDragAll(){
-  const lists = document.querySelectorAll(".memberList");
-  lists.forEach(listEl=>{
-    new Sortable(listEl,{
-      group:{ name:"members", pull:true, put:true },
-      animation:180,
-      draggable:".member",
-      ghostClass:"sortable-ghost",
-      chosenClass:"dragging",
-      dragClass:"dragging",
-
-      scroll:true,
-      scrollSensitivity:80,
-      scrollSpeed:16,
-
-      onStart: ()=> setDragging(true),
-      onEnd: ()=> setDragging(false),
-
-      onAdd: async (evt)=>{
-        if(!isAdmin) { await refreshDataAndRender(); return; }
-        const memberId = evt.item?.dataset?.id;
-        const newFraktionId = evt.to?.dataset?.fraktionId;
-        if(!memberId || !newFraktionId) return;
-
-        const wasLeader = evt.item?.dataset?.leader === "1";
-
-        if(wasLeader){
-          await db.from("fraktions_mitglieder").update({leader:false}).eq("fraktion_id", newFraktionId);
-          await db.from("fraktions_mitglieder").update({fraktion_id:newFraktionId, leader:true}).eq("id", memberId);
-        }else{
-          await db.from("fraktions_mitglieder").update({fraktion_id:newFraktionId}).eq("id", memberId);
-        }
-
-        await persistMemberOrder(evt.to);
-        if(evt.from) await persistMemberOrder(evt.from);
-      },
-      onUpdate: async (evt)=>{
-        if(!isAdmin) { await refreshDataAndRender(); return; }
-        await persistMemberOrder(evt.to);
-      }
-    });
   });
 }
 
-/* ✅ IMPORTANT: kein upsert, nur UPDATE batch => keine INSERT policy nötig */
-async function persistMemberOrder(listEl){
-  if(!listEl) return;
+/* ===== MODAL ===== */
 
-  const items = [...listEl.querySelectorAll(".member")];
-  const updates = items
-    .map((el, i)=>({ id: el.dataset.id, sort_order: i }))
-    .filter(x=>x.id);
-
-  if(!updates.length) return;
-
-  const promises = updates.map(u =>
-    db.from("fraktions_mitglieder").update({ sort_order: u.sort_order }).eq("id", u.id)
-  );
-
-  const results = await Promise.all(promises);
-  const err = results.find(r => r.error)?.error;
-  if(err) console.error("persistMemberOrder update error:", err);
+function openAddModal(id){
+  modalFraktionId=id;
+  document.getElementById("addModalOverlay").style.display="flex";
+}
+function confirmAddMember(){
+  const vor=document.getElementById("addVor").value;
+  const nach=document.getElementById("addNach").value;
+  db.from("fraktions_mitglieder").insert([{fraktion_id:modalFraktionId,vorname:vor,nachname:nach}]);
+  document.getElementById("addModalOverlay").style.display="none";
+  refreshDataAndRender();
 }
 
-/* ================== DRAG & DROP: FRAKTIONSBOXEN ================== */
-function setupFactionDrag(){
-  const container = document.getElementById("container");
-  if(!container) return;
-
-  new Sortable(container,{
-    animation:200,
-    draggable:".card",
-    handle:"h3",
-    ghostClass:"sortable-ghost",
-    chosenClass:"dragging",
-    dragClass:"dragging",
-
-    scroll:true,
-    scrollSensitivity:90,
-    scrollSpeed:16,
-
-    onStart: ()=> setDragging(true),
-
-    onEnd: async ()=>{
-      try{
-        if(!isAdmin) { await refreshDataAndRender(); return; }
-
-        const cards = [...container.querySelectorAll(".card")];
-        const updates = cards
-          .map((c, i)=>({ id: c.dataset.fraktionId, sort_order: i }))
-          .filter(x=>x.id);
-
-        const promises = updates.map(u =>
-          db.from("fraktionen").update({ sort_order: u.sort_order }).eq("id", u.id)
-        );
-
-        const results = await Promise.all(promises);
-        const err = results.find(r => r.error)?.error;
-        if(err) console.error("fraktionen sort update error:", err);
-
-        scheduleRefresh();
-      } finally {
-        setDragging(false);
-      }
-    }
-  });
+function openDeleteModal(id){
+  modalFraktionId=id;
+  document.getElementById("delModalOverlay").style.display="flex";
+}
+function confirmDeleteFraktion(){
+  db.from("fraktionen").delete().eq("id",modalFraktionId);
+  document.getElementById("delModalOverlay").style.display="none";
+  refreshDataAndRender();
 }
 
-/* ================== CRUD: FRAKTION ================== */
-async function createFraktion(){
-  const name=document.getElementById("fName").value.trim();
-  const color=document.getElementById("fColor").value;
-  if(!name) return;
-
-  let nextOrder = 0;
-  try{
-    const last = await db.from("fraktionen").select("sort_order").order("sort_order",{ascending:false}).limit(1);
-    if(!last.error && last.data && last.data.length) nextOrder = (last.data[0].sort_order ?? 0) + 1;
-  }catch(e){}
-
-  const ins = await db.from("fraktionen").insert([{name, color, sort_order: nextOrder}]);
-  if(ins.error){
-    await db.from("fraktionen").insert([{name, color}]);
-  }
-
-  document.getElementById("fName").value="";
-}
-
-/* Kompatibilität */
-async function deleteFraktion(id){
-  openDeleteModal(id, (allFraktionen.find(x=>x.id===id)?.name || ""));
-}
-
-/* ================== CRUD: MEMBER ================== */
-async function deleteMember(ev, id){
-  ev.stopPropagation();
-  if(!isAdmin) return;
-  await db.from("fraktions_mitglieder").delete().eq("id",id);
-}
-
-/* ✅ NUR 1 LEADER PRO FRAKTION */
-async function toggleLeader(ev, fraktion_id, member_id, current){
-  ev.stopPropagation();
-  if(!isAdmin) return;
-
-  if(current){
-    await db.from("fraktions_mitglieder").update({leader:false}).eq("id", member_id);
-    return;
-  }
-  await db.from("fraktions_mitglieder").update({leader:false}).eq("fraktion_id", fraktion_id);
-  await db.from("fraktions_mitglieder").update({leader:true}).eq("id", member_id);
-}
-
-/* SEARCH (Fraktion + Mitglieder) */
-document.getElementById("searchBox").addEventListener("input", async (e)=>{
-  const q = e.target.value.toLowerCase().trim();
-
-  if(!q){
-    await renderFraktionen(allFraktionen);
-    setupMembersDragAll();
-    setupFactionDrag();
-    return;
-  }
-
-  const filtered = allFraktionen.filter(f=>{
-    if((f.name || "").toLowerCase().includes(q)) return true;
-    const members = membersByFraktion.get(f.id) || [];
-    return members.some(m=>{
-      const full = `${m.vorname || ""} ${m.nachname || ""}`.toLowerCase();
-      return full.includes(q);
-    });
-  });
-
-  await renderFraktionen(filtered);
-  setupMembersDragAll();
-  setupFactionDrag();
-});
-
-/* REALTIME (debounced) */
-function setupRealtime(){
-  db.channel("fraktionen-realtime")
-    .on("postgres_changes",{event:"*",schema:"public",table:"fraktionen"}, scheduleRefresh)
-    .on("postgres_changes",{event:"*",schema:"public",table:"fraktions_mitglieder"}, scheduleRefresh)
-    .subscribe();
-}
-
-/* ADMIN TOGGLE */
-document.getElementById("adminToggle").onclick=()=>{
-  document.getElementById("adminPanel").classList.toggle("open");
-};
-
-/* Helpers */
-function escapeHtml(str){
-  return String(str)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-function escapeAttr(str){
-  return String(str)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
+refreshDataAndRender();
 </script>
+
 </body>
 </html>
