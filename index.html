@@ -12,245 +12,497 @@
 <style>
 *{ box-sizing:border-box; }
 
-/* ================= PREMIUM BACKGROUND ================= */
 body{
-  margin:0;
-  font-family:Arial;
-  color:white;
-  overflow:hidden;
-  min-height:100vh;
-
-  background:
-    radial-gradient(1200px 700px at 12% 18%, rgba(0,255,195,0.10), transparent 60%),
-    radial-gradient(900px 650px at 88% 72%, rgba(255,70,180,0.07), transparent 62%),
-    radial-gradient(760px 520px at 72% 20%, rgba(0,140,255,0.08), transparent 60%),
-    linear-gradient(135deg, #07070b 0%, #0c0c12 45%, #07070b 100%);
+ margin:0;
+ background:#0e0e0e;
+ font-family:Arial;
+ color:white;
+ overflow:hidden;
 }
 
-/* ================= MAP ================= */
-#map{
-  height:100vh;
-  display:none;
+/* Map */
+#map{height:100vh;display:none;}
+
+/* Login Panel (kannst du später auch an fraktionen-style anpassen, hab's gelassen) */
+.panel{
+ position:absolute;
+ top:50%;left:50%;
+ transform:translate(-50%,-50%);
+ background:#181818;
+ padding:30px;
+ border-radius:15px;
+ width:90%;max-width:400px;
+ box-shadow:0 0 25px #00ffc355;
+ text-align:center;
+ z-index:2000;
+}
+input{
+ width:100%;
+ padding:10px;
+ margin:8px 0;
+ border-radius:8px;
+ border:none;
+ background:#222;
+ color:white;
+}
+button{
+ padding:8px 14px;
+ border:none;
+ border-radius:8px;
+ cursor:pointer;
+ font-weight:bold;
 }
 
-/* ================= LOGIN ================= */
-#loginPanel{
-  position:absolute;
-  top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  width:min(420px, calc(100vw - 28px));
-  padding:22px;
-  border-radius:22px;
-  z-index:2000;
+.primary{background:#00ffc3;color:black;}
+.danger{background:#ff3b3b;color:white;}
 
-  background:rgba(22,22,28,0.85);
-  border:1px solid rgba(255,255,255,0.12);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-
-  box-shadow:
-    0 30px 90px rgba(0,0,0,0.65),
-    0 0 22px rgba(0,255,195,0.10);
-}
-
-#loginPanel h2{
-  margin:0 0 14px 0;
-  text-align:center;
-  color:#00ffc3;
-  font-weight:900;
-}
-
-#loginPanel input{
-  width:100%;
-  padding:12px;
-  margin-bottom:10px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,0.12);
-  background:rgba(255,255,255,0.06);
-  color:white;
-  outline:none;
-}
-
-#loginBtn{
-  width:100%;
-  padding:12px;
-  border-radius:14px;
-  border:1px solid rgba(0,255,195,0.55);
-  background:rgba(0,255,195,0.08);
-  color:#00ffc3;
-  font-weight:900;
-  cursor:pointer;
-}
-#loginBtn:hover{
-  background:rgba(0,255,195,0.14);
-}
-
-#msg{
-  text-align:center;
-  margin-top:10px;
-  font-weight:800;
-  color:#ffb3b3;
-}
-
-/* ================= SEARCH ================= */
+/* ====== Suche: Position bleibt gleich, Look wie fraktionen ====== */
 #searchBox{
-  position:absolute;
-  top:10px;
-  left:80px;
-  z-index:1100;
-  display:none;
-  width:min(380px, calc(100vw - 160px));
-  padding:11px 14px 11px 36px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,0.12);
-  background:rgba(22,22,28,0.85);
-  color:white;
-  backdrop-filter: blur(16px);
+ position:absolute;
+ top:10px;
+ left:80px;          /* ✅ Position bleibt */
+ z-index:1100;
+ display:none;
+ width:min(380px, calc(100vw - 160px));
+ padding:11px 14px 11px 36px;
+ border-radius:14px;
+ border:none;
+ background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+ border:1px solid rgba(255,255,255,0.10);
+ color:rgba(255,255,255,0.92);
+ outline:none;
+ backdrop-filter: blur(12px);
+ -webkit-backdrop-filter: blur(12px);
+ box-shadow:
+   0 12px 28px rgba(0,0,0,0.40),
+   inset 0 0 0 1px rgba(255,255,255,0.04);
+ transition:0.18s ease;
+}
+#searchBox::placeholder{
+ color:rgba(255,255,255,0.45);
+ font-weight:800;
+ letter-spacing:0.15px;
+}
+#searchBox:focus{
+ border-color: rgba(0,255,195,0.55);
+ box-shadow:
+   0 0 0 3px rgba(0,255,195,0.12),
+   0 14px 34px rgba(0,0,0,0.45),
+   inset 0 0 0 1px rgba(0,255,195,0.10);
 }
 
+/* kleines Search-Icon wie fraktionen (nur optisch) */
 #searchIcon{
-  position:absolute;
-  top:10px;
-  left:92px;
-  z-index:1101;
-  display:none;
-  color:#00ffc3;
+ position:absolute;
+ top:10px;
+ left:92px;          /* 80 + 12 */
+ z-index:1101;
+ display:none;
+ width:20px;
+ height:20px;
+ pointer-events:none;
+ color:#00ffc3;
+ opacity:0.9;
+ font-size:14px;
+ line-height:20px;
 }
 
-/* ================= BUTTONS ================= */
+/* ====== Floating Buttons / Panel Alignment wie fraktionen ====== */
+:root{
+  --edge-gap: 0px;
+  --btn-gap: 8px;
+  --btn-h: 40px;
+  --btn-top: 10px;
+}
+
 .pillBtn{
   position:fixed;
-  right:0;
+  right:var(--edge-gap);
   display:flex;
   align-items:center;
+  justify-content:center;
   gap:8px;
-  padding:8px 12px;
+
+  padding:8px 10px;
   border-radius:14px 0 0 14px;
-  background:rgba(22,22,28,0.85);
-  border:1px solid rgba(255,255,255,0.12);
-  backdrop-filter: blur(16px);
+  font-size:13px;
+
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+  border:1px solid rgba(255,255,255,0.10);
+  color:rgba(255,255,255,0.92);
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  box-shadow:
+    0 14px 34px rgba(0,0,0,0.45),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+
   cursor:pointer;
   z-index:1200;
-  height:40px;
+  transition:0.18s ease;
+  user-select:none;
+  height:var(--btn-h);
+}
+.pillBtn:hover{
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,0.14);
+  box-shadow:
+    0 18px 46px rgba(0,0,0,0.50),
+    inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+.pillBtn:active{ transform: scale(0.99); transition:0.06s ease; }
+
+.pillIcon{
+  width:24px;
+  height:24px;
+  border-radius:9px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
 }
 
-#logoutBtn{ top:10px; }
-#adminToggle{ top:58px; }
+/* Logout / Admin Positionen */
+#logoutBtn{ top:var(--btn-top); }
+#adminToggle{ top:calc(var(--btn-top) + var(--btn-h) + var(--btn-gap)); }
 
-/* ================= ADMIN PANEL ================= */
+#logoutBtn{
+  color:#ffb3b3;
+  border-color: rgba(255,59,59,0.35);
+}
+#logoutBtn .pillIcon{
+  background:rgba(255,59,59,0.10);
+  border-color: rgba(255,59,59,0.20);
+}
+#logoutBtn:hover{
+  box-shadow:
+    0 18px 46px rgba(0,0,0,0.50),
+    0 0 26px rgba(255,59,59,0.10),
+    inset 0 0 0 1px rgba(255,59,59,0.12);
+  color:#fff;
+}
+
+#adminToggle{
+  color:#00ffc3;
+  border-color: rgba(0,255,195,0.35);
+}
+#adminToggle .pillIcon{
+  background:rgba(0,255,195,0.10);
+  border-color: rgba(0,255,195,0.20);
+}
+#adminToggle:hover{
+  box-shadow:
+    0 18px 46px rgba(0,0,0,0.50),
+    0 0 26px rgba(0,255,195,0.10),
+    inset 0 0 0 1px rgba(0,255,195,0.12);
+}
+
+/* Fraktionen Button (unten rechts wie backBtn) */
+#fraktionenBtn{
+  position:fixed;
+  bottom:18px;
+  right:18px;
+  padding:12px 14px;
+  border-radius:16px;
+
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+  border:1px solid rgba(0,255,195,0.35);
+  color:#00ffc3;
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  box-shadow:
+    0 16px 40px rgba(0,0,0,0.52),
+    0 0 24px rgba(0,255,195,0.10),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+  z-index:1200;
+  transition:0.18s ease;
+  display:none;
+  font-weight:900;
+}
+#fraktionenBtn:hover{
+  transform: translateY(-1px);
+  box-shadow:
+    0 20px 52px rgba(0,0,0,0.58),
+    0 0 30px rgba(0,255,195,0.14),
+    inset 0 0 0 1px rgba(0,255,195,0.12);
+}
+#fraktionenBtn:active{ transform: scale(0.99); transition:0.06s ease; }
+
+/* Coords */
+#coords{
+ position:absolute;
+ bottom:15px;
+ left:15px;
+ background:#000000aa;
+ padding:8px 14px;
+ border-radius:8px;
+ font-size:14px;
+ display:none;
+ z-index:1000;
+}
+
+/* Admin Panel: aligned unter Admin Button */
 #adminPanel{
   position:fixed;
-  top:108px;
-  right:0;
+  top:calc(var(--btn-top) + (var(--btn-h) + var(--btn-gap)) * 2);
+  right:var(--edge-gap);
+
   width:320px;
-  background:rgba(22,22,28,0.85);
+  background:rgba(22,22,28,0.72);
   padding:18px;
   border-radius:18px 0 0 18px;
-  border:1px solid rgba(255,255,255,0.12);
-  backdrop-filter: blur(18px);
-  box-shadow:0 24px 70px rgba(0,0,0,0.62);
+
+  border:1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  box-shadow:
+    0 24px 70px rgba(0,0,0,0.62),
+    0 0 0 1px rgba(255,255,255,0.05) inset,
+    0 0 22px rgba(0,255,195,0.08);
+
   transform: translateX(106%);
   transition:0.35s ease;
   z-index:1190;
-  max-height:calc(100vh - 120px);
-  overflow:auto;
-  scrollbar-width:none;
 }
-#adminPanel::-webkit-scrollbar{ display:none; }
-#adminPanel.open{ transform:translateX(0); }
+#adminPanel.open{ transform: translateX(0); }
+
+#adminPanel h3{
+  margin:0 0 10px 0;
+  text-align:center;
+  color:#00ffc3;
+  font-weight:900;
+  letter-spacing:0.25px;
+}
 
 .panelLabel{
   font-size:12px;
-  font-weight:900;
+  opacity:0.75;
+  font-weight:800;
+  letter-spacing:0.18px;
   margin:10px 0 6px 0;
 }
 
 #adminPanel input{
   width:100%;
-  padding:12px;
-  margin-bottom:10px;
+  padding:12px 12px;
+  margin:0 0 10px 0;
   border-radius:14px;
-  border:1px solid rgba(255,255,255,0.12);
-  background:rgba(255,255,255,0.06);
-  color:white;
+  border:none;
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+  border:1px solid rgba(255,255,255,0.10);
+  color:rgba(255,255,255,0.92);
   outline:none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 10px 24px rgba(0,0,0,0.35),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+  transition:0.18s ease;
+}
+#adminPanel input::placeholder{
+  color:rgba(255,255,255,0.45);
+  font-weight:800;
+}
+#adminPanel input:focus{
+  border-color: rgba(0,255,195,0.55);
+  box-shadow:
+    0 0 0 3px rgba(0,255,195,0.12),
+    0 14px 34px rgba(0,0,0,0.45),
+    inset 0 0 0 1px rgba(0,255,195,0.10);
 }
 
-/* Color only */
+/* Badge */
+#coordBadge{
+ margin:10px 0 14px 0;
+ padding:10px 12px;
+ border-radius:14px;
+ font-size:13px;
+ line-height:1.25;
+ background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+ border:1px solid rgba(255,255,255,0.10);
+ color:rgba(255,255,255,0.86);
+ box-shadow:
+   0 10px 24px rgba(0,0,0,0.35),
+   inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+#coordBadge.ready{
+ border-color: rgba(0,255,195,0.35);
+ color:#00ffc3;
+}
+#coordBadge.editing{
+ border-color: rgba(255,213,74,0.45);
+ color:#ffd54a;
+}
+#coordBadge b{ color:white; }
+
+/* Icon Picker */
+.iconPickerTitle{
+ margin:10px 0 6px 0;
+ font-size:12px;
+ opacity:0.75;
+ font-weight:800;
+ letter-spacing:0.18px;
+}
+.iconPicker{
+ display:flex;
+ gap:10px;
+ margin:0 0 10px 0;
+}
+.iconPick{
+ flex:1;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ gap:8px;
+ padding:10px 10px;
+ border-radius:14px;
+ cursor:pointer;
+ user-select:none;
+ background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+ border:1px solid rgba(255,255,255,0.10);
+ color:rgba(255,255,255,0.92);
+ box-shadow:
+   0 10px 24px rgba(0,0,0,0.35),
+   inset 0 0 0 1px rgba(255,255,255,0.04);
+ transition:0.18s ease;
+}
+.iconPick:hover{ transform: translateY(-1px); }
+.iconPick:active{ transform: scale(0.99); transition:0.06s ease; }
+.iconPick svg{ width:20px; height:20px; display:block; opacity:0.95; }
+.iconPick small{ font-weight:900; letter-spacing:.2px; opacity:.95; }
+.iconPick.active{
+ border-color: rgba(0,255,195,0.35);
+ box-shadow:
+   0 14px 34px rgba(0,0,0,0.42),
+   0 0 22px rgba(0,255,195,0.10),
+   inset 0 0 0 1px rgba(0,255,195,0.10);
+}
+
+/* Color input nicer */
 .colorRow{
-  display:flex;
-  margin-bottom:10px;
+ display:flex;
+ gap:10px;
+ align-items:center;
+ margin-bottom:10px;
 }
 .colorRow input[type="color"]{
-  width:100%;
-  height:42px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,0.12);
-  background:transparent;
-  cursor:pointer;
-  appearance:none;
-  -webkit-appearance:none;
+ width:56px;
+ height:42px;
+ border-radius:14px;
+ border:1px solid rgba(255,255,255,0.10);
+ background:transparent;
+ padding:0;
+ cursor:pointer;
+ overflow:hidden;
+ box-shadow:
+   0 10px 24px rgba(0,0,0,0.35),
+   inset 0 0 0 1px rgba(255,255,255,0.04);
 }
 .colorRow input[type="color"]::-webkit-color-swatch-wrapper{ padding:0; }
 .colorRow input[type="color"]::-webkit-color-swatch{ border:none; border-radius:14px; }
 
-/* Buttons */
+#colorPreview{
+ flex:1;
+ height:42px;
+ border-radius:14px;
+ border:1px solid rgba(255,255,255,0.10);
+ box-shadow:
+   0 10px 24px rgba(0,0,0,0.35),
+   inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+/* Save/Delete buttons row */
 .panelBtnRow{
-  display:flex;
-  gap:10px;
+ display:flex;
+ gap:10px;
+ margin-top:10px;
 }
 .panelBtnRow button{
-  flex:1;
-  padding:12px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,0.12);
-  background:rgba(255,255,255,0.06);
-  color:white;
-  font-weight:900;
-  cursor:pointer;
+ flex:1;
+ padding:12px 12px;
+ border-radius:14px;
+ font-weight:900;
+ background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.20));
+ border:1px solid rgba(255,255,255,0.10);
+ color:white;
+ backdrop-filter: blur(10px);
+ transition:0.18s ease;
 }
-
+.panelBtnRow button:hover{ transform: translateY(-1px); }
+.panelBtnRow button:active{ transform: scale(0.985); transition:0.06s ease; }
 .panelBtnRow .saveBtn{
-  border-color:rgba(0,255,195,0.35);
-  color:#00ffc3;
+ color:#00ffc3;
+ border:1px solid rgba(0,255,195,0.35);
+}
+.panelBtnRow .saveBtn:hover{
+ background: rgba(0,255,195,0.08);
+ box-shadow: 0 0 26px rgba(0,255,195,0.14);
 }
 .panelBtnRow .delBtn{
-  border-color:rgba(255,59,59,0.35);
-  color:#ff6b6b;
+ color:#ff6b6b;
+ border:1px solid rgba(255,59,59,0.35);
+}
+.panelBtnRow .delBtn:hover{
+ background: rgba(255,59,59,0.10);
+ box-shadow: 0 0 26px rgba(255,59,59,0.14);
+ color:#fff;
 }
 
+/* Leaflet divIcon defaults neutralisieren */
 .leaflet-div-icon{
-  background:transparent !important;
-  border:none !important;
+ background:transparent !important;
+ border:none !important;
 }
 
+/* Popup etwas wie fraktionen */
 .leaflet-popup-content-wrapper{
-  background:rgba(22,22,28,0.90);
-  color:white;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,0.10);
+ background:rgba(22,22,28,0.90);
+ color:white;
+ border-radius:14px;
+ border:1px solid rgba(255,255,255,0.10);
+ box-shadow:0 18px 55px rgba(0,0,0,0.55);
+ backdrop-filter: blur(12px);
 }
+.leaflet-popup-tip{ background:rgba(22,22,28,0.90); }
 </style>
 </head>
 
 <body>
 
-<div id="loginPanel">
+<div id="loginPanel" class="panel">
   <h2>GTA Map Login</h2>
   <input id="username" placeholder="Benutzername">
   <input id="password" type="password" placeholder="Passwort">
-  <button id="loginBtn" onclick="login()">Login</button>
+  <button class="primary" onclick="login()">Login</button>
   <p id="msg"></p>
 </div>
 
+<!-- Search icon overlay -->
 <div id="searchIcon">🔎</div>
 <input id="searchBox" placeholder="Suche...">
 
-<button id="logoutBtn" class="pillBtn" onclick="logout()" style="display:none;">Logout</button>
-<div id="adminToggle" class="pillBtn" style="display:none;">Admin</div>
+<!-- Right pills -->
+<button id="logoutBtn" class="pillBtn" onclick="logout()" style="display:none;">
+  <span class="pillIcon">⎋</span>
+  <span>Logout</span>
+</button>
 
+<div id="adminToggle" class="pillBtn" style="display:none;">
+  <span class="pillIcon">⚙</span>
+  <span>Admin</span>
+</div>
+
+<!-- Admin Panel -->
 <div id="adminPanel">
   <h3>Marker Verwaltung</h3>
+
+  <div id="coordBadge">🖱️ <b>Keine Koordinate gewählt</b><br>Klicke in die Karte, um einen neuen Marker zu platzieren.</div>
 
   <div class="panelLabel">Titel</div>
   <input id="mTitle" placeholder="Titel">
@@ -258,9 +510,32 @@ body{
   <div class="panelLabel">Beschreibung</div>
   <input id="mDesc" placeholder="Beschreibung">
 
+  <div class="iconPickerTitle">Icon (optional)</div>
+  <div class="iconPicker">
+    <div class="iconPick active" id="pickDot" onclick="setIcon('')">
+      <div id="dotPreview" style="width:16px;height:16px;border-radius:50%;border:2px solid #fff;background:#666;"></div>
+      <small>Punkt</small>
+    </div>
+
+    <div class="iconPick" id="pickHouse" onclick="setIcon('house')">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M12 3.2 3 10.2v10.2c0 .9.7 1.6 1.6 1.6H9.8v-6.3c0-.7.5-1.2 1.2-1.2h2c.7 0 1.2.5 1.2 1.2V22h5.2c.9 0 1.6-.7 1.6-1.6V10.2L12 3.2z"/>
+      </svg>
+      <small>Haus</small>
+    </div>
+
+    <div class="iconPick" id="pickLab" onclick="setIcon('lab')">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M9 2h6v2h-1v5l5 8.5c1 1.7-.2 3.5-2.2 3.5H7.2c-2 0-3.2-1.8-2.2-3.5L10 9V4H9V2z"/>
+      </svg>
+      <small>Labor</small>
+    </div>
+  </div>
+
   <div class="panelLabel">Farbe</div>
   <div class="colorRow">
-    <input id="mColor" type="color" value="#ff0000">
+    <input id="mColor" type="color" value="#ff0000" onchange="updateColorPreview()" title="Farbe">
+    <div id="colorPreview"></div>
   </div>
 
   <div class="panelBtnRow">
@@ -269,8 +544,10 @@ body{
   </div>
 </div>
 
-<div id="coords" style="position:absolute;bottom:15px;left:15px;display:none;"></div>
+<div id="coords"></div>
 <div id="map"></div>
+
+<button id="fraktionenBtn" onclick="window.location='fraktionen.html'">🏴 Fraktionen</button>
 
 <script>
 const SUPABASE_URL="https://lleldalugvgmgqekcolx.supabase.co";
@@ -279,152 +556,356 @@ const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let map, markerLayer;
 let isAdmin=false;
+
 let selectedCoords=null;
 let currentEditId=null;
 let allMarkers=[];
 
-/* LOGIN */
-document.addEventListener("keydown",e=>{ if(e.key==="Enter") login(); });
+let inactivityTimer;
+
+// Desktop Hover Erkennung: nur wenn echte Hover-Maus vorhanden
+const isDesktopHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+// Icon state ("" => Punkt)
+let selectedIcon = "";
+
+/* ================= AUTO LOGOUT ================= */
+function resetInactivityTimer(){
+ clearTimeout(inactivityTimer);
+ inactivityTimer=setTimeout(()=>{
+  alert("Automatischer Logout wegen Inaktivität (60 Minuten)");
+  logout();
+ },60*60*1000);
+}
+document.addEventListener("mousemove",resetInactivityTimer);
+document.addEventListener("keydown",resetInactivityTimer);
+document.addEventListener("click",resetInactivityTimer);
+document.addEventListener("touchstart",resetInactivityTimer);
+
+/* ================= LOGIN ================= */
+document.addEventListener("keydown",e=>{
+ if(e.key==="Enter") login();
+});
 
 window.onload=async()=>{
-  const {data}=await db.auth.getSession();
-  if(data.session){
-    isAdmin = ((data.session.user.email || "").toLowerCase() === "admin@gta.local");
-    startApp();
-  }
+ const {data}=await db.auth.getSession();
+ if(data.session){
+  isAdmin = ((data.session.user.email || "").toLowerCase() === "admin@gta.local");
+  startApp();
+ }
 };
 
 async function login(){
-  const username=document.getElementById("username").value.toLowerCase().trim();
-  const password=document.getElementById("password").value;
+ const usernameRaw=document.getElementById("username").value;
+ const username=usernameRaw.toLowerCase();
+ const password=document.getElementById("password").value;
 
-  const {error}=await db.auth.signInWithPassword({
-    email:username+"@gta.local",
-    password
-  });
+ const {error}=await db.auth.signInWithPassword({
+  email:username+"@gta.local",
+  password
+ });
 
-  if(error){
-    document.getElementById("msg").innerText="Login fehlgeschlagen";
-  }else{
-    isAdmin = (username==="admin");
-    startApp();
-  }
+ if(error){
+  document.getElementById("msg").innerText="Login fehlgeschlagen";
+ }else{
+  isAdmin = (username === "admin");
+  startApp();
+ }
 }
 
 async function logout(){
-  await db.auth.signOut();
-  location.reload();
+ await db.auth.signOut();
+ location.reload();
 }
 
-/* START */
+/* ================= START ================= */
 function startApp(){
-  document.getElementById("loginPanel").style.display="none";
-  document.getElementById("map").style.display="block";
-  document.getElementById("coords").style.display="block";
-  document.getElementById("logoutBtn").style.display="flex";
-  document.getElementById("searchBox").style.display="block";
-  document.getElementById("searchIcon").style.display="block";
+ document.getElementById("loginPanel").style.display="none";
+ document.getElementById("map").style.display="block";
+ document.getElementById("coords").style.display="block";
 
-  if(isAdmin){
-    document.getElementById("adminToggle").style.display="flex";
-  }
+ document.getElementById("logoutBtn").style.display="flex";
+ document.getElementById("searchBox").style.display="block";
+ document.getElementById("searchIcon").style.display="block";
+ document.getElementById("fraktionenBtn").style.display="block";
 
-  initMap();
-  loadMarkers();
+ if(isAdmin){
+  document.getElementById("adminToggle").style.display="flex";
+ }else{
+  document.getElementById("adminToggle").style.display="none";
+  document.getElementById("adminPanel").classList.remove("open");
+ }
+
+ initMap();
+ loadMarkers();
+ setupRealtime();
+ updateColorPreview();
+ updateCoordBadge();
+ resetInactivityTimer();
 }
 
-/* MAP */
+/* ================= ADMIN PANEL TOGGLE ================= */
+document.getElementById("adminToggle").onclick=()=>{
+ if(!isAdmin) return;
+ document.getElementById("adminPanel").classList.toggle("open");
+};
+
+/* ================= COORD BADGE ================= */
+function updateCoordBadge(mode){
+ const badge=document.getElementById("coordBadge");
+ badge.classList.remove("ready","editing");
+
+ if(mode==="editing"){
+  badge.classList.add("editing");
+  badge.innerHTML="✏️ <b>Bearbeiten-Modus</b><br>Du bearbeitest einen bestehenden Marker.";
+  return;
+ }
+
+ if(selectedCoords){
+  badge.classList.add("ready");
+  badge.innerHTML=
+   "✅ <b>Koordinate gewählt</b><br>" +
+   "X: "+Math.round(selectedCoords.lng)+" &nbsp; | &nbsp; Y: "+Math.round(selectedCoords.lat);
+ }else{
+  badge.innerHTML="🖱️ <b>Keine Koordinate gewählt</b><br>Klicke in die Karte, um einen neuen Marker zu platzieren.";
+ }
+}
+
+/* ================= ICON PICKER ================= */
+function setIcon(icon){
+ selectedIcon = icon || "";
+ document.getElementById("pickDot").classList.toggle("active", selectedIcon==="");
+ document.getElementById("pickHouse").classList.toggle("active", selectedIcon==="house");
+ document.getElementById("pickLab").classList.toggle("active", selectedIcon==="lab");
+}
+function setIconFromMarker(icon){
+ setIcon(icon || "");
+}
+
+/* ================= MAP ================= */
 function initMap(){
-  map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2});
-  const bounds=[[0,0],[8192,8192]];
-  L.imageOverlay("gta_map.png",bounds).addTo(map);
-  map.fitBounds(bounds);
-  markerLayer=L.layerGroup().addTo(map);
+ map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2});
+ const bounds=[[0,0],[8192,8192]];
+ L.imageOverlay("gta_map.png",bounds).addTo(map);
+ map.fitBounds(bounds);
 
-  map.on("mousemove",e=>{
-    document.getElementById("coords").innerText=
-      "X:"+Math.round(e.latlng.lng)+" | Y:"+Math.round(e.latlng.lat);
+ markerLayer=L.layerGroup().addTo(map);
+
+ map.on("mousemove",e=>{
+  document.getElementById("coords").innerText=
+   "X:"+Math.round(e.latlng.lng)+" | Y:"+Math.round(e.latlng.lat);
+ });
+
+ if(isAdmin){
+  map.on("click",e=>{
+   clearForm();
+   selectedCoords=e.latlng;
+   currentEditId=null;
+
+   document.getElementById("adminPanel").classList.add("open");
+   updateCoordBadge();
   });
-
-  if(isAdmin){
-    map.on("click",e=>{
-      selectedCoords=e.latlng;
-      currentEditId=null;
-    });
-  }
+ }
 }
 
-/* MARKER */
+/* ================= ICON SPECS (Anchor fix gegen Drift) ================= */
+function buildMarkerIconSpec(color, icon){
+ const safeColor = color || "#ff0000";
+
+ // Punkt: 22px + border 3px => ~28px Iconbox
+ if(!icon){
+  const size = [28,28];
+  return {
+   html: `<div style="
+      width:22px;height:22px;
+      border-radius:50%;
+      background:${safeColor};
+      border:3px solid white;
+      box-sizing:content-box;
+    "></div>`,
+   iconSize: size,
+   iconAnchor: [size[0]/2, size[1]/2],
+   popupAnchor: [0, -(size[1]/2)]
+  };
+ }
+
+ // Haus/Labor: 42px, dünne Outline
+ const size = [42,42];
+ const strokeW = 1.2;
+
+ if(icon==="house"){
+  return {
+   html: `<div style="width:${size[0]}px;height:${size[1]}px;display:flex;align-items:center;justify-content:center;">
+     <svg viewBox="0 0 24 24" width="${size[0]}" height="${size[1]}">
+       <path fill="${safeColor}" stroke="white" stroke-width="${strokeW}"
+        d="M12 3.2 3 10.2v10.2c0 .9.7 1.6 1.6 1.6H9.8v-6.3c0-.7.5-1.2 1.2-1.2h2c.7 0 1.2.5 1.2 1.2V22h5.2c.9 0 1.6-.7 1.6-1.6V10.2L12 3.2z"/>
+     </svg>
+   </div>`,
+   iconSize: size,
+   iconAnchor: [size[0]/2, size[1]/2],
+   popupAnchor: [0, -(size[1]/2)]
+  };
+ }
+
+ if(icon==="lab"){
+  return {
+   html: `<div style="width:${size[0]}px;height:${size[1]}px;display:flex;align-items:center;justify-content:center;">
+     <svg viewBox="0 0 24 24" width="${size[0]}" height="${size[1]}">
+       <path fill="${safeColor}" stroke="white" stroke-width="${strokeW}"
+        d="M9 2h6v2h-1v5l5 8.5c1 1.7-.2 3.5-2.2 3.5H7.2c-2 0-3.2-1.8-2.2-3.5L10 9V4H9V2z"/>
+     </svg>
+   </div>`,
+   iconSize: size,
+   iconAnchor: [size[0]/2, size[1]/2],
+   popupAnchor: [0, -(size[1]/2)]
+  };
+ }
+
+ // Fallback
+ const size2=[28,28];
+ return {
+  html: `<div style="width:22px;height:22px;border-radius:50%;background:${safeColor};border:3px solid white;"></div>`,
+  iconSize:size2,
+  iconAnchor:[size2[0]/2,size2[1]/2],
+  popupAnchor:[0,-(size2[1]/2)]
+ };
+}
+
+/* ================= MARKER ================= */
 async function loadMarkers(){
-  const {data}=await db.from("markers").select("*");
+ const {data, error}=await db.from("markers").select("*");
+ if(error){
+  console.error(error);
+  allMarkers=[];
+ }else{
   allMarkers=data || [];
-  renderMarkers(allMarkers);
+ }
+ renderMarkers(allMarkers);
 }
 
 function renderMarkers(data){
-  markerLayer.clearLayers();
-  data.forEach(m=>{
-    const icon=L.divIcon({
-      html:`<div style="width:22px;height:22px;border-radius:50%;background:${m.color};border:3px solid white;"></div>`,
-      className:"",
-      iconSize:[28,28],
-      iconAnchor:[14,14]
-    });
+ markerLayer.clearLayers();
 
-    const marker=L.marker([m.y,m.x],{icon,draggable:isAdmin}).addTo(markerLayer);
-    marker.bindPopup("<b>"+(m.title||"")+"</b><br>"+(m.description||""));
+ data.forEach(m=>{
+  const spec = buildMarkerIconSpec(m.color, m.icon);
 
-    if(isAdmin){
-      marker.on("click",()=>{
-        currentEditId=m.id;
-        document.getElementById("mTitle").value=m.title||"";
-        document.getElementById("mDesc").value=m.description||"";
-        document.getElementById("mColor").value=m.color||"#ff0000";
-        document.getElementById("adminPanel").classList.add("open");
-      });
-
-      marker.on("dragend",async e=>{
-        const pos=e.target.getLatLng();
-        await db.from("markers")
-          .update({x:Math.round(pos.lng),y:Math.round(pos.lat)})
-          .eq("id",m.id);
-      });
-    }
+  const icon = L.divIcon({
+   html: spec.html,
+   className: "",
+   iconSize: spec.iconSize,
+   iconAnchor: spec.iconAnchor,
+   popupAnchor: spec.popupAnchor
   });
-}
 
-async function saveMarker(){
-  const title=document.getElementById("mTitle").value.trim();
-  const description=document.getElementById("mDesc").value.trim();
-  const color=document.getElementById("mColor").value;
+  const marker = L.marker([m.y, m.x], {
+   icon,
+   draggable: isAdmin
+  }).addTo(markerLayer);
 
-  if(currentEditId){
+  marker.bindPopup("<b>"+(m.title||"")+"</b><br>"+(m.description||""));
+
+  // Hover + Klick nur Desktop
+  if(isDesktopHover){
+   marker.on("mouseover", function(){ this.openPopup(); });
+   marker.on("mouseout", function(){ this.closePopup(); });
+  }
+
+  if(isAdmin){
+   marker.on("click",()=>{
+    selectedCoords=null;
+    currentEditId=m.id;
+
+    document.getElementById("mTitle").value=m.title || "";
+    document.getElementById("mDesc").value=m.description || "";
+    document.getElementById("mColor").value=m.color || "#ff0000";
+    updateColorPreview();
+
+    setIconFromMarker(m.icon);
+
+    document.getElementById("adminPanel").classList.add("open");
+    updateCoordBadge("editing");
+   });
+
+   marker.on("dragend", async (e)=>{
+    const pos = e.target.getLatLng();
     await db.from("markers")
-      .update({title,description,color})
-      .eq("id",currentEditId);
-  }else{
-    if(!selectedCoords){ alert("Karte anklicken"); return; }
-    await db.from("markers").insert([{
-      title,description,color,
-      x:Math.round(selectedCoords.lng),
-      y:Math.round(selectedCoords.lat)
-    }]);
+     .update({x:Math.round(pos.lng), y:Math.round(pos.lat)})
+     .eq("id", m.id);
+   });
   }
 }
 
-async function deleteMarker(){
-  if(!currentEditId) return;
-  await db.from("markers").delete().eq("id",currentEditId);
+async function saveMarker(){
+ const title=document.getElementById("mTitle").value.trim();
+ const description=document.getElementById("mDesc").value.trim();
+ const color=document.getElementById("mColor").value;
+ const icon = selectedIcon || null;
+
+ if(!title){ alert("Titel fehlt"); return; }
+
+ if(currentEditId){
+  await db.from("markers")
+   .update({title, description, color, icon})
+   .eq("id", currentEditId);
+
+  clearForm();
+  updateCoordBadge();
+ }else{
+  if(!selectedCoords){ alert("Karte anklicken"); return; }
+
+  await db.from("markers").insert([{
+   title, description, color, icon,
+   x:Math.round(selectedCoords.lng),
+   y:Math.round(selectedCoords.lat)
+  }]);
+
+  clearForm();
+  selectedCoords=null;
+  updateCoordBadge();
+ }
 }
 
-document.getElementById("searchBox").addEventListener("input",e=>{
-  const value=e.target.value.toLowerCase();
-  const filtered=allMarkers.filter(m=>
-    (m.title||"").toLowerCase().includes(value) ||
-    (m.description||"").toLowerCase().includes(value)
-  );
-  renderMarkers(filtered);
+async function deleteMarker(){
+ if(!currentEditId) return;
+ await db.from("markers").delete().eq("id", currentEditId);
+ clearForm();
+ selectedCoords=null;
+ updateCoordBadge();
+}
+
+function clearForm(){
+ document.getElementById("mTitle").value="";
+ document.getElementById("mDesc").value="";
+ currentEditId=null;
+ setIcon("");
+}
+
+/* ================= SEARCH ================= */
+document.getElementById("searchBox").addEventListener("input",(e)=>{
+ const value = e.target.value.toLowerCase();
+ const filtered = allMarkers.filter(m =>
+  (m.title||"").toLowerCase().includes(value) ||
+  (m.description||"").toLowerCase().includes(value)
+ );
+ renderMarkers(filtered);
 });
+
+/* ================= REALTIME ================= */
+function setupRealtime(){
+ db.channel("realtime-markers")
+  .on("postgres_changes",
+   {event:"*", schema:"public", table:"markers"},
+   ()=>loadMarkers()
+  ).subscribe();
+}
+
+/* ================= COLOR PREVIEW ================= */
+function updateColorPreview(){
+ const v=document.getElementById("mColor").value;
+ document.getElementById("colorPreview").style.background=v;
+ const dot=document.getElementById("dotPreview");
+ if(dot) dot.style.background=v;
+}
 </script>
 </body>
 </html>
