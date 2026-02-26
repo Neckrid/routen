@@ -847,12 +847,23 @@ function renderMarkers(data){
         updateCoordBadge("editing");
       });
 
-      marker.on("dragend", async (e)=>{
-        const pos = e.target.getLatLng();
-        await db.from("markers")
-          .update({x:Math.round(pos.lng), y:Math.round(pos.lat)})
-          .eq("id", m.id);
-      });
+      marker.on("click",()=>{
+  selectedCoords=null;
+  currentEditId=m.id;
+
+  document.getElementById("mTitle").value = m.title || "";
+  document.getElementById("mDesc").value  = m.description || "";
+
+  // ✅ Farbe korrekt übernehmen (Fallback #ff0000)
+  const c = (m.color && typeof m.color === "string") ? m.color : "#ff0000";
+  document.getElementById("mColor").value = c;
+  updateColorPreview();
+
+  setIconFromMarker(m.icon);
+
+  document.getElementById("adminPanel").classList.add("open");
+  updateCoordBadge("editing");
+});
     }
   });
 }
