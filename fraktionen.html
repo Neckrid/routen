@@ -752,13 +752,12 @@ async function logout(){
   window.location="index.html";
 }
 
-/* ===== Drag state helper (nur Realtime-Pause, KEIN alter CSS-Jitter-Fix) ===== */
+/* ===== Drag state helper (Realtime-Pause, kein altes CSS jitter fix) ===== */
 function setDragging(state){
   if(state){
     suppressRealtime = true;
     clearTimeout(refreshTimer);
   } else {
-    // nach Drop kurz warten, dann 1 sauberer Refresh
     setTimeout(()=>{
       suppressRealtime = false;
       scheduleRefresh();
@@ -884,7 +883,6 @@ async function renderFraktionen(list){
     card.innerHTML=html;
     container.appendChild(card);
 
-    // Wenn wir gerade Realtime-suppress haben (z.B. nach Drag), keine extra Animation-Bursts
     if(suppressRealtime){
       card.classList.add("mounted");
     }else{
@@ -1022,6 +1020,7 @@ function setupMembersDragAll(){
   });
 }
 
+/* ✅ IMPORTANT: kein upsert, nur UPDATE batch => keine INSERT policy nötig */
 async function persistMemberOrder(listEl){
   if(!listEl) return;
 
@@ -1032,7 +1031,6 @@ async function persistMemberOrder(listEl){
 
   if(!updates.length) return;
 
-  // ✅ parallel Updates (schnell), ohne INSERT/UPSERT
   const promises = updates.map(u =>
     db.from("fraktions_mitglieder").update({ sort_order: u.sort_order }).eq("id", u.id)
   );
@@ -1061,28 +1059,30 @@ function setupFactionDrag(){
 
     onStart: ()=> setDragging(true),
 
-   onEnd: async ()=>{
-  try{
-    if(!isAdmin) { await refreshDataAndRender(); return; }
+    onEnd: async ()=>{
+      try{
+        if(!isAdmin) { await refreshDataAndRender(); return; }
 
-    const cards = [...container.querySelectorAll(".card")];
-    const updates = cards
-      .map((c, i)=>({ id: c.dataset.fraktionId, sort_order: i }))
-      .filter(x=>x.id);
+        const cards = [...container.querySelectorAll(".card")];
+        const updates = cards
+          .map((c, i)=>({ id: c.dataset.fraktionId, sort_order: i }))
+          .filter(x=>x.id);
 
-    const promises = updates.map(u =>
-      db.from("fraktionen").update({ sort_order: u.sort_order }).eq("id", u.id)
-    );
+        const promises = updates.map(u =>
+          db.from("fraktionen").update({ sort_order: u.sort_order }).eq("id", u.id)
+        );
 
-    const results = await Promise.all(promises);
-    const err = results.find(r => r.error)?.error;
-    if(err) console.error("fraktionen sort update error:", err);
+        const results = await Promise.all(promises);
+        const err = results.find(r => r.error)?.error;
+        if(err) console.error("fraktionen sort update error:", err);
 
-    scheduleRefresh();
-  } finally {
-    setDragging(false);
-  }
-},
+        scheduleRefresh();
+      } finally {
+        setDragging(false);
+      }
+    }
+  });
+}
 
 /* ================== CRUD: FRAKTION ================== */
 async function createFraktion(){
