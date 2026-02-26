@@ -25,14 +25,14 @@ body{
     linear-gradient(135deg, #0b0b10 0%, #11111a 55%, #0b0b10 100%);
 }
 
-/* ✅ Subtiles Noise Overlay (macht Glas teurer) */
+/* ✅ Subtiles Noise Overlay */
 body::after{
   content:"";
   position:fixed;
   inset:0;
   pointer-events:none;
   z-index:5;
-  opacity:0.055; /* 0.04–0.09 */
+  opacity:0.055;
   mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E");
 }
@@ -175,11 +175,13 @@ body::after{
   flex:1;
 }
 
-/* ===== MEMBER ROW ===== */
+/* ===== MEMBER ROW (optisch angepasst) ===== */
 .member{
-  background:linear-gradient(145deg, rgba(32,32,34,0.80), rgba(10,10,14,0.88));
-  border:1px solid rgba(255,255,255,0.05);
-  padding:12px 14px;
+  background:linear-gradient(145deg, rgba(28,28,34,0.78), rgba(8,8,12,0.88));
+  border:1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.28);
+
+  padding:13px 14px;
   border-radius:14px;
   margin-bottom:10px;
   display:flex;
@@ -197,30 +199,25 @@ body::after{
 }
 .member:active{ cursor:grabbing; transform: scale(0.99); }
 
-/* Drag-Lift */
-.sortable-ghost, .dragging{
-  box-shadow:0 18px 55px rgba(0,0,0,0.6) !important;
-  filter:saturate(1.1);
-}
-.dragging{
-  opacity:0.5;
-  transform:scale(1.01) rotate(2deg);
-}
-
 .memberLeft{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:12px;
   min-width:0;
 }
 .memberName{
-  font-size:16px;
-  font-weight:800;
-  color:#f1f1f1;
-  letter-spacing:0.2px;
+  font-size:15.5px;
+  font-weight:900;
+  letter-spacing:0.25px;
+  color:rgba(255,255,255,0.92);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.35);
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
+  min-width:0;
+}
+.member:hover .memberName{
+  color:rgba(255,255,255,0.98);
 }
 
 /* ===== LEADER (Chip) ===== */
@@ -370,7 +367,7 @@ button{
   box-shadow: 0 0 26px rgba(0,255,157,0.14);
 }
 
-/* Delete: Text harmonischer -> nur "Löschen" */
+/* Delete */
 .dangerSoft{
   color:#ff6b6b;
   border:1px solid rgba(255,59,59,0.55);
@@ -542,16 +539,39 @@ button{
   gap:10px;
   margin-bottom:14px;
 }
+
+/* ✅ Modal Inputs (optisch angepasst) */
 .modal input{
   width:100%;
-  padding:11px 12px;
-  border-radius:12px;
-  border:none;
-  background:rgba(20,20,26,0.80);
-  border:1px solid rgba(255,255,255,0.08);
-  color:white;
+  padding:12px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.10);
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+  color:rgba(255,255,255,0.92);
   outline:none;
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  box-shadow:
+    0 10px 24px rgba(0,0,0,0.35),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+
+  transition:0.18s ease;
 }
+.modal input::placeholder{
+  color:rgba(255,255,255,0.45);
+  font-weight:800;
+  letter-spacing:0.2px;
+}
+.modal input:focus{
+  border-color: rgba(0,255,157,0.55);
+  box-shadow:
+    0 0 0 3px rgba(0,255,157,0.12),
+    0 14px 34px rgba(0,0,0,0.45),
+    inset 0 0 0 1px rgba(0,255,157,0.10);
+}
+
 .modalActions{
   display:flex;
   gap:12px;
@@ -605,6 +625,34 @@ button{
   user-select:none;
 }
 .modalCloseX:hover{ background:rgba(255,255,255,0.10); }
+
+/* ===== DRAG JITTER FIX =====
+   Während Drag: Hover-Transforms/Transitions ausschalten,
+   weil Sortable selbst mit transforms arbeitet. */
+body.is-dragging .card,
+body.is-dragging .member,
+body.is-dragging .actionBtn{
+  transition:none !important;
+}
+body.is-dragging .card:hover,
+body.is-dragging .actionBtn:hover{
+  transform:none !important;
+}
+body.is-dragging .card:hover{
+  box-shadow:
+    0 18px 55px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(255,255,255,0.05) inset,
+    0 0 22px color-mix(in srgb, var(--glow, #00ffc3) 40%, transparent) !important;
+}
+
+/* Sortable states */
+.dragging{
+  opacity:0.55;
+  filter:saturate(1.05);
+}
+.sortable-ghost{
+  opacity:0.25;
+}
 
 @media (max-width: 520px){
   #container{ padding-left:14px; padding-right:14px; }
@@ -710,7 +758,6 @@ window.onload=async()=>{
   await refreshDataAndRender();
   setupRealtime();
   setupFactionDrag();
-
   setupModalUX();
 };
 
@@ -719,8 +766,13 @@ async function logout(){
   window.location="index.html";
 }
 
+/* ===== Drag state helper (Jitter Fix) ===== */
+function setDragging(state){
+  document.body.classList.toggle("is-dragging", !!state);
+}
+
+/* ===== Modal UX ===== */
 function setupModalUX(){
-  // Backdrop click -> close
   document.getElementById("addModalOverlay").addEventListener("click",(e)=>{
     if(e.target.id==="addModalOverlay") closeAddModal();
   });
@@ -728,7 +780,6 @@ function setupModalUX(){
     if(e.target.id==="delModalOverlay") closeDeleteModal();
   });
 
-  // ESC closes the topmost modal
   document.addEventListener("keydown",(e)=>{
     if(e.key==="Escape"){
       if(isAddModalOpen()) closeAddModal();
@@ -736,7 +787,6 @@ function setupModalUX(){
     }
   });
 
-  // Enter in add modal -> save
   const addVor = document.getElementById("addVor");
   const addNach = document.getElementById("addNach");
   const enterHandler = (e)=>{
@@ -748,17 +798,11 @@ function setupModalUX(){
   addVor.addEventListener("keydown", enterHandler);
   addNach.addEventListener("keydown", enterHandler);
 }
-
-function isAddModalOpen(){
-  return document.getElementById("addModalOverlay").style.display==="flex";
-}
-function isDeleteModalOpen(){
-  return document.getElementById("delModalOverlay").style.display==="flex";
-}
+function isAddModalOpen(){ return document.getElementById("addModalOverlay").style.display==="flex"; }
+function isDeleteModalOpen(){ return document.getElementById("delModalOverlay").style.display==="flex"; }
 
 /* ================= DATA LOAD + RENDER ================= */
 async function refreshDataAndRender(){
-  // Für globale Reihenfolge: fraktionen.sort_order (int)
   let fr = await db.from("fraktionen").select("*").order("sort_order", {ascending:true});
   if(fr.error){
     fr = await db.from("fraktionen").select("*").order("created_at", {ascending:true});
@@ -844,7 +888,6 @@ async function renderFraktionen(list){
 
     card.innerHTML=html;
     container.appendChild(card);
-
     requestAnimationFrame(()=> card.classList.add("mounted"));
   }
 }
@@ -926,7 +969,6 @@ async function confirmDeleteFraktion(){
   if(!isAdmin) return;
   if(!modalFraktionId) return;
 
-  // Nur fraktionen löschen wie vorher (dein altes Verhalten)
   const del = await db.from("fraktionen").delete().eq("id", modalFraktionId);
   if(del.error){ console.error(del.error); return; }
 
@@ -940,12 +982,19 @@ function setupMembersDragAll(){
   lists.forEach(listEl=>{
     new Sortable(listEl,{
       group:{ name:"members", pull:true, put:true },
-      animation:160,
+      animation:180,
       draggable:".member",
+      ghostClass:"sortable-ghost",
+      chosenClass:"dragging",
+      dragClass:"dragging",
 
       scroll:true,
       scrollSensitivity:80,
       scrollSpeed:16,
+
+      // ✅ jitter fix
+      onStart: ()=> setDragging(true),
+      onEnd: ()=> setDragging(false),
 
       onAdd: async (evt)=>{
         if(!isAdmin) { await refreshDataAndRender(); return; }
@@ -989,25 +1038,35 @@ function setupFactionDrag(){
   if(!container) return;
 
   new Sortable(container,{
-    animation:180,
+    animation:200,
     draggable:".card",
     handle:"h3",
+    ghostClass:"sortable-ghost",
+    chosenClass:"dragging",
+    dragClass:"dragging",
 
     scroll:true,
     scrollSensitivity:90,
     scrollSpeed:16,
 
-    onEnd: async ()=>{
-      if(!isAdmin) { await refreshDataAndRender(); return; }
+    // ✅ jitter fix
+    onStart: ()=> setDragging(true),
 
-      const cards = container.querySelectorAll(".card");
-      for(let i=0;i<cards.length;i++){
-        const fid = cards[i].dataset.fraktionId;
-        if(!fid) continue;
-        const res = await db.from("fraktionen").update({sort_order:i}).eq("id", fid);
-        if(res.error){
-          // wenn sort_order nicht existiert, ignorieren
+    onEnd: async ()=>{
+      try{
+        if(!isAdmin) { await refreshDataAndRender(); return; }
+
+        const cards = container.querySelectorAll(".card");
+        for(let i=0;i<cards.length;i++){
+          const fid = cards[i].dataset.fraktionId;
+          if(!fid) continue;
+          const res = await db.from("fraktionen").update({sort_order:i}).eq("id", fid);
+          if(res.error){
+            console.error("sort_order update failed:", res.error);
+          }
         }
+      } finally {
+        setDragging(false);
       }
     }
   });
@@ -1033,7 +1092,7 @@ async function createFraktion(){
   document.getElementById("fName").value="";
 }
 
-/* (deleteFraktion Funktion bleibt aus Kompatibilität, wird aber nicht mehr direkt genutzt) */
+/* Kompatibilität */
 async function deleteFraktion(id){
   openDeleteModal(id, (allFraktionen.find(x=>x.id===id)?.name || ""));
 }
@@ -1106,7 +1165,6 @@ function escapeHtml(str){
     .replaceAll("'","&#039;");
 }
 function escapeAttr(str){
-  // für HTML-Attribute in Template-Strings (single quotes)
   return String(str)
     .replaceAll("&","&amp;")
     .replaceAll("<","&lt;")
