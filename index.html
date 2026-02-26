@@ -168,18 +168,22 @@ html::after{
 }
 #searchIcon{
   position:absolute;
-  top:50%;
+  top:10px;                 /* gleiche Top-Position wie #searchBox */
   left:92px;
-  transform:translateY(-50%);
+
+  height:42px;              /* exakt gleiche Höhe wie die Suchbox */
+  display:flex;
+  align-items:center;       /* vertikal zentriert */
+  justify-content:center;
 
   z-index:1101;
-  display:none;
+  pointer-events:none;
 
-  font-size:14px;
   color:#00ffc3;
   opacity:0.95;
+  font-size:14px;
 
-  pointer-events:none;
+  text-shadow:0 2px 10px rgba(0,0,0,0.55);
 }
 
 /* ====== Floating Buttons / Panel Alignment ====== */
