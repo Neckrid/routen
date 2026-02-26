@@ -51,6 +51,9 @@ button{
  font-weight:bold;
 }
 
+.primary{background:#00ffc3;color:black;}
+.danger{background:#ff3b3b;color:white;}
+
 /* SEARCH */
 #searchBox{
  position:absolute;
@@ -91,7 +94,7 @@ button{
  display:none;
 }
 
-/* ADMIN PANEL (komplett versteckt via transform) */
+/* ADMIN PANEL */
 #adminPanel{
  position:absolute;
  top:90px;
@@ -113,7 +116,7 @@ button{
  color:#00ffc3;
 }
 
-/* Koordinaten-Status */
+/* Badge */
 #coordBadge{
  margin:10px 0 14px 0;
  padding:10px 12px;
@@ -144,42 +147,6 @@ button{
  margin-top:5px;
  margin-bottom:12px;
  border:2px solid white;
-}
-
-.primary{background:#00ffc3;color:black;}
-.danger{background:#ff3b3b;color:white;}
-
-#coords{
- position:absolute;
- bottom:15px;
- left:15px;
- background:#000000aa;
- padding:8px 14px;
- border-radius:8px;
- font-size:14px;
- display:none;
- z-index:1000;
-}
-
-#fraktionenBtn{
- position:absolute;
- bottom:20px;
- right:20px;
- background:#00ffc3;
- color:black;
- padding:12px 16px;
- border-radius:12px;
- font-weight:bold;
- cursor:pointer;
- z-index:1200;
- box-shadow:0 0 20px #00ffc355;
- display:none;
-}
-
-/* Wichtig: Leaflet divIcon default styles neutralisieren */
-.leaflet-div-icon{
- background:transparent !important;
- border:none !important;
 }
 
 /* Icon Picker */
@@ -221,17 +188,62 @@ button{
  font-weight:bold;
  letter-spacing:.2px;
 }
+
+/* coords bottom left */
+#coords{
+ position:absolute;
+ bottom:15px;
+ left:15px;
+ background:#000000aa;
+ padding:8px 14px;
+ border-radius:8px;
+ font-size:14px;
+ display:none;
+ z-index:1000;
+}
+
+#fraktionenBtn{
+ position:absolute;
+ bottom:20px;
+ right:20px;
+ background:#00ffc3;
+ color:black;
+ padding:12px 16px;
+ border-radius:12px;
+ font-weight:bold;
+ cursor:pointer;
+ z-index:1200;
+ box-shadow:0 0 20px #00ffc355;
+ display:none;
+}
+
+/* Leaflet divIcon defaults neutralisieren */
+.leaflet-div-icon{
+ background:transparent !important;
+ border:none !important;
+}
+
+/* Optional: Popup etwas dunkler/lesbarer */
+.leaflet-popup-content-wrapper{
+ background:#121212;
+ color:white;
+ border-radius:10px;
+ border:1px solid #2a2a2a;
+}
+.leaflet-popup-tip{
+ background:#121212;
+}
 </style>
 </head>
 
 <body>
 
 <div id="loginPanel" class="panel">
-<h2>GTA Map Login</h2>
-<input id="username" placeholder="Benutzername">
-<input id="password" type="password" placeholder="Passwort">
-<button class="primary" onclick="login()">Login</button>
-<p id="msg"></p>
+  <h2>GTA Map Login</h2>
+  <input id="username" placeholder="Benutzername">
+  <input id="password" type="password" placeholder="Passwort">
+  <button class="primary" onclick="login()">Login</button>
+  <p id="msg"></p>
 </div>
 
 <button id="logoutBtn" onclick="logout()">Logout</button>
@@ -239,47 +251,47 @@ button{
 <div id="adminToggle">Admin</div>
 
 <div id="adminPanel">
-<h3>Marker Verwaltung</h3>
+  <h3>Marker Verwaltung</h3>
 
-<div id="coordBadge">🖱️ <b>Keine Koordinate gewählt</b><br>Klicke in die Karte, um einen neuen Marker zu platzieren.</div>
+  <div id="coordBadge">🖱️ <b>Keine Koordinate gewählt</b><br>Klicke in die Karte, um einen neuen Marker zu platzieren.</div>
 
-<input id="mTitle" placeholder="Titel">
-<input id="mDesc" placeholder="Beschreibung">
+  <input id="mTitle" placeholder="Titel">
+  <input id="mDesc" placeholder="Beschreibung">
 
-<div class="iconPickerTitle">Icon (optional)</div>
-<div class="iconPicker">
-  <div class="iconPick active" id="pickDot" onclick="setIcon('')">
-    <div id="dotPreview" style="width:16px;height:16px;border-radius:50%;border:2px solid #fff;background:#666;"></div>
-    <small>Punkt</small>
+  <div class="iconPickerTitle">Icon (optional)</div>
+  <div class="iconPicker">
+    <div class="iconPick active" id="pickDot" onclick="setIcon('')">
+      <div id="dotPreview" style="width:16px;height:16px;border-radius:50%;border:2px solid #fff;background:#666;"></div>
+      <small>Punkt</small>
+    </div>
+
+    <div class="iconPick" id="pickHouse" onclick="setIcon('house')">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M12 3.2 3 10.2v10.2c0 .9.7 1.6 1.6 1.6H9.8v-6.3c0-.7.5-1.2 1.2-1.2h2c.7 0 1.2.5 1.2 1.2V22h5.2c.9 0 1.6-.7 1.6-1.6V10.2L12 3.2z"/>
+      </svg>
+      <small>Haus</small>
+    </div>
+
+    <div class="iconPick" id="pickLab" onclick="setIcon('lab')">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M9 2h6v2h-1v5l5 8.5c1 1.7-.2 3.5-2.2 3.5H7.2c-2 0-3.2-1.8-2.2-3.5L10 9V4H9V2z"/>
+      </svg>
+      <small>Labor</small>
+    </div>
   </div>
 
-  <div class="iconPick" id="pickHouse" onclick="setIcon('house')">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="currentColor" d="M12 3.2 3 10.2v10.2c0 .9.7 1.6 1.6 1.6H9.8v-6.3c0-.7.5-1.2 1.2-1.2h2c.7 0 1.2.5 1.2 1.2V22h5.2c.9 0 1.6-.7 1.6-1.6V10.2L12 3.2z"/>
-    </svg>
-    <small>Haus</small>
-  </div>
+  <input id="mColor" type="color" value="#ff0000" onchange="updateColorPreview()">
+  <div id="colorPreview" class="colorPreview"></div>
 
-  <div class="iconPick" id="pickLab" onclick="setIcon('lab')">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="currentColor" d="M9 2h6v2h-1v5l5 8.5c1 1.7-.2 3.5-2.2 3.5H7.2c-2 0-3.2-1.8-2.2-3.5L10 9V4H9V2z"/>
-    </svg>
-    <small>Labor</small>
-  </div>
-</div>
-
-<input id="mColor" type="color" value="#ff0000" onchange="updateColorPreview()">
-<div id="colorPreview" class="colorPreview"></div>
-
-<button class="primary" onclick="saveMarker()">Speichern</button>
-<button class="danger" onclick="deleteMarker()">Löschen</button>
+  <button class="primary" onclick="saveMarker()">Speichern</button>
+  <button class="danger" onclick="deleteMarker()">Löschen</button>
 </div>
 
 <div id="coords"></div>
 <div id="map"></div>
 
 <button id="fraktionenBtn" onclick="window.location='fraktionen.html'">
-🏴 Fraktionen
+  🏴 Fraktionen
 </button>
 
 <script>
@@ -287,10 +299,20 @@ const SUPABASE_URL="https://lleldalugvgmgqekcolx.supabase.co";
 const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc";
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let map,markerLayer,isAdmin=false,selectedCoords=null,currentEditId=null,allMarkers=[];
+let map, markerLayer;
+let isAdmin=false;
+
+let selectedCoords=null;
+let currentEditId=null;
+let allMarkers=[];
+
 let inactivityTimer;
 
-let selectedIcon = ""; // "" = Punkt
+// Desktop Hover Erkennung: nur wenn echte Hover-Maus vorhanden
+const isDesktopHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+// Icon state ("" => Punkt)
+let selectedIcon = "";
 
 /* ================= AUTO LOGOUT ================= */
 function resetInactivityTimer(){
@@ -313,7 +335,7 @@ document.addEventListener("keydown",e=>{
 window.onload=async()=>{
  const {data}=await db.auth.getSession();
  if(data.session){
-  isAdmin=data.session.user.email.toLowerCase()==="admin@gta.local";
+  isAdmin = (data.session.user.email || "").toLowerCase() === "admin@gta.local";
   startApp();
  }
 };
@@ -331,7 +353,7 @@ async function login(){
  if(error){
   document.getElementById("msg").innerText="Login fehlgeschlagen";
  }else{
-  isAdmin=username==="admin";
+  isAdmin = (username === "admin");
   startApp();
  }
 }
@@ -361,6 +383,11 @@ function startApp(){
  updateCoordBadge();
  resetInactivityTimer();
 }
+
+/* ================= ADMIN PANEL TOGGLE ================= */
+document.getElementById("adminToggle").onclick=()=>{
+ document.getElementById("adminPanel").classList.toggle("open");
+};
 
 /* ================= COORD BADGE ================= */
 function updateCoordBadge(mode){
@@ -421,11 +448,11 @@ function initMap(){
  }
 }
 
-/* ================= ICON SPECS (FIX: Anchor/Size korrekt) ================= */
-function buildMarkerIcon(color, icon){
+/* ================= ICON SPECS (Anchor fix gegen Drift) ================= */
+function buildMarkerIconSpec(color, icon){
  const safeColor = color || "#ff0000";
 
- // Punkt: 22px + border 3px => visuell ca. 28px
+ // Punkt: 22px + border 3px => ~28px "Iconbox"
  if(!icon){
   const size = [28,28];
   return {
@@ -442,14 +469,13 @@ function buildMarkerIcon(color, icon){
   };
  }
 
- // Haus/Labor: 42px (Outline via stroke)
+ // Haus/Labor: 42px, dünne weiße Outline
  const size = [42,42];
- const commonWrap = `style="width:${size[0]}px;height:${size[1]}px;display:flex;align-items:center;justify-content:center;"`;
  const strokeW = 1.2;
 
  if(icon==="house"){
   return {
-   html: `<div ${commonWrap}>
+   html: `<div style="width:${size[0]}px;height:${size[1]}px;display:flex;align-items:center;justify-content:center;">
      <svg viewBox="0 0 24 24" width="${size[0]}" height="${size[1]}">
        <path fill="${safeColor}" stroke="white" stroke-width="${strokeW}"
         d="M12 3.2 3 10.2v10.2c0 .9.7 1.6 1.6 1.6H9.8v-6.3c0-.7.5-1.2 1.2-1.2h2c.7 0 1.2.5 1.2 1.2V22h5.2c.9 0 1.6-.7 1.6-1.6V10.2L12 3.2z"/>
@@ -463,7 +489,7 @@ function buildMarkerIcon(color, icon){
 
  if(icon==="lab"){
   return {
-   html: `<div ${commonWrap}>
+   html: `<div style="width:${size[0]}px;height:${size[1]}px;display:flex;align-items:center;justify-content:center;">
      <svg viewBox="0 0 24 24" width="${size[0]}" height="${size[1]}">
        <path fill="${safeColor}" stroke="white" stroke-width="${strokeW}"
         d="M9 2h6v2h-1v5l5 8.5c1 1.7-.2 3.5-2.2 3.5H7.2c-2 0-3.2-1.8-2.2-3.5L10 9V4H9V2z"/>
@@ -476,19 +502,24 @@ function buildMarkerIcon(color, icon){
  }
 
  // Fallback
- const fallbackSize = [28,28];
+ const size2=[28,28];
  return {
   html: `<div style="width:22px;height:22px;border-radius:50%;background:${safeColor};border:3px solid white;"></div>`,
-  iconSize: fallbackSize,
-  iconAnchor: [fallbackSize[0]/2, fallbackSize[1]/2],
-  popupAnchor: [0, -(fallbackSize[1]/2)]
+  iconSize:size2,
+  iconAnchor:[size2[0]/2,size2[1]/2],
+  popupAnchor:[0,-(size2[1]/2)]
  };
 }
 
 /* ================= MARKER ================= */
 async function loadMarkers(){
- const {data}=await db.from("markers").select("*");
- allMarkers=data || [];
+ const {data, error}=await db.from("markers").select("*");
+ if(error){
+  console.error(error);
+  allMarkers=[];
+ }else{
+  allMarkers=data || [];
+ }
  renderMarkers(allMarkers);
 }
 
@@ -496,45 +527,52 @@ function renderMarkers(data){
  markerLayer.clearLayers();
 
  data.forEach(m=>{
-  const spec = buildMarkerIcon(m.color, m.icon);
+  const spec = buildMarkerIconSpec(m.color, m.icon);
 
-  const icon=L.divIcon({
+  const icon = L.divIcon({
    html: spec.html,
-   className: "",              // keine Leaflet default box
-   iconSize: spec.iconSize,     // ✅ Fix: Leaflet weiß jetzt die Größe
-   iconAnchor: spec.iconAnchor, // ✅ Fix: exakt zentriert
+   className: "",
+   iconSize: spec.iconSize,
+   iconAnchor: spec.iconAnchor,
    popupAnchor: spec.popupAnchor
   });
 
-  const marker=L.marker([m.y,m.x],{
+  const marker = L.marker([m.y, m.x], {
    icon,
-   draggable:isAdmin
+   draggable: isAdmin
   }).addTo(markerLayer);
+
+  marker.bindPopup("<b>"+(m.title||"")+"</b><br>"+(m.description||""));
+
+  // ✅ Option 1: Hover + Klick nur Desktop
+  if(isDesktopHover){
+   marker.on("mouseover", function(){ this.openPopup(); });
+   marker.on("mouseout", function(){ this.closePopup(); });
+  }
 
   if(isAdmin){
    marker.on("click",()=>{
-    selectedCoords=null;
-
+    selectedCoords=null; // beim Edit kein Insert anhand alter coords
     currentEditId=m.id;
+
     document.getElementById("mTitle").value=m.title || "";
     document.getElementById("mDesc").value=m.description || "";
     document.getElementById("mColor").value=m.color || "#ff0000";
     updateColorPreview();
+
     setIconFromMarker(m.icon);
 
     document.getElementById("adminPanel").classList.add("open");
     updateCoordBadge("editing");
    });
 
-   marker.on("dragend",async e=>{
-    const pos=e.target.getLatLng();
+   marker.on("dragend", async (e)=>{
+    const pos = e.target.getLatLng();
     await db.from("markers")
-     .update({x:Math.round(pos.lng),y:Math.round(pos.lat)})
-     .eq("id",m.id);
+     .update({x:Math.round(pos.lng), y:Math.round(pos.lat)})
+     .eq("id", m.id);
    });
   }
-
-  marker.bindPopup("<b>"+(m.title||"")+"</b><br>"+(m.description||""));
  });
 }
 
@@ -548,8 +586,8 @@ async function saveMarker(){
 
  if(currentEditId){
   await db.from("markers")
-   .update({title,description,color,icon})
-   .eq("id",currentEditId);
+   .update({title, description, color, icon})
+   .eq("id", currentEditId);
 
   clearForm();
   updateCoordBadge();
@@ -557,7 +595,7 @@ async function saveMarker(){
   if(!selectedCoords){ alert("Karte anklicken"); return; }
 
   await db.from("markers").insert([{
-   title,description,color,icon,
+   title, description, color, icon,
    x:Math.round(selectedCoords.lng),
    y:Math.round(selectedCoords.lat)
   }]);
@@ -570,7 +608,7 @@ async function saveMarker(){
 
 async function deleteMarker(){
  if(!currentEditId) return;
- await db.from("markers").delete().eq("id",currentEditId);
+ await db.from("markers").delete().eq("id", currentEditId);
  clearForm();
  selectedCoords=null;
  updateCoordBadge();
@@ -580,37 +618,34 @@ function clearForm(){
  document.getElementById("mTitle").value="";
  document.getElementById("mDesc").value="";
  currentEditId=null;
- setIcon("");
+ setIcon(""); // zurück auf Punkt
 }
 
-/* SEARCH */
-document.getElementById("searchBox").addEventListener("input",e=>{
- const value=e.target.value.toLowerCase();
- const filtered=allMarkers.filter(m=>
+/* ================= SEARCH ================= */
+document.getElementById("searchBox").addEventListener("input",(e)=>{
+ const value = e.target.value.toLowerCase();
+ const filtered = allMarkers.filter(m =>
   (m.title||"").toLowerCase().includes(value) ||
   (m.description||"").toLowerCase().includes(value)
  );
  renderMarkers(filtered);
 });
 
-/* REALTIME */
+/* ================= REALTIME ================= */
 function setupRealtime(){
  db.channel("realtime-markers")
   .on("postgres_changes",
-   {event:"*",schema:"public",table:"markers"},
+   {event:"*", schema:"public", table:"markers"},
    ()=>loadMarkers()
   ).subscribe();
 }
 
-document.getElementById("adminToggle").onclick=()=>{
- document.getElementById("adminPanel").classList.toggle("open");
-};
-
+/* ================= COLOR PREVIEW ================= */
 function updateColorPreview(){
- const v = document.getElementById("mColor").value;
- document.getElementById("colorPreview").style.background = v;
- const dot = document.getElementById("dotPreview");
- if(dot) dot.style.background = v;
+ const v=document.getElementById("mColor").value;
+ document.getElementById("colorPreview").style.background=v;
+ const dot=document.getElementById("dotPreview");
+ if(dot) dot.style.background=v;
 }
 </script>
 </body>
