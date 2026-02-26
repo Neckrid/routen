@@ -1026,15 +1026,20 @@ async function persistMemberOrder(listEl){
   if(!listEl) return;
 
   const items = [...listEl.querySelectorAll(".member")];
-  const updates = items.map((el, i)=>({
-    id: el.dataset.id,
-    sort_order: i
-  })).filter(x=>x.id);
+  const updates = items
+    .map((el, i)=>({ id: el.dataset.id, sort_order: i }))
+    .filter(x=>x.id);
 
   if(!updates.length) return;
 
-  const res = await db.from("fraktions_mitglieder").upsert(updates, { onConflict: "id" });
-  if(res.error) console.error("persistMemberOrder upsert error:", res.error);
+  // ✅ parallel Updates (schnell), ohne INSERT/UPSERT
+  const promises = updates.map(u =>
+    db.from("fraktions_mitglieder").update({ sort_order: u.sort_order }).eq("id", u.id)
+  );
+
+  const results = await Promise.all(promises);
+  const err = results.find(r => r.error)?.error;
+  if(err) console.error("persistMemberOrder update error:", err);
 }
 
 /* ================== DRAG & DROP: FRAKTIONSBOXEN ================== */
@@ -1056,26 +1061,28 @@ function setupFactionDrag(){
 
     onStart: ()=> setDragging(true),
 
-    onEnd: async ()=>{
-      try{
-        if(!isAdmin) { await refreshDataAndRender(); return; }
+   onEnd: async ()=>{
+  try{
+    if(!isAdmin) { await refreshDataAndRender(); return; }
 
-        const cards = [...container.querySelectorAll(".card")];
-        const updates = cards.map((c, i)=>({
-          id: c.dataset.fraktionId,
-          sort_order: i
-        })).filter(x=>x.id);
+    const cards = [...container.querySelectorAll(".card")];
+    const updates = cards
+      .map((c, i)=>({ id: c.dataset.fraktionId, sort_order: i }))
+      .filter(x=>x.id);
 
-        const res = await db.from("fraktionen").upsert(updates, { onConflict: "id" });
-        if(res.error) console.error("fraktionen order upsert error:", res.error);
+    const promises = updates.map(u =>
+      db.from("fraktionen").update({ sort_order: u.sort_order }).eq("id", u.id)
+    );
 
-        scheduleRefresh();
-      } finally {
-        setDragging(false);
-      }
-    }
-  });
-}
+    const results = await Promise.all(promises);
+    const err = results.find(r => r.error)?.error;
+    if(err) console.error("fraktionen sort update error:", err);
+
+    scheduleRefresh();
+  } finally {
+    setDragging(false);
+  }
+},
 
 /* ================== CRUD: FRAKTION ================== */
 async function createFraktion(){
