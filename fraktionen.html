@@ -175,80 +175,147 @@ body::after{
   flex:1;
 }
 
-/* ===== MEMBER ROW (optisch angepasst) ===== */
+/* ===== MEMBER ROW (Premium Glass + Accent + bessere Tiefe) ===== */
 .member{
-  background:linear-gradient(145deg, rgba(28,28,34,0.78), rgba(8,8,12,0.88));
-  border:1px solid rgba(255,255,255,0.06);
-  box-shadow: 0 10px 24px rgba(0,0,0,0.28);
+  position:relative;
+  overflow:hidden;
 
-  padding:13px 14px;
-  border-radius:14px;
+  background:
+    radial-gradient(120% 120% at 18% 0%, rgba(255,255,255,0.08), transparent 52%),
+    linear-gradient(145deg, rgba(26,26,32,0.78), rgba(7,7,10,0.92));
+  border:1px solid rgba(255,255,255,0.07);
+
+  padding:14px 14px;
+  border-radius:16px;
   margin-bottom:10px;
+
   display:flex;
   justify-content:space-between;
   align-items:center;
+
   cursor:grab;
   user-select:none;
-  transition:0.2s ease;
+
+  box-shadow:
+    0 14px 30px rgba(0,0,0,0.36),
+    inset 0 0 0 1px rgba(255,255,255,0.03);
+
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
-.member:last-child{ margin-bottom:0; }
+
+/* Glow “sheen” oben rechts */
+.member::after{
+  content:"";
+  position:absolute;
+  inset:-40% -25% auto auto;
+  width:240px;
+  height:180px;
+  background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.10), transparent 60%);
+  transform:rotate(18deg);
+  opacity:0.75;
+  pointer-events:none;
+}
+
+/* Linker Accent-Streifen (passt zur Fraktionsfarbe) */
+.member::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:10px;
+  bottom:10px;
+  width:3px;
+  border-radius:999px;
+  background:color-mix(in srgb, var(--glow, #00ffc3) 55%, transparent);
+  opacity:0.55;
+  pointer-events:none;
+}
 
 .card .member:hover{
-  border:1px solid color-mix(in srgb, var(--glow, #00ffc3) 55%, rgba(255,255,255,0.12));
-  box-shadow:0 0 18px color-mix(in srgb, var(--glow, #00ffc3) 22%, transparent);
+  border-color: color-mix(in srgb, var(--glow, #00ffc3) 40%, rgba(255,255,255,0.12));
+  box-shadow:
+    0 18px 44px rgba(0,0,0,0.48),
+    0 0 22px color-mix(in srgb, var(--glow, #00ffc3) 14%, transparent),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+  transform: translateY(-1px);
 }
-.member:active{ cursor:grabbing; transform: scale(0.99); }
 
+.member:active{
+  cursor:grabbing;
+  transform: scale(0.992);
+}
+
+/* links: icon + name */
 .memberLeft{
   display:flex;
   align-items:center;
   gap:12px;
   min-width:0;
 }
+
+/* Leader-Stern als “Badge” */
+.leader-star{
+  width:28px;
+  height:28px;
+  border-radius:11px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:16px;
+  line-height:1;
+  cursor:pointer;
+
+  background:
+    radial-gradient(120% 120% at 20% 10%, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+  border:1px solid rgba(255,255,255,0.10);
+  box-shadow:
+    0 10px 20px rgba(0,0,0,0.28),
+    inset 0 0 0 1px rgba(255,255,255,0.03);
+
+  transition: transform .14s ease, border-color .14s ease, background .14s ease;
+}
+.member:hover .leader-star{
+  border-color: color-mix(in srgb, var(--glow, #00ffc3) 28%, rgba(255,255,255,0.10));
+  transform: translateY(-1px);
+}
+
+.leader-active{
+  color:#ffd54a;
+  background: rgba(255,213,74,0.14);
+  border:1px solid rgba(255,213,74,0.60);
+  box-shadow:0 0 16px rgba(255,213,74,0.18);
+}
+
+/* Name typografisch “cleaner” */
 .memberName{
   font-size:15.5px;
   font-weight:900;
   letter-spacing:0.25px;
   color:rgba(255,255,255,0.92);
   text-shadow: 0 1px 0 rgba(0,0,0,0.35);
+
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
   min-width:0;
 }
+
+/* Optional: leichte “Highlight”-Schrift beim Hover */
 .member:hover .memberName{
   color:rgba(255,255,255,0.98);
 }
 
-/* ===== LEADER (Chip) ===== */
-.leader-star{
-  cursor:pointer;
-  font-size:16px;
-  opacity:0.95;
-  line-height:1;
-
-  width:26px;
-  height:26px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:10px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.08);
-  transition:0.15s ease;
-}
-.member:hover .leader-star{
-  border-color: color-mix(in srgb, var(--glow, #00ffc3) 22%, rgba(255,255,255,0.10));
-}
-.leader-active{
-  color:#ffd54a;
-  background:rgba(255,213,74,0.12);
-  border:1px solid rgba(255,213,74,0.55);
-  box-shadow:0 0 14px rgba(255,213,74,0.18);
-}
+/* Leader Row bleibt goldig, aber cleaner */
 .member.leaderRow{
-  border:1px solid rgba(255,213,74,0.85);
-  box-shadow:0 0 16px rgba(255,213,74,0.18);
+  border-color: rgba(255,213,74,0.65);
+  box-shadow:
+    0 18px 44px rgba(0,0,0,0.48),
+    0 0 18px rgba(255,213,74,0.10),
+    inset 0 0 0 1px rgba(255,213,74,0.10);
+}
+.member.leaderRow::before{
+  background: rgba(255,213,74,0.80);
+  opacity:0.65;
 }
 
 /* ===== DELETE MEMBER BUTTON (hover only) ===== */
