@@ -10,6 +10,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+*{ box-sizing:border-box; }
+
 body{
  margin:0;
  background:#0e0e0e;
@@ -18,8 +20,10 @@ body{
  overflow:hidden;
 }
 
+/* Map */
 #map{height:100vh;display:none;}
 
+/* Login Panel (kannst du später auch an fraktionen-style anpassen, hab's gelassen) */
 .panel{
  position:absolute;
  top:50%;left:50%;
@@ -30,8 +34,8 @@ body{
  width:90%;max-width:400px;
  box-shadow:0 0 25px #00ffc355;
  text-align:center;
+ z-index:2000;
 }
-
 input{
  width:100%;
  padding:10px;
@@ -40,9 +44,7 @@ input{
  border:none;
  background:#222;
  color:white;
- box-sizing:border-box;
 }
-
 button{
  padding:8px 14px;
  border:none;
@@ -54,106 +56,298 @@ button{
 .primary{background:#00ffc3;color:black;}
 .danger{background:#ff3b3b;color:white;}
 
-/* SEARCH */
+/* ====== Suche: Position bleibt gleich, Look wie fraktionen ====== */
 #searchBox{
  position:absolute;
  top:10px;
- left:80px;
+ left:80px;          /* ✅ Position bleibt */
  z-index:1100;
  display:none;
- width:220px;
+ width:min(380px, calc(100vw - 160px));
+ padding:11px 14px 11px 36px;
+ border-radius:14px;
+ border:none;
+ background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+ border:1px solid rgba(255,255,255,0.10);
+ color:rgba(255,255,255,0.92);
+ outline:none;
+ backdrop-filter: blur(12px);
+ -webkit-backdrop-filter: blur(12px);
+ box-shadow:
+   0 12px 28px rgba(0,0,0,0.40),
+   inset 0 0 0 1px rgba(255,255,255,0.04);
+ transition:0.18s ease;
+}
+#searchBox::placeholder{
+ color:rgba(255,255,255,0.45);
+ font-weight:800;
+ letter-spacing:0.15px;
+}
+#searchBox:focus{
+ border-color: rgba(0,255,195,0.55);
+ box-shadow:
+   0 0 0 3px rgba(0,255,195,0.12),
+   0 14px 34px rgba(0,0,0,0.45),
+   inset 0 0 0 1px rgba(0,255,195,0.10);
 }
 
-/* LOGOUT */
-#logoutBtn{
+/* kleines Search-Icon wie fraktionen (nur optisch) */
+#searchIcon{
  position:absolute;
  top:10px;
- right:0;
- background:#ff3b3b;
- color:white;
- padding:8px 12px;
- border-radius:8px 0 0 8px;
- cursor:pointer;
- font-weight:bold;
+ left:92px;          /* 80 + 12 */
+ z-index:1101;
  display:none;
- z-index:1200;
+ width:20px;
+ height:20px;
+ pointer-events:none;
+ color:#00ffc3;
+ opacity:0.9;
+ font-size:14px;
+ line-height:20px;
 }
 
-/* ADMIN TOGGLE */
+/* ====== Floating Buttons / Panel Alignment wie fraktionen ====== */
+:root{
+  --edge-gap: 0px;
+  --btn-gap: 8px;
+  --btn-h: 40px;
+  --btn-top: 10px;
+}
+
+.pillBtn{
+  position:fixed;
+  right:var(--edge-gap);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+
+  padding:8px 10px;
+  border-radius:14px 0 0 14px;
+  font-size:13px;
+
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+  border:1px solid rgba(255,255,255,0.10);
+  color:rgba(255,255,255,0.92);
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  box-shadow:
+    0 14px 34px rgba(0,0,0,0.45),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+
+  cursor:pointer;
+  z-index:1200;
+  transition:0.18s ease;
+  user-select:none;
+  height:var(--btn-h);
+}
+.pillBtn:hover{
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,0.14);
+  box-shadow:
+    0 18px 46px rgba(0,0,0,0.50),
+    inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+.pillBtn:active{ transform: scale(0.99); transition:0.06s ease; }
+
+.pillIcon{
+  width:24px;
+  height:24px;
+  border-radius:9px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+/* Logout / Admin Positionen */
+#logoutBtn{ top:var(--btn-top); }
+#adminToggle{ top:calc(var(--btn-top) + var(--btn-h) + var(--btn-gap)); }
+
+#logoutBtn{
+  color:#ffb3b3;
+  border-color: rgba(255,59,59,0.35);
+}
+#logoutBtn .pillIcon{
+  background:rgba(255,59,59,0.10);
+  border-color: rgba(255,59,59,0.20);
+}
+#logoutBtn:hover{
+  box-shadow:
+    0 18px 46px rgba(0,0,0,0.50),
+    0 0 26px rgba(255,59,59,0.10),
+    inset 0 0 0 1px rgba(255,59,59,0.12);
+  color:#fff;
+}
+
 #adminToggle{
- position:absolute;
- top:50px;
- right:0;
- background:#00ffc3;
- color:black;
- padding:8px 12px;
- border-radius:8px 0 0 8px;
- cursor:pointer;
- font-weight:bold;
- z-index:1100;
- display:none;
+  color:#00ffc3;
+  border-color: rgba(0,255,195,0.35);
+}
+#adminToggle .pillIcon{
+  background:rgba(0,255,195,0.10);
+  border-color: rgba(0,255,195,0.20);
+}
+#adminToggle:hover{
+  box-shadow:
+    0 18px 46px rgba(0,0,0,0.50),
+    0 0 26px rgba(0,255,195,0.10),
+    inset 0 0 0 1px rgba(0,255,195,0.12);
 }
 
-/* ADMIN PANEL */
-#adminPanel{
- position:absolute;
- top:90px;
- right:0;
- width:300px;
- background:#161616;
- padding:20px;
- border-radius:15px 0 0 15px;
- box-shadow:0 0 25px #00ffc322;
- transition:transform 0.4s ease;
- z-index:1000;
- transform:translateX(100%);
+/* Fraktionen Button (unten rechts wie backBtn) */
+#fraktionenBtn{
+  position:fixed;
+  bottom:18px;
+  right:18px;
+  padding:12px 14px;
+  border-radius:16px;
+
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+  border:1px solid rgba(0,255,195,0.35);
+  color:#00ffc3;
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  box-shadow:
+    0 16px 40px rgba(0,0,0,0.52),
+    0 0 24px rgba(0,255,195,0.10),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+  z-index:1200;
+  transition:0.18s ease;
+  display:none;
+  font-weight:900;
 }
-#adminPanel.open{ transform:translateX(0); }
+#fraktionenBtn:hover{
+  transform: translateY(-1px);
+  box-shadow:
+    0 20px 52px rgba(0,0,0,0.58),
+    0 0 30px rgba(0,255,195,0.14),
+    inset 0 0 0 1px rgba(0,255,195,0.12);
+}
+#fraktionenBtn:active{ transform: scale(0.99); transition:0.06s ease; }
+
+/* Coords */
+#coords{
+ position:absolute;
+ bottom:15px;
+ left:15px;
+ background:#000000aa;
+ padding:8px 14px;
+ border-radius:8px;
+ font-size:14px;
+ display:none;
+ z-index:1000;
+}
+
+/* Admin Panel: aligned unter Admin Button */
+#adminPanel{
+  position:fixed;
+  top:calc(var(--btn-top) + (var(--btn-h) + var(--btn-gap)) * 2);
+  right:var(--edge-gap);
+
+  width:320px;
+  background:rgba(22,22,28,0.72);
+  padding:18px;
+  border-radius:18px 0 0 18px;
+
+  border:1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  box-shadow:
+    0 24px 70px rgba(0,0,0,0.62),
+    0 0 0 1px rgba(255,255,255,0.05) inset,
+    0 0 22px rgba(0,255,195,0.08);
+
+  transform: translateX(106%);
+  transition:0.35s ease;
+  z-index:1190;
+}
+#adminPanel.open{ transform: translateX(0); }
 
 #adminPanel h3{
- margin-top:0;
- text-align:center;
- color:#00ffc3;
+  margin:0 0 10px 0;
+  text-align:center;
+  color:#00ffc3;
+  font-weight:900;
+  letter-spacing:0.25px;
+}
+
+.panelLabel{
+  font-size:12px;
+  opacity:0.75;
+  font-weight:800;
+  letter-spacing:0.18px;
+  margin:10px 0 6px 0;
+}
+
+#adminPanel input{
+  width:100%;
+  padding:12px 12px;
+  margin:0 0 10px 0;
+  border-radius:14px;
+  border:none;
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+  border:1px solid rgba(255,255,255,0.10);
+  color:rgba(255,255,255,0.92);
+  outline:none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 10px 24px rgba(0,0,0,0.35),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+  transition:0.18s ease;
+}
+#adminPanel input::placeholder{
+  color:rgba(255,255,255,0.45);
+  font-weight:800;
+}
+#adminPanel input:focus{
+  border-color: rgba(0,255,195,0.55);
+  box-shadow:
+    0 0 0 3px rgba(0,255,195,0.12),
+    0 14px 34px rgba(0,0,0,0.45),
+    inset 0 0 0 1px rgba(0,255,195,0.10);
 }
 
 /* Badge */
 #coordBadge{
  margin:10px 0 14px 0;
  padding:10px 12px;
- border-radius:10px;
+ border-radius:14px;
  font-size:13px;
  line-height:1.25;
- background:#0b0b0b;
- border:1px solid #2a2a2a;
- color:#cfcfcf;
- box-shadow:inset 0 0 0 1px #000;
+ background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+ border:1px solid rgba(255,255,255,0.10);
+ color:rgba(255,255,255,0.86);
+ box-shadow:
+   0 10px 24px rgba(0,0,0,0.35),
+   inset 0 0 0 1px rgba(255,255,255,0.04);
 }
 #coordBadge.ready{
- border-color:#00ffc355;
+ border-color: rgba(0,255,195,0.35);
  color:#00ffc3;
- box-shadow:0 0 12px #00ffc322, inset 0 0 0 1px #000;
 }
 #coordBadge.editing{
- border-color:#ffcc0033;
- color:#ffcc00;
- box-shadow:0 0 12px #ffcc0022, inset 0 0 0 1px #000;
+ border-color: rgba(255,213,74,0.45);
+ color:#ffd54a;
 }
 #coordBadge b{ color:white; }
-
-.colorPreview{
- width:100%;
- height:20px;
- border-radius:6px;
- margin-top:5px;
- margin-bottom:12px;
- border:2px solid white;
-}
 
 /* Icon Picker */
 .iconPickerTitle{
  margin:10px 0 6px 0;
- font-size:13px;
- color:#bfbfbf;
+ font-size:12px;
+ opacity:0.75;
+ font-weight:800;
+ letter-spacing:0.18px;
 }
 .iconPicker{
  display:flex;
@@ -167,54 +361,97 @@ button{
  justify-content:center;
  gap:8px;
  padding:10px 10px;
- border-radius:12px;
+ border-radius:14px;
  cursor:pointer;
  user-select:none;
- background:#111;
- border:1px solid #2a2a2a;
- color:#eaeaea;
+ background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+ border:1px solid rgba(255,255,255,0.10);
+ color:rgba(255,255,255,0.92);
+ box-shadow:
+   0 10px 24px rgba(0,0,0,0.35),
+   inset 0 0 0 1px rgba(255,255,255,0.04);
+ transition:0.18s ease;
 }
-.iconPick svg{
- width:22px;
- height:22px;
- display:block;
-}
+.iconPick:hover{ transform: translateY(-1px); }
+.iconPick:active{ transform: scale(0.99); transition:0.06s ease; }
+.iconPick svg{ width:20px; height:20px; display:block; opacity:0.95; }
+.iconPick small{ font-weight:900; letter-spacing:.2px; opacity:.95; }
 .iconPick.active{
- border-color:#00ffc355;
- box-shadow:0 0 14px #00ffc322;
-}
-.iconPick small{
- opacity:.9;
- font-weight:bold;
- letter-spacing:.2px;
+ border-color: rgba(0,255,195,0.35);
+ box-shadow:
+   0 14px 34px rgba(0,0,0,0.42),
+   0 0 22px rgba(0,255,195,0.10),
+   inset 0 0 0 1px rgba(0,255,195,0.10);
 }
 
-/* coords bottom left */
-#coords{
- position:absolute;
- bottom:15px;
- left:15px;
- background:#000000aa;
- padding:8px 14px;
- border-radius:8px;
- font-size:14px;
- display:none;
- z-index:1000;
+/* Color input nicer */
+.colorRow{
+ display:flex;
+ gap:10px;
+ align-items:center;
+ margin-bottom:10px;
 }
-
-#fraktionenBtn{
- position:absolute;
- bottom:20px;
- right:20px;
- background:#00ffc3;
- color:black;
- padding:12px 16px;
- border-radius:12px;
- font-weight:bold;
+.colorRow input[type="color"]{
+ width:56px;
+ height:42px;
+ border-radius:14px;
+ border:1px solid rgba(255,255,255,0.10);
+ background:transparent;
+ padding:0;
  cursor:pointer;
- z-index:1200;
- box-shadow:0 0 20px #00ffc355;
- display:none;
+ overflow:hidden;
+ box-shadow:
+   0 10px 24px rgba(0,0,0,0.35),
+   inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+.colorRow input[type="color"]::-webkit-color-swatch-wrapper{ padding:0; }
+.colorRow input[type="color"]::-webkit-color-swatch{ border:none; border-radius:14px; }
+
+#colorPreview{
+ flex:1;
+ height:42px;
+ border-radius:14px;
+ border:1px solid rgba(255,255,255,0.10);
+ box-shadow:
+   0 10px 24px rgba(0,0,0,0.35),
+   inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+/* Save/Delete buttons row */
+.panelBtnRow{
+ display:flex;
+ gap:10px;
+ margin-top:10px;
+}
+.panelBtnRow button{
+ flex:1;
+ padding:12px 12px;
+ border-radius:14px;
+ font-weight:900;
+ background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.20));
+ border:1px solid rgba(255,255,255,0.10);
+ color:white;
+ backdrop-filter: blur(10px);
+ transition:0.18s ease;
+}
+.panelBtnRow button:hover{ transform: translateY(-1px); }
+.panelBtnRow button:active{ transform: scale(0.985); transition:0.06s ease; }
+.panelBtnRow .saveBtn{
+ color:#00ffc3;
+ border:1px solid rgba(0,255,195,0.35);
+}
+.panelBtnRow .saveBtn:hover{
+ background: rgba(0,255,195,0.08);
+ box-shadow: 0 0 26px rgba(0,255,195,0.14);
+}
+.panelBtnRow .delBtn{
+ color:#ff6b6b;
+ border:1px solid rgba(255,59,59,0.35);
+}
+.panelBtnRow .delBtn:hover{
+ background: rgba(255,59,59,0.10);
+ box-shadow: 0 0 26px rgba(255,59,59,0.14);
+ color:#fff;
 }
 
 /* Leaflet divIcon defaults neutralisieren */
@@ -223,16 +460,16 @@ button{
  border:none !important;
 }
 
-/* Optional: Popup etwas dunkler/lesbarer */
+/* Popup etwas wie fraktionen */
 .leaflet-popup-content-wrapper{
- background:#121212;
+ background:rgba(22,22,28,0.90);
  color:white;
- border-radius:10px;
- border:1px solid #2a2a2a;
+ border-radius:14px;
+ border:1px solid rgba(255,255,255,0.10);
+ box-shadow:0 18px 55px rgba(0,0,0,0.55);
+ backdrop-filter: blur(12px);
 }
-.leaflet-popup-tip{
- background:#121212;
-}
+.leaflet-popup-tip{ background:rgba(22,22,28,0.90); }
 </style>
 </head>
 
@@ -246,16 +483,31 @@ button{
   <p id="msg"></p>
 </div>
 
-<button id="logoutBtn" onclick="logout()">Logout</button>
-<input id="searchBox" placeholder="🔎 Suche...">
-<div id="adminToggle">Admin</div>
+<!-- Search icon overlay -->
+<div id="searchIcon">🔎</div>
+<input id="searchBox" placeholder="Suche...">
 
+<!-- Right pills -->
+<button id="logoutBtn" class="pillBtn" onclick="logout()" style="display:none;">
+  <span class="pillIcon">⎋</span>
+  <span>Logout</span>
+</button>
+
+<div id="adminToggle" class="pillBtn" style="display:none;">
+  <span class="pillIcon">⚙</span>
+  <span>Admin</span>
+</div>
+
+<!-- Admin Panel -->
 <div id="adminPanel">
   <h3>Marker Verwaltung</h3>
 
   <div id="coordBadge">🖱️ <b>Keine Koordinate gewählt</b><br>Klicke in die Karte, um einen neuen Marker zu platzieren.</div>
 
+  <div class="panelLabel">Titel</div>
   <input id="mTitle" placeholder="Titel">
+
+  <div class="panelLabel">Beschreibung</div>
   <input id="mDesc" placeholder="Beschreibung">
 
   <div class="iconPickerTitle">Icon (optional)</div>
@@ -280,23 +532,26 @@ button{
     </div>
   </div>
 
-  <input id="mColor" type="color" value="#ff0000" onchange="updateColorPreview()">
-  <div id="colorPreview" class="colorPreview"></div>
+  <div class="panelLabel">Farbe</div>
+  <div class="colorRow">
+    <input id="mColor" type="color" value="#ff0000" onchange="updateColorPreview()" title="Farbe">
+    <div id="colorPreview"></div>
+  </div>
 
-  <button class="primary" onclick="saveMarker()">Speichern</button>
-  <button class="danger" onclick="deleteMarker()">Löschen</button>
+  <div class="panelBtnRow">
+    <button class="saveBtn" onclick="saveMarker()">Speichern</button>
+    <button class="delBtn" onclick="deleteMarker()">Löschen</button>
+  </div>
 </div>
 
 <div id="coords"></div>
 <div id="map"></div>
 
-<button id="fraktionenBtn" onclick="window.location='fraktionen.html'">
-  🏴 Fraktionen
-</button>
+<button id="fraktionenBtn" onclick="window.location='fraktionen.html'">🏴 Fraktionen</button>
 
 <script>
-const SUPABASE_URL="https://lleldalugvgmgqekcolx.supabase.co";
-const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc";
+const SUPABASE_URL="DEINE_SUPABASE_URL";
+const SUPABASE_KEY="DEIN_PUBLIC_KEY";
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let map, markerLayer;
@@ -335,7 +590,7 @@ document.addEventListener("keydown",e=>{
 window.onload=async()=>{
  const {data}=await db.auth.getSession();
  if(data.session){
-  isAdmin = (data.session.user.email || "").toLowerCase() === "admin@gta.local";
+  isAdmin = ((data.session.user.email || "").toLowerCase() === "admin@gta.local");
   startApp();
  }
 };
@@ -368,12 +623,17 @@ function startApp(){
  document.getElementById("loginPanel").style.display="none";
  document.getElementById("map").style.display="block";
  document.getElementById("coords").style.display="block";
- document.getElementById("logoutBtn").style.display="block";
+
+ document.getElementById("logoutBtn").style.display="flex";
  document.getElementById("searchBox").style.display="block";
+ document.getElementById("searchIcon").style.display="block";
  document.getElementById("fraktionenBtn").style.display="block";
 
  if(isAdmin){
-  document.getElementById("adminToggle").style.display="block";
+  document.getElementById("adminToggle").style.display="flex";
+ }else{
+  document.getElementById("adminToggle").style.display="none";
+  document.getElementById("adminPanel").classList.remove("open");
  }
 
  initMap();
@@ -386,6 +646,7 @@ function startApp(){
 
 /* ================= ADMIN PANEL TOGGLE ================= */
 document.getElementById("adminToggle").onclick=()=>{
+ if(!isAdmin) return;
  document.getElementById("adminPanel").classList.toggle("open");
 };
 
@@ -417,7 +678,6 @@ function setIcon(icon){
  document.getElementById("pickHouse").classList.toggle("active", selectedIcon==="house");
  document.getElementById("pickLab").classList.toggle("active", selectedIcon==="lab");
 }
-
 function setIconFromMarker(icon){
  setIcon(icon || "");
 }
@@ -452,7 +712,7 @@ function initMap(){
 function buildMarkerIconSpec(color, icon){
  const safeColor = color || "#ff0000";
 
- // Punkt: 22px + border 3px => ~28px "Iconbox"
+ // Punkt: 22px + border 3px => ~28px Iconbox
  if(!icon){
   const size = [28,28];
   return {
@@ -469,7 +729,7 @@ function buildMarkerIconSpec(color, icon){
   };
  }
 
- // Haus/Labor: 42px, dünne weiße Outline
+ // Haus/Labor: 42px, dünne Outline
  const size = [42,42];
  const strokeW = 1.2;
 
@@ -544,7 +804,7 @@ function renderMarkers(data){
 
   marker.bindPopup("<b>"+(m.title||"")+"</b><br>"+(m.description||""));
 
-  // ✅ Option 1: Hover + Klick nur Desktop
+  // Hover + Klick nur Desktop
   if(isDesktopHover){
    marker.on("mouseover", function(){ this.openPopup(); });
    marker.on("mouseout", function(){ this.closePopup(); });
@@ -552,7 +812,7 @@ function renderMarkers(data){
 
   if(isAdmin){
    marker.on("click",()=>{
-    selectedCoords=null; // beim Edit kein Insert anhand alter coords
+    selectedCoords=null;
     currentEditId=m.id;
 
     document.getElementById("mTitle").value=m.title || "";
@@ -573,7 +833,6 @@ function renderMarkers(data){
      .eq("id", m.id);
    });
   }
- });
 }
 
 async function saveMarker(){
@@ -618,7 +877,7 @@ function clearForm(){
  document.getElementById("mTitle").value="";
  document.getElementById("mDesc").value="";
  currentEditId=null;
- setIcon(""); // zurück auf Punkt
+ setIcon("");
 }
 
 /* ================= SEARCH ================= */
