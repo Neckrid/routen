@@ -135,7 +135,6 @@ html::after{
 }
 #loginBtn:hover{ transform:translateY(-1px); background:rgba(0,255,195,0.14); }
 #loginBtn:active{ transform:scale(0.99); }
-
 #msg{
   margin:10px 0 0 0;
   text-align:center;
@@ -144,15 +143,20 @@ html::after{
   color:#ffb3b3;
 }
 
-/* ====== Suche (Position bleibt) ====== */
-#searchBox{
+/* ====== Search Wrapper (Position bleibt) ====== */
+.searchWrapper{
   position:absolute;
   top:10px;
   left:80px;
   z-index:1100;
   display:none;
+}
+
+/* Search input look */
+#searchBox{
   width:min(380px, calc(100vw - 160px));
-  padding:11px 14px 11px 36px;
+  height:42px;
+  padding:0 14px 0 40px; /* Platz fürs Icon */
   border-radius:14px;
   border:none;
   color:rgba(255,255,255,0.92);
@@ -166,23 +170,17 @@ html::after{
     0 18px 55px rgba(0,0,0,0.55),
     inset 0 0 0 1px rgba(0,255,195,0.10);
 }
+
+/* Search icon inside input */
 #searchIcon{
   position:absolute;
-  top:10px;                 /* gleiche Top-Position wie #searchBox */
-  left:92px;
-
-  height:42px;              /* exakt gleiche Höhe wie die Suchbox */
-  display:flex;
-  align-items:center;       /* vertikal zentriert */
-  justify-content:center;
-
-  z-index:1101;
+  left:14px;
+  top:50%;
+  transform:translateY(-50%);
   pointer-events:none;
-
   color:#00ffc3;
   opacity:0.95;
   font-size:14px;
-
   text-shadow:0 2px 10px rgba(0,0,0,0.55);
 }
 
@@ -321,22 +319,18 @@ html::after{
   box-shadow: 0 0 0 3px rgba(0,255,195,0.12);
 }
 
-/* ✅ Symmetrisches Badge */
+/* Badge */
 #coordBadge{
   margin:10px 0 14px 0;
   padding:14px 16px;
-
   border-radius:16px;
   font-size:13px;
   line-height:1.4;
-
   display:flex;
   flex-direction:column;
   gap:4px;
-
   background:rgba(255,255,255,0.05);
   border:1px solid rgba(255,255,255,0.12);
-
   transition:0.2s ease;
 }
 #coordBadge b{
@@ -358,7 +352,7 @@ html::after{
   color:#ffd54a;
 }
 
-/* Icon Picker: ✅ Grid + pill look */
+/* Icon Picker */
 .iconPickerTitle{
   margin:10px 0 6px 0;
   font-size:12px;
@@ -377,20 +371,16 @@ html::after{
   align-items:center;
   justify-content:center;
   gap:8px;
-
   padding:10px 10px;
   border-radius:14px;
   cursor:pointer;
   user-select:none;
-
   background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
   border:1px solid rgba(255,255,255,0.10);
   color:rgba(255,255,255,0.92);
-
   box-shadow:
     0 10px 24px rgba(0,0,0,0.35),
     inset 0 0 0 1px rgba(255,255,255,0.04);
-
   transition:0.18s ease;
 }
 .iconPick:hover{ transform: translateY(-1px); }
@@ -405,7 +395,7 @@ html::after{
     inset 0 0 0 1px rgba(0,255,195,0.10);
 }
 
-/* Color row (no preview) */
+/* Color row */
 .colorRow{
   display:flex;
   align-items:center;
@@ -477,8 +467,10 @@ html::after{
   <p id="msg"></p>
 </div>
 
-<div id="searchIcon">🔎</div>
-<input id="searchBox" class="glass" placeholder="Suche...">
+<div class="searchWrapper" id="searchWrapper">
+  <div id="searchIcon">🔎</div>
+  <input id="searchBox" class="glass" placeholder="Suche...">
+</div>
 
 <button id="logoutBtn" class="pillBtn glass" onclick="logout()" style="display:none;">
   <span class="pillIcon">⎋</span>
@@ -615,8 +607,7 @@ function startApp(){
   document.getElementById("coords").style.display="block";
 
   document.getElementById("logoutBtn").style.display="flex";
-  document.getElementById("searchBox").style.display="block";
-  document.getElementById("searchIcon").style.display="block";
+  document.getElementById("searchWrapper").style.display="block";
   document.getElementById("fraktionenBtn").style.display="block";
 
   if(isAdmin){
