@@ -784,31 +784,57 @@ async function loadMarkers(){
 }
 
 function renderMarkers(data){
- markerLayer.clearLayers();
+  markerLayer.clearLayers();
 
- data.forEach(m=>{
-  const spec = buildMarkerIconSpec(m.color, m.icon);
+  data.forEach(m=>{
+    const spec = buildMarkerIconSpec(m.color, m.icon);
 
-  const icon = L.divIcon({
-   html: spec.html,
-   className: "",
-   iconSize: spec.iconSize,
-   iconAnchor: spec.iconAnchor,
-   popupAnchor: spec.popupAnchor
+    const icon = L.divIcon({
+      html: spec.html,
+      className: "",
+      iconSize: spec.iconSize,
+      iconAnchor: spec.iconAnchor,
+      popupAnchor: spec.popupAnchor
+    });
+
+    const marker = L.marker([m.y, m.x], {
+      icon,
+      draggable: isAdmin
+    }).addTo(markerLayer);
+
+    marker.bindPopup("<b>"+(m.title||"")+"</b><br>"+(m.description||""));
+
+    // Hover + Klick nur Desktop
+    if(isDesktopHover){
+      marker.on("mouseover", function(){ this.openPopup(); });
+      marker.on("mouseout", function(){ this.closePopup(); });
+    }
+
+    if(isAdmin){
+      marker.on("click",()=>{
+        selectedCoords=null;
+        currentEditId=m.id;
+
+        document.getElementById("mTitle").value=m.title || "";
+        document.getElementById("mDesc").value=m.description || "";
+        document.getElementById("mColor").value=m.color || "#ff0000";
+        updateColorPreview();
+
+        setIconFromMarker(m.icon);
+
+        document.getElementById("adminPanel").classList.add("open");
+        updateCoordBadge("editing");
+      });
+
+      marker.on("dragend", async (e)=>{
+        const pos = e.target.getLatLng();
+        await db.from("markers")
+          .update({x:Math.round(pos.lng), y:Math.round(pos.lat)})
+          .eq("id", m.id);
+      });
+    }
   });
-
-  const marker = L.marker([m.y, m.x], {
-   icon,
-   draggable: isAdmin
-  }).addTo(markerLayer);
-
-  marker.bindPopup("<b>"+(m.title||"")+"</b><br>"+(m.description||""));
-
-  // Hover + Klick nur Desktop
-  if(isDesktopHover){
-   marker.on("mouseover", function(){ this.openPopup(); });
-   marker.on("mouseout", function(){ this.closePopup(); });
-  }
+}
 
   if(isAdmin){
    marker.on("click",()=>{
