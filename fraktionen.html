@@ -518,13 +518,15 @@ button{
 /* ================= FLOATING RIGHT BUTTONS (LOOK MATCH) ================= */
 .pillBtn{
   position:fixed;
-  right:16px;
+  right:0;                 /* ✅ ganz an den Rand */
   display:flex;
   align-items:center;
   justify-content:center;
   gap:8px;
-  padding:10px 12px;
+
+  padding:8px 10px;        /* ✅ etwas kleiner */
   border-radius:14px 0 0 14px;
+  font-size:13px;          /* ✅ etwas kleiner */
 
   background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
   border:1px solid rgba(255,255,255,0.10);
@@ -552,19 +554,22 @@ button{
 .pillBtn:active{ transform: scale(0.99); transition:0.06s ease; }
 
 .pillIcon{
-  width:26px;
-  height:26px;
-  border-radius:10px;
+  width:24px;              /* ✅ etwas kleiner */
+  height:24px;
+  border-radius:9px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:14px;
+  font-size:13px;
   background:rgba(255,255,255,0.05);
   border:1px solid rgba(255,255,255,0.08);
 }
 
+/* ✅ sauber getrennt */
+#logoutBtn{ top:10px; }
+#adminToggle{ top:52px; }  /* Abstand zum Logout */
+
 #logoutBtn{
-  top:10px;
   color:#ffb3b3;
   border-color: rgba(255,59,59,0.35);
 }
@@ -581,7 +586,6 @@ button{
 }
 
 #adminToggle{
-  top:54px;
   color:#00ffc3;
   border-color: rgba(0,255,195,0.35);
 }
@@ -628,10 +632,11 @@ button{
 #backBtn:active{ transform: scale(0.99); transition:0.06s ease; }
 
 /* ================= ADMIN PANEL (MATCHED) ================= */
+/* ✅ Panel startet deutlich unter den Buttons, damit es NICHT "rein schiebt" */
 #adminPanel{
   position:fixed;
-  top:96px;
-  right:-360px;
+  top:110px;               /* ✅ Abstand zu Logout/Admin Buttons */
+  right:0;
   width:320px;
 
   background:rgba(22,22,28,0.72);
@@ -647,10 +652,11 @@ button{
     0 0 0 1px rgba(255,255,255,0.05) inset,
     0 0 22px rgba(0,255,195,0.08);
 
+  transform: translateX(106%); /* ✅ statt right:-... => kein "reinschieben" */
   transition:0.35s ease;
   z-index:1190;
 }
-#adminPanel.open{ right:0; }
+#adminPanel.open{ transform: translateX(0); }
 
 #adminPanel h3{
   margin:0 0 10px 0;
@@ -671,6 +677,32 @@ button{
   letter-spacing:0.18px;
   margin:10px 0 6px 0;
 }
+
+/* ✅ Dropdown: Text lesbar + Pfeil weiter links */
+#adminPanel select{
+  appearance:none;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+
+  padding-right:46px !important; /* Platz für Pfeil */
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(255,255,255,0.78) 50%),
+    linear-gradient(135deg, rgba(255,255,255,0.78) 50%, transparent 50%);
+  background-position:
+    calc(100% - 22px) 50%,        /* ✅ Pfeil weiter nach links */
+    calc(100% - 16px) 50%;
+  background-size:6px 6px, 6px 6px;
+  background-repeat:no-repeat;
+
+  color:rgba(255,255,255,0.92);
+}
+
+/* ✅ Optionen im Dropdown lesbar (native UI variiert je Browser, aber hilft in vielen) */
+#adminPanel select option{
+  background:#0f0f14;
+  color:#ffffff;
+}
+
 #adminPanel input, #adminPanel select{
   width:100%;
   padding:12px 12px;
@@ -756,39 +788,6 @@ button{
 .primary:active{
   transform:scale(0.985);
   transition:0.06s ease;
-}
-.softDanger{
-  width:100%;
-  margin-top:10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-
-  padding:12px 14px;
-  border-radius:14px;
-  font-size:14px;
-
-  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.20));
-  border:1px solid rgba(255,59,59,0.55);
-  color:#ff6b6b;
-
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
-  box-shadow:
-    0 10px 24px rgba(0,0,0,0.35),
-    0 0 20px rgba(255,59,59,0.07);
-
-  transition:0.18s ease;
-}
-.softDanger:hover{
-  background:rgba(255,59,59,0.10);
-  box-shadow:
-    0 0 26px rgba(255,59,59,0.14),
-    inset 0 0 0 1px rgba(255,59,59,0.12);
-  color:#fff;
-  transform:translateY(-1px);
 }
 
 /* ================= MODALS ================= */
@@ -963,7 +962,7 @@ button{
     </div>
   </div>
 
-  <!-- EDIT -->
+  <!-- EDIT (ohne Löschen-Button) -->
   <div class="panelSection">
     <div class="panelLabel">Fraktion bearbeiten</div>
     <select id="editSelect"></select>
@@ -978,8 +977,6 @@ button{
       </div>
       <button class="primary" onclick="saveFraktionEdits()">Speichern</button>
     </div>
-
-    <button class="softDanger" onclick="deleteSelectedFraktionFromPanel()">🗑 Fraktion löschen</button>
   </div>
 </div>
 
@@ -1203,11 +1200,9 @@ function refreshEditDropdown(){
     sel.appendChild(opt);
   }
 
-  // Auswahl beibehalten falls möglich
   const stillExists = allFraktionen.some(x=>String(x.id)===String(current));
   sel.value = stillExists ? current : String(allFraktionen[0].id);
 
-  // Felder füllen
   const f = allFraktionen.find(x=>String(x.id)===String(sel.value));
   if(f){
     document.getElementById("editName").value = f.name || "";
@@ -1372,16 +1367,6 @@ async function saveFraktionEdits(){
   if(upd.error){ console.error(upd.error); return; }
 
   await refreshDataAndRender();
-}
-
-async function deleteSelectedFraktionFromPanel(){
-  if(!isAdmin) return;
-  const id = document.getElementById("editSelect").value;
-  if(!id) return;
-
-  // Gleicher Flow wie Modal: wir nutzen das Modal für Konsistenz
-  const f = allFraktionen.find(x=>String(x.id)===String(id));
-  openDeleteModal(id, f?.name || "");
 }
 
 /* ================== DRAG & DROP: MEMBERS (ADMIN ONLY) ================== */
