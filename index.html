@@ -685,10 +685,22 @@ function initMap(){
   map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2});
   const bounds=[[0,0],[8192,8192]];
 
-  /* ✅ Map-Overlay jetzt über deine URL */
-  L.imageOverlay(MAP_IMAGE_URL, bounds, { crossOrigin: true }).addTo(map);
+  // ✅ Cachebuster (hilft bei CDN/Browser-Cache)
+  const url = MAP_IMAGE_URL + (MAP_IMAGE_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
 
-  map.fitBounds(bounds);
+  // ✅ Preload mit onerror, damit du nicht "blind" bleibst
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = () => {
+    L.imageOverlay(url, bounds, { crossOrigin: "anonymous" }).addTo(map);
+    map.fitBounds(bounds);
+  };
+  img.onerror = () => {
+    alert("Map-Image konnte nicht geladen werden. Prüfe: public Zugriff / Hotlink-Schutz / Content-Type. URL: " + MAP_IMAGE_URL);
+    // trotzdem bounds setzen, damit die Karte bedienbar bleibt
+    map.fitBounds(bounds);
+  };
+  img.src = url;
 
   markerLayer=L.layerGroup().addTo(map);
 
