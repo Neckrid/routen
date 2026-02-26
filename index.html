@@ -137,19 +137,15 @@ html::after{
   color:#ffb3b3;
 }
 
-/* ================= SEARCH (Position bleibt) ================= */
+/* ================= SEARCH ================= */
 .searchWrapper{
   position:absolute;
   top:10px;
   left:80px;
   z-index:1100;
   display:none;
-  /* ✅ wichtig: Icon relativ zur Box */
-  position:absolute;
 }
-.searchInner{
-  position:relative; /* ✅ Icon sitzt relativ zum Input */
-}
+.searchInner{ position:relative; }
 #searchBox{
   width:min(380px, calc(100vw - 160px));
   height:42px;
@@ -279,7 +275,7 @@ html::after{
   transition:0.35s ease;
   z-index:1190;
 
-  max-height: calc(100vh - (var(--btn-top) + (var(--btn-h) + var(--btn-gap)) * 2) - 14px);
+  max-height: calc(100vh - (var(--btn-top) + (var(--btn-h) + (var(--btn-gap)) * 2) - 14px));
   overflow:auto;
   scrollbar-width:none;
 }
@@ -397,7 +393,7 @@ html::after{
     inset 0 0 0 1px rgba(0,255,195,0.10);
 }
 
-/* Color row (no preview box) */
+/* Color row */
 .colorRow{
   display:flex;
   align-items:center;
@@ -440,7 +436,7 @@ html::after{
 .panelBtnRow .saveBtn{ color:#00ffc3; border-color: rgba(0,255,195,0.35); }
 .panelBtnRow .delBtn{ color:#ff6b6b; border-color: rgba(255,59,59,0.35); }
 
-/* Leaflet divIcon defaults neutralisieren */
+/* Leaflet divIcon defaults */
 .leaflet-div-icon{ background:transparent !important; border:none !important; }
 
 /* Popup premium */
@@ -466,7 +462,7 @@ html::after{
   <p id="msg"></p>
 </div>
 
-<!-- Suche (Position bleibt, Icon sitzt im Input) -->
+<!-- Suche -->
 <div class="searchWrapper" id="searchWrapper">
   <div class="searchInner">
     <div id="searchIcon">🔎</div>
@@ -544,8 +540,12 @@ const SUPABASE_URL="https://lleldalugvgmgqekcolx.supabase.co";
 const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZWxkYWx1Z3ZnbWdxZWtjb2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3OTg4OTgsImV4cCI6MjA4NzM3NDg5OH0.CuiVJ9kWraso1tLEJ3D6V4IssYGVeWaLs2ygerVU5tc";
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-/* ✅ DEINE MAP-URL */
+/* ✅ DEINE MAP-URL (Cloudflare R2) */
 const MAP_IMAGE_URL = "https://pub-bf90b1dd998f46a68368bd4403249dc8.r2.dev/gta_map.png";
+
+/* ✅ Bildmaße in Pixeln (Breite x Höhe) */
+const IMG_W = 10000;
+const IMG_H = 14999;
 
 let map, markerLayer;
 let isAdmin=false;
@@ -682,16 +682,27 @@ function setIconFromMarker(icon){
 
 /* ================= MAP ================= */
 function initMap(){
-  map = L.map('map', { crs: L.CRS.Simple, minZoom: -2, maxZoom: 2 });
-  const bounds = [[0,0],[8192,8192]];
+  map = L.map('map', {
+    crs: L.CRS.Simple,
+    minZoom: -2,
+    maxZoom: 2,
+    preferCanvas: true
+  });
 
-  // ✅ Cachebuster gegen CDN-Cache-Zicken
+  /* ✅ Bounds an echte Bildgröße anpassen: [[0,0],[Höhe,Breite]] */
+  const bounds = [[0,0],[IMG_H, IMG_W]];
+
+  /* ✅ Cachebuster gegen Caching während Tests */
   const url = MAP_IMAGE_URL + (MAP_IMAGE_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
 
-  const overlay = L.imageOverlay(url, bounds).addTo(map);
+  const overlay = L.imageOverlay(url, bounds, { crossOrigin: true }).addTo(map);
   map.fitBounds(bounds);
 
-  // ✅ Fehlermeldung direkt am Overlay-Image (ohne CORS-Mode)
+  /* ✅ Optional/Empfohlen: nicht "wegdriften" können */
+  map.setMaxBounds(bounds);
+  map.on("drag", () => map.panInsideBounds(bounds, { animate: false }));
+
+  /* ✅ Fehlermeldung direkt am Overlay-Image */
   overlay.once("add", () => {
     const img = overlay.getElement && overlay.getElement();
     if(!img) return;
