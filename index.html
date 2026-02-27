@@ -684,53 +684,32 @@ function setIconFromMarker(icon){
 
 /* ================= MAP ================= */
 function initMap(){
-  // ✅ weiter rauszoomen möglich
-  map = L.map('map', {
-    crs: L.CRS.Simple,
-    minZoom: -5,     // <- weiter raus (vorher -2)
-    maxZoom: 2,
-    zoomSnap: 0.25,  // optional: feinere Zoom-Schritte
-    zoomDelta: 0.25, // optional
-    preferCanvas: true
-  });
+  map = L.map('map', { crs: L.CRS.Simple, minZoom: -2, maxZoom: 2, preferCanvas:true });
 
-  // ✅ Bounds an echte Bildgröße: [[0,0],[Höhe,Breite]]
+  /* ✅ Bounds an echte Bildgröße anpassen: [[0,0],[Höhe,Breite]] */
   const bounds = [[0,0],[IMG_H, IMG_W]];
 
-  // optional Cachebuster
+  /* ✅ Cachebuster (optional, hilft beim Testen) */
   const url = MAP_IMAGE_URL + (MAP_IMAGE_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
 
-  // ✅ Overlay rein (ohne “Ränder”-Limit)
-  const overlay = L.imageOverlay(url, bounds).addTo(map);
+  /* ✅ Wichtig für R2 -> GitHub Pages: crossOrigin + CORS-Header im Bucket */
+  const overlay = L.imageOverlay(url, bounds, { crossOrigin:true }).addTo(map);
   map.fitBounds(bounds);
 
-  // ✅ KEIN maxBounds / KEIN panInsideBounds -> frei verschiebbar ohne Begrenzung
-  // map.setMaxBounds(bounds);
-  // map.on("drag", () => map.panInsideBounds(bounds, { animate:false }));
+  /* ✅ Nicht “wegziehen” */
+  map.setMaxBounds(bounds);
+  map.on("drag", () => map.panInsideBounds(bounds, { animate:false }));
 
-  // Fehlermeldung falls Bild nicht lädt
+  /* ✅ Fehler am Overlay melden */
   overlay.once("add", () => {
     const img = overlay.getElement && overlay.getElement();
     if(!img) return;
-    img.onerror = () => alert("Map-Overlay konnte nicht geladen werden.\nURL:\n" + MAP_IMAGE_URL);
+    img.onerror = () => alert(
+      "Map-Overlay konnte nicht geladen werden.\n\n" +
+      "Ursache meist: R2 CORS nicht gesetzt.\n\n" +
+      "URL:\n" + MAP_IMAGE_URL
+    );
   });
-
-  markerLayer = L.layerGroup().addTo(map);
-
-  map.on("mousemove", e => {
-    document.getElementById("coords").innerText =
-      "X:" + Math.round(e.latlng.lng) + " | Y:" + Math.round(e.latlng.lat);
-  });
-
-  if(isAdmin){
-    map.on("click", e => {
-      clearForm();
-      selectedCoords = e.latlng;
-      currentEditId = null;
-      document.getElementById("adminPanel").classList.add("open");
-      updateCoordBadge();
-    });
-  }
 
   markerLayer = L.layerGroup().addTo(map);
 
